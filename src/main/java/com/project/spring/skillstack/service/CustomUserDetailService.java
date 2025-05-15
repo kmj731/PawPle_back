@@ -39,19 +39,45 @@ public class CustomUserDetailService extends DefaultOAuth2UserService implements
         OAuth2User oAuth2User = super.loadUser(userRequest);
         String provider = userRequest.getClientRegistration().getRegistrationId();
         UserEntity user = new UserEntity();
-        if(provider.equals("naver")) {
-            Map<String, Object> attr = (Map<String, Object>)oAuth2User.getAttributes().get("response");
-            Optional<UserEntity> getUser = userRep.findByNameLike(((String)attr.get("id")) + "_" + provider);
-            if(getUser.isEmpty()) {
-                user.setName(((String)attr.get("id")) + "_" + provider);
-                user.setPass("Unknown");
-                user.setSocialName("Social_" + Random.getRandomString(20));
-                user.setRoles(List.of("USER"));
-                user.setCreated(LocalDateTime.now());
-                userRep.save(user);
-            } else user = getUser.get();
-            user.setAttr(attr);
+
+        Map<String, Object> attr = oAuth2User.getAttributes();
+        String userId;
+        String socialName;
+
+        switch (provider) {
+            case "naver":
+                attr = (Map<String, Object>) oAuth2User.getAttributes().get("response");
+                userId = (String) attr.get("id");
+                socialName = "Social_Naver_" + Random.getRandomString(20);
+                break;
+
+            case "kakao":
+                attr = (Map<String, Object>) oAuth2User.getAttributes().get("properties");
+                userId = oAuth2User.getAttributes().get("id").toString();
+                socialName = "Social_Kakao_" + Random.getRandomString(20);
+                break;
+
+            case "google":
+                userId = (String) oAuth2User.getAttributes().get("sub");
+                socialName = "Social_Google_" + Random.getRandomString(20);
+                break;
+
+            default:
+                throw new OAuth2AuthenticationException("Unsupported provider: " + provider);
         }
+
+        Optional<UserEntity> getUser = userRep.findByNameLike(userId + "_" + provider);
+        if (getUser.isEmpty()) {
+            user.setName(userId + "_" + provider);
+            user.setPass("Unknown");
+            user.setSocialName(socialName);
+            user.setRoles(List.of("USER"));
+            user.setCreated(LocalDateTime.now());
+            userRep.save(user);
+        } else {
+            user = getUser.get();
+        }
+        user.setAttr(attr);
 
         return new CustomUserDetails(user.toDto());
     }
