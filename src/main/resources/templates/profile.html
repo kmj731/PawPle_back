@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>회원정보 수정</title>
+</head>
+<body>
+    <h1>회원정보 수정</h1>
+    <div th:if="${param.message}">
+        <p th:text="'수정 완료: ' + ${param.message}"></p>
+    </div>
+    <form action="/auth/update" method="post">
+        <label>현재 아이디: 
+            <input type="text" name="id" th:value="${user.name}" readonly>
+        </label><br>
+        <label>현재 비밀번호: 
+            <input type="password" name="currentPassword" required>
+        </label><br>
+        <label>새로운 비밀번호: 
+            <input type="password" name="newPassword">
+        </label><br>
+        <label>소셜 이름: 
+            <input type="text" name="socialName" th:value="${user.socialName}">
+        </label><br>
+        <button type="submit">수정하기</button>
+    </form>
+    <form action="/auth/delete" method="post">
+        <label>현재 비밀번호: 
+            <input type="password" name="password" required>
+        </label><br>
+        <button type="submit">회원탈퇴</button>
+    </form>
+    <a th:href="@{/home}">홈으로</a>
+</body>
+</html>

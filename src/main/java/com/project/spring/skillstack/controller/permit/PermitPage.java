@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 
 import com.project.spring.skillstack.dao.UserRepository;
 import com.project.spring.skillstack.entity.UserEntity;
+import com.project.spring.skillstack.service.CustomUserDetails;
 import com.project.spring.skillstack.utility.CookieUtil;
 import com.project.spring.skillstack.utility.JwtUtil;
 
@@ -45,8 +46,33 @@ public class PermitPage {
         UserEntity user = new UserEntity(null, id, new BCryptPasswordEncoder().encode(pw), id, List.of("USER"), LocalDateTime.now(), null);
         userRep.save(user);
         String token = jwtUtil.generateToken(user.getName());
+        // String token = jwtUtil.generateToken(new CustomUserDetails(user.toDto()));
         cookieUtil.GenerateJWTCookie(token, response);
 
         return "redirect:" + corsOrigin + "/home";
+        
     }
+
+
+
+
+
+    
+    /////////////////////////////////////////////// 백엔드 테스트용 ///////////////////////////////////////////////
+    // @PostMapping("/signup")
+    // @Transactional
+    // public String signup(@RequestParam("id")String id, @RequestParam("pw")String pw, @RequestParam("pwr")String pwr, @AuthenticationPrincipal UserDetails userDetails, HttpServletResponse response) {
+    //     if(userDetails != null) return "redirect:/home";
+    //     if(id.isEmpty() || pw.isEmpty() || pwr.isEmpty()) return "redirect:/auth/signup?error=empty_input";
+    //     if(userRep.findByNameLike(id).isPresent()) return "redirect:/auth/signup?error=user_exists";
+    //     if(!pw.equals(pwr)) return "redirect:/auth/signup?error=password_mismatch";
+
+    //     UserEntity user = new UserEntity(null, id, new BCryptPasswordEncoder().encode(pw), id, List.of("USER"), LocalDateTime.now(), null);
+    //     userRep.save(user);
+    //     String token = jwtUtil.generateToken(new CustomUserDetails(user.toDto()));
+    //     cookieUtil.GenerateJWTCookie(token, response);
+
+    //     return "redirect:/home";
+        
+    // }
 }

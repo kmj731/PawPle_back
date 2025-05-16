@@ -3,6 +3,7 @@ package com.project.spring.skillstack.controller.auth;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -36,13 +37,11 @@ public class Auth {
 
 
 
-    
-    // 회원정보 삭제
+    // 회원 삭제
     @PostMapping("/delete")
     @Transactional
     public String deleteUser(
         @AuthenticationPrincipal UserDetails userDetails,
-        @RequestParam("id") String id,
         @RequestParam("password") String password,
         HttpServletResponse response
     ) {
@@ -52,28 +51,27 @@ public class Auth {
 
         String loggedInUsername = userDetails.getUsername();
 
-        if (!loggedInUsername.equals(id)) {
-            return "redirect:" + corsOrigin + "/auth/profile?error=unauthorized";
-        }
-
         if (!passwordEncoder.matches(password, userDetails.getPassword())) {
             return "redirect:" + corsOrigin + "/auth/profile?error=wrong_password";
         }
 
-        userRep.deleteByName(id);
-        cookieUtil.RemoveJWTCookie(response);
-
-        return "redirect:" + corsOrigin + "/home?message=delete_success";
+        try {
+            userRep.deleteByName(loggedInUsername);
+            cookieUtil.RemoveJWTCookie(response);
+            SecurityContextHolder.clearContext();
+            return "redirect:" + corsOrigin + "/home?message=delete_success";
+        } catch (Exception e) {
+            e.printStackTrace();
+            return "redirect:" + corsOrigin + "/auth/profile?error=delete_failed";
+        }
     }
     
-
 
     // 회원정보 수정
     @PostMapping("/update")
     @Transactional
     public String updateUser(
         @AuthenticationPrincipal UserDetails userDetails,
-        @RequestParam("id") String id,
         @RequestParam("currentPassword") String currentPassword,
         @RequestParam("newPassword") String newPassword,
         @RequestParam("socialName") String socialName,
@@ -85,15 +83,11 @@ public class Auth {
 
         String loggedInUsername = userDetails.getUsername();
 
-        if (!loggedInUsername.equals(id)) {
-            return "redirect:" + corsOrigin + "/auth/profile?error=unauthorized";
-        }
-
         if (!passwordEncoder.matches(currentPassword, userDetails.getPassword())) {
             return "redirect:" + corsOrigin + "/auth/profile?error=wrong_password";
         }
-
-        UserEntity user = userRep.findByNameLike(id).orElse(null);
+        
+        UserEntity user = userRep.findByNameLike(loggedInUsername).orElse(null);
         if (user == null) {
             return "redirect:" + corsOrigin + "/auth/profile?error=user_not_found";
         }
@@ -105,10 +99,11 @@ public class Auth {
             user.setSocialName(socialName);
         }
 
-        userRep.save(user);
-
         return "redirect:" + corsOrigin + "/home?message=update_success";
+        // return "redirect:/profile"; // 백엔드 테스트용
     }
+
+
 
 
 

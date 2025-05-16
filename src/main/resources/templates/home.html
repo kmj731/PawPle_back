@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Home</title>
+</head>
+<body>
+    <h1>Home Page</h1>
+    <div th:if="${#authentication.authenticated} and ${#authentication.name != 'anonymousUser'}">
+        <p>환영합니다, <span th:text="${#authentication.name}">유저</span>님!</p>
+        <a th:href="@{/profile}">회원정보 수정</a>
+        <a th:href="@{/logout}">로그아웃</a>
+    </div>
+    <div th:if="${not #authentication.authenticated} or ${#authentication.name == 'anonymousUser'}">
+        <p>로그인하지 않았습니다.</p>
+        <a th:href="@{/signin}">로그인</a>
+        <a th:href="@{/signup}">회원가입</a>
+    </div>
+
+
+
+</body>
+</html>
