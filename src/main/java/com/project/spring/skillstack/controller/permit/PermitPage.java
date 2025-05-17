@@ -23,7 +23,7 @@ import com.project.spring.skillstack.utility.JwtUtil;
 import jakarta.servlet.http.HttpServletResponse;
 
 @Controller
-@RequestMapping("/permit/user")
+@RequestMapping("/permit/auth")
 public class PermitPage {
 
     @Autowired
