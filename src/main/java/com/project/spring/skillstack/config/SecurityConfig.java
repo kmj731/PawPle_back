@@ -66,8 +66,8 @@ public class SecurityConfig {
             )
             .authorizeHttpRequests(auth->auth
                 .requestMatchers("/public/**", "/permit/**", "/docs", "/swagger-ui/**", "/v3/**", "/favicon.ico").permitAll()
-                .requestMatchers("/auth/signup", "/auth/login", "/auth/signin", "/oauth2/**").permitAll()
-                .requestMatchers("/user/delete").authenticated() 
+                .requestMatchers("/auth/signup", "/auth/login", "/auth/signin", "/oauth2/**", "/logout").permitAll()
+                .requestMatchers("/user/delete", "/user/update", "/user/profile").authenticated() 
                 .requestMatchers("/admin/**").hasRole("ADMIN")
                 .anyRequest().authenticated()
             )
@@ -85,7 +85,7 @@ public class SecurityConfig {
                 .permitAll()
             )
             .logout(logout->logout
-                .logoutUrl("/logout") // 백엔드 로그아웃 경로
+                .logoutUrl("logout") // 백엔드 로그아웃 경로
                 .logoutSuccessHandler((request, response, authentication)->{
                     cookieUtil.RemoveJWTCookie(response);
                     response.sendRedirect(corsOrigin + "/home"); // 로그아웃 성공시 이동 경로
@@ -93,9 +93,9 @@ public class SecurityConfig {
                 .permitAll()
             )
             .oauth2Login(oauth -> oauth
-                .loginPage(corsOrigin + "/auth/oauth2login")
+                .loginPage(corsOrigin + "/auth/signin")
                 .defaultSuccessUrl(corsOrigin + "/home")
-                .failureUrl(corsOrigin + "/auth/oauth2login")
+                .failureUrl(corsOrigin + "/auth/signin")
                 .userInfoEndpoint(userInfo -> userInfo.userService(customUserDetailService))
                 .successHandler((request, response, authentication) -> {
                     OAuth2User oAuth2User = (OAuth2User) authentication.getPrincipal();

@@ -16,14 +16,14 @@ import org.springframework.web.bind.annotation.RequestParam;
 
 import com.project.spring.skillstack.dao.UserRepository;
 import com.project.spring.skillstack.entity.UserEntity;
-import com.project.spring.skillstack.service.CustomUserDetails;
+// import com.project.spring.skillstack.service.CustomUserDetails;
 import com.project.spring.skillstack.utility.CookieUtil;
 import com.project.spring.skillstack.utility.JwtUtil;
 
 import jakarta.servlet.http.HttpServletResponse;
 
 @Controller
-@RequestMapping("/permit/page")
+@RequestMapping("/permit/user")
 public class PermitPage {
 
     @Autowired
@@ -37,7 +37,13 @@ public class PermitPage {
 
     @PostMapping("/signup")
     @Transactional
-    public String signup(@RequestParam("id")String id, @RequestParam("pw")String pw, @RequestParam("pwr")String pwr, @AuthenticationPrincipal UserDetails userDetails, HttpServletResponse response) {
+    public String signup(
+        @RequestParam("id")String id,
+        @RequestParam("pw")String pw,
+        @RequestParam("pwr")String pwr,
+        @AuthenticationPrincipal UserDetails userDetails,
+        HttpServletResponse response
+    ) {
         if(userDetails != null) return "redirect:" + corsOrigin + "/home";
         if(id.isEmpty() || pw.isEmpty() || pwr.isEmpty()) return "redirect:" + corsOrigin + "/auth/signup?error=empty_input";
         if(userRep.findByNameLike(id).isPresent()) return "redirect:" + corsOrigin + "/auth/signup?error=user_exists";
@@ -46,7 +52,6 @@ public class PermitPage {
         UserEntity user = new UserEntity(null, id, new BCryptPasswordEncoder().encode(pw), id, List.of("USER"), LocalDateTime.now(), null);
         userRep.save(user);
         String token = jwtUtil.generateToken(user.getName());
-        // String token = jwtUtil.generateToken(new CustomUserDetails(user.toDto()));
         cookieUtil.GenerateJWTCookie(token, response);
 
         return "redirect:" + corsOrigin + "/home";
@@ -69,7 +74,8 @@ public class PermitPage {
 
     //     UserEntity user = new UserEntity(null, id, new BCryptPasswordEncoder().encode(pw), id, List.of("USER"), LocalDateTime.now(), null);
     //     userRep.save(user);
-    //     String token = jwtUtil.generateToken(new CustomUserDetails(user.toDto()));
+    //     // String token = jwtUtil.generateToken(new CustomUserDetails(user.toDto()));
+    //     String token = jwtUtil.generateToken(user.getName());
     //     cookieUtil.GenerateJWTCookie(token, response);
 
     //     return "redirect:/home";

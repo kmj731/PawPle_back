@@ -17,6 +17,7 @@ import com.project.spring.skillstack.dao.UserRepository;
 import com.project.spring.skillstack.entity.UserEntity;
 import com.project.spring.skillstack.service.CustomUserDetails;
 import com.project.spring.skillstack.utility.CookieUtil;
+import com.project.spring.skillstack.utility.JwtUtil;
 
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.transaction.Transactional;
@@ -34,15 +35,16 @@ public class Auth {
     String corsOrigin;
     @Autowired
     PasswordEncoder passwordEncoder;
+    @Autowired
+    JwtUtil jwtUtil;
 
 
-
-    // 회원 삭제
+    // 회원삭제
     @PostMapping("/delete")
     @Transactional
     public String deleteUser(
         @AuthenticationPrincipal UserDetails userDetails,
-        @RequestParam("password") String password,
+        @RequestParam("pw") String pw,
         HttpServletResponse response
     ) {
         if (userDetails == null) {
@@ -51,7 +53,7 @@ public class Auth {
 
         String loggedInUsername = userDetails.getUsername();
 
-        if (!passwordEncoder.matches(password, userDetails.getPassword())) {
+        if (!passwordEncoder.matches(pw, userDetails.getPassword())) {
             return "redirect:" + corsOrigin + "/auth/profile?error=wrong_password";
         }
 
@@ -67,14 +69,14 @@ public class Auth {
     }
     
 
-    // 회원정보 수정
+
     @PostMapping("/update")
     @Transactional
     public String updateUser(
         @AuthenticationPrincipal UserDetails userDetails,
-        @RequestParam("currentPassword") String currentPassword,
-        @RequestParam("newPassword") String newPassword,
-        @RequestParam("socialName") String socialName,
+        @RequestParam("pw") String pw,
+        @RequestParam("newpw") String newpw,
+        @RequestParam("newSocialName") String newSocialName,
         HttpServletResponse response
     ) {
         if (userDetails == null) {
@@ -83,24 +85,26 @@ public class Auth {
 
         String loggedInUsername = userDetails.getUsername();
 
-        if (!passwordEncoder.matches(currentPassword, userDetails.getPassword())) {
+        if (!passwordEncoder.matches(pw, userDetails.getPassword())) {
             return "redirect:" + corsOrigin + "/auth/profile?error=wrong_password";
         }
         
         UserEntity user = userRep.findByNameLike(loggedInUsername).orElse(null);
         if (user == null) {
-            return "redirect:" + corsOrigin + "/auth/profile?error=user_not_found";
+            return "redirect:" + corsOrigin + "/auth/signin?error=user_not_found";
         }
 
-        if (newPassword != null && !newPassword.isEmpty()) {
-            user.setPass(passwordEncoder.encode(newPassword));
+        if (newpw != null && !newpw.isEmpty()) {
+            user.setPass(passwordEncoder.encode(newpw));
+            
+            String newToken = jwtUtil.generateToken(user.getName());
+            cookieUtil.GenerateJWTCookie(newToken, response);
         }
-        if (socialName != null && !socialName.isEmpty()) {
-            user.setSocialName(socialName);
+        if (newSocialName != null && !newSocialName.isEmpty()) {
+            user.setSocialName(newSocialName);
         }
 
-        return "redirect:" + corsOrigin + "/home?message=update_success";
-        // return "redirect:/profile"; // 백엔드 테스트용
+        return "redirect:" + corsOrigin + "/auth/profile?message=update_success";
     }
 
 
