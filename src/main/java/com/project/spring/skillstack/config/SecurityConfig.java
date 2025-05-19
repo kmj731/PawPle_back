@@ -57,6 +57,7 @@ public class SecurityConfig {
         return source;
     }
 
+
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
@@ -64,7 +65,11 @@ public class SecurityConfig {
                 .disable()
             )
             .authorizeHttpRequests(auth->auth
-                .requestMatchers("/public/**", "/permit/**", "/docs", "/swagger-ui/**", "/v3/**", "/favicon.ico").permitAll()
+                .requestMatchers(
+                    "/public/**", "/permit/**", "/test/**",
+                    "/docs", "/docs/**", "/swagger-ui/**", "/swagger-ui.html", "/v3/api-docs/**", "/v3/**",
+                    "/favicon.ico"
+                ).permitAll()
                 .requestMatchers("/admin/**").hasRole("ADMIN")
                 .anyRequest().authenticated()
             )
