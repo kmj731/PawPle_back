@@ -9,6 +9,7 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
@@ -65,12 +66,9 @@ public class SecurityConfig {
                 .disable()
             )
             .authorizeHttpRequests(auth->auth
-                .requestMatchers(
-                    "/public/**", "/permit/**", "/test/**",
-                    "/posts/**",
-                    "/docs", "/docs/**", "/swagger-ui/**", "/swagger-ui.html", "/v3/api-docs/**", "/v3/**",
-                    "/favicon.ico"
-                ).permitAll()
+                .requestMatchers("/public/**", "/permit/**", "/docs", "/swagger-ui/**", "/v3/**", "/favicon.ico").permitAll()
+                .requestMatchers("/auth/signup", "/auth/login", "/auth/signin", "/oauth2/**", "/logout").permitAll()
+                .requestMatchers("/user/delete", "/user/update", "/user/profile").authenticated() 
                 .requestMatchers("/admin/**").hasRole("ADMIN")
                 .anyRequest().authenticated()
             )
@@ -88,12 +86,24 @@ public class SecurityConfig {
                 .permitAll()
             )
             .logout(logout->logout
-                .logoutUrl("/logout") // 백엔드 로그아웃 경로
+                .logoutUrl("logout") // 백엔드 로그아웃 경로
                 .logoutSuccessHandler((request, response, authentication)->{
                     cookieUtil.RemoveJWTCookie(response);
                     response.sendRedirect(corsOrigin + "/home"); // 로그아웃 성공시 이동 경로
                 })
                 .permitAll()
+            )
+            .oauth2Login(oauth -> oauth
+                .loginPage(corsOrigin + "/auth/signin")
+                .defaultSuccessUrl(corsOrigin + "/home")
+                .failureUrl(corsOrigin + "/auth/signin")
+                .userInfoEndpoint(userInfo -> userInfo.userService(customUserDetailService))
+                .successHandler((request, response, authentication) -> {
+                    OAuth2User oAuth2User = (OAuth2User) authentication.getPrincipal();
+                    String token = jwtUtil.generateToken((UserDetails) customUserDetailService.loadUserByUsername(oAuth2User.getName()));
+                    cookieUtil.GenerateJWTCookie(token, response);
+                    response.sendRedirect(corsOrigin + "/home");
+                })
             )
             .exceptionHandling(error->error
                 .authenticationEntryPoint((request, response, authException)->{
@@ -107,4 +117,67 @@ public class SecurityConfig {
             .userDetailsService(customUserDetailService);
         return http.getOrBuild();
     }
+
+    ///////////////////////////////////////////// 백엔드 테스트용 ///////////////////////////////////////////////
+    // @Bean
+    // public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+    //     http
+    //         .csrf(csrf->csrf
+    //             .disable()
+    //         )
+    //         .authorizeHttpRequests(auth->auth
+    //             .requestMatchers("/public/**", "/permit/**", "/docs", "/swagger-ui/**", "/v3/**", "/favicon.ico").permitAll()
+    //             .requestMatchers("/auth/signup", "/auth/login", "/auth/signin", "/oauth2/**").permitAll()
+    //             .requestMatchers("/signup", "/signin", "/home", "/profile").permitAll()
+    //             .requestMatchers("/user/delete").authenticated() 
+    //             .requestMatchers("/admin/**").hasRole("ADMIN")
+    //             .anyRequest().authenticated()
+    //         )
+    //         .formLogin(form->form
+    //             .loginPage("/signin")
+    //             .loginProcessingUrl("/signin")
+    //             .failureUrl("/signin")
+    //             .usernameParameter("id")
+    //             .passwordParameter("pw")
+    //             .successHandler((request, response, authentication)->{
+    //                 String token = jwtUtil.generateToken((UserDetails)authentication.getPrincipal());
+    //                 cookieUtil.GenerateJWTCookie(token, response);
+    //                 response.sendRedirect("/home");
+    //             })
+    //             .permitAll()
+    //         )
+    //         .logout(logout->logout
+    //             .logoutUrl("/logout")
+    //             .logoutSuccessHandler((request, response, authentication)->{
+    //                 cookieUtil.RemoveJWTCookie(response);
+    //                 response.sendRedirect("/home");
+    //             })
+    //             .permitAll()
+    //         )
+    //         .oauth2Login(oauth -> oauth
+    //             .loginPage("/auth/oauth2login")
+    //             .defaultSuccessUrl("/home")
+    //             .failureUrl("/auth/oauth2login")
+    //             .userInfoEndpoint(userInfo -> userInfo.userService(customUserDetailService))
+    //             .successHandler((request, response, authentication) -> {
+    //                 OAuth2User oAuth2User = (OAuth2User) authentication.getPrincipal();
+    //                 String token = jwtUtil.generateToken((UserDetails) customUserDetailService.loadUserByUsername(oAuth2User.getName()));
+    //                 cookieUtil.GenerateJWTCookie(token, response);
+    //                 response.sendRedirect("/home");
+    //             })
+    //         )
+    //         .exceptionHandling(error->error
+    //             .authenticationEntryPoint((request, response, authException)->{
+    //                 response.getWriter().write("{\"message\":\"Authentication Error\",\"type\":\"Failed Authenticate\"}");
+    //             })
+    //         )
+    //         .sessionManagement(session->session
+    //             .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+    //         )
+    //         .addFilterBefore(jwtAuthorizationFilter, UsernamePasswordAuthenticationFilter.class)
+    //         .userDetailsService(customUserDetailService);
+    //     return http.getOrBuild();
+    // }
+
+
 }

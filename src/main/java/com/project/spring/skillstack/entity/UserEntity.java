@@ -1,5 +1,6 @@
 package com.project.spring.skillstack.entity;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
@@ -47,6 +48,12 @@ public class UserEntity {
     @ElementCollection
     private List<String> roles;
 
+    private String email;
+    private String gender;
+    private String phoneNumber;
+
+
+    private LocalDate birthDate;
     private LocalDateTime created;
 
     @Transient
