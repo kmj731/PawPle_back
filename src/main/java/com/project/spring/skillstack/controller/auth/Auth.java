@@ -74,9 +74,9 @@ public class Auth {
     @Transactional
     public String updateUser(
         @AuthenticationPrincipal UserDetails userDetails,
-        @RequestParam("pw") String pw,
-        @RequestParam("newpw") String newpw,
-        @RequestParam("newSocialName") String newSocialName,
+        @RequestParam("password1") String password1,
+        @RequestParam("password2") String password2,
+        @RequestParam("name") String name,
         HttpServletResponse response
     ) {
         if (userDetails == null) {
@@ -85,23 +85,23 @@ public class Auth {
 
         String loggedInUsername = userDetails.getUsername();
 
-        if (!passwordEncoder.matches(pw, userDetails.getPassword())) {
+        if (!passwordEncoder.matches(password1, userDetails.getPassword())) {
             return "redirect:" + corsOrigin + "/auth/profile?error=wrong_password";
         }
         
-        UserEntity user = userRep.findByNameLike(loggedInUsername).orElse(null);
+        UserEntity user = userRep.findByName(loggedInUsername).orElse(null);
         if (user == null) {
             return "redirect:" + corsOrigin + "/auth/signin?error=user_not_found";
         }
 
-        if (newpw != null && !newpw.isEmpty()) {
-            user.setPass(passwordEncoder.encode(newpw));
+        if (password2 != null && !password2.isEmpty()) {
+            user.setPass(passwordEncoder.encode(password2));
             
             String newToken = jwtUtil.generateToken(user.getName());
             cookieUtil.GenerateJWTCookie(newToken, response);
         }
-        if (newSocialName != null && !newSocialName.isEmpty()) {
-            user.setSocialName(newSocialName);
+        if (name != null && !name.isEmpty()) {
+            user.setSocialName(name);
         }
 
         return "redirect:" + corsOrigin + "/auth/profile?message=update_success";

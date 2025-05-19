@@ -72,23 +72,23 @@ public class SecurityConfig {
                 .anyRequest().authenticated()
             )
             .formLogin(form->form
-                .loginPage(corsOrigin + "/auth/signin")
-                .loginProcessingUrl("/permit/signin")
-                .failureUrl(corsOrigin + "/auth/signin")
-                .usernameParameter("id") 
-                .passwordParameter("pw")
+                .loginPage(corsOrigin + "/auth/signin") // 프론트에서 로그인을 만들경로
+                .loginProcessingUrl("/permit/signin") // 로그인 프로세싱 경로 수정 필요 X
+                .failureUrl(corsOrigin + "/auth/signin") // 실패시 이동 경로
+                .usernameParameter("id") // 프론트에서 input 태그에 적을 name
+                .passwordParameter("pw") // 프론트에서 input 태그에 적을 name
                 .successHandler((request, response, authentication)->{
                     String token = jwtUtil.generateToken((UserDetails)authentication.getPrincipal());
                     cookieUtil.GenerateJWTCookie(token, response);
-                    response.sendRedirect(corsOrigin + "/home");
+                    response.sendRedirect(corsOrigin + "/home"); // 로그인 성공시 이동 경로
                 })
                 .permitAll()
             )
             .logout(logout->logout
-                .logoutUrl("logout")
+                .logoutUrl("logout") // 백엔드 로그아웃 경로
                 .logoutSuccessHandler((request, response, authentication)->{
                     cookieUtil.RemoveJWTCookie(response);
-                    response.sendRedirect(corsOrigin + "/home");
+                    response.sendRedirect(corsOrigin + "/home"); // 로그아웃 성공시 이동 경로
                 })
                 .permitAll()
             )
@@ -117,7 +117,7 @@ public class SecurityConfig {
         return http.getOrBuild();
     }
 
-    /////////////////////////////////////////////// 백엔드 테스트용 ///////////////////////////////////////////////
+    ///////////////////////////////////////////// 백엔드 테스트용 ///////////////////////////////////////////////
     // @Bean
     // public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
     //     http

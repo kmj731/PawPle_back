@@ -9,7 +9,9 @@ import com.project.spring.skillstack.entity.UserEntity;
 
 @Repository
 public interface UserRepository extends JpaRepository<UserEntity, Long> {
-    public Optional<UserEntity> findByNameLike(String name);
+    public Optional<UserEntity> findByName(String name);
+    public Optional<UserEntity> findByEmail(String email);
+    public Optional<UserEntity> findByPhoneNumber(String phoneNumber);
     public void deleteByName(String name);
 }
 

@@ -29,7 +29,7 @@ public class CustomUserDetailService extends DefaultOAuth2UserService implements
     @Override
     @Transactional
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        UserEntity user = userRep.findByNameLike(username).orElseThrow(()->new UsernameNotFoundException(username + "를 찾을 수 없음"));
+        UserEntity user = userRep.findByName(username).orElseThrow(()->new UsernameNotFoundException(username + "를 찾을 수 없음"));
         return new CustomUserDetails(user.toDto());
     }
 
@@ -66,7 +66,7 @@ public class CustomUserDetailService extends DefaultOAuth2UserService implements
                 throw new OAuth2AuthenticationException("Unsupported provider: " + provider);
         }
 
-        Optional<UserEntity> getUser = userRep.findByNameLike(userId + "_" + provider);
+        Optional<UserEntity> getUser = userRep.findByName(userId + "_" + provider);
         if (getUser.isEmpty()) {
             user.setName(userId + "_" + provider);
             user.setPass("Unknown");

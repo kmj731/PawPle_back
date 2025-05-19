@@ -1,5 +1,3 @@
-////////////////////////////////////////////// 백엔드 테스트용 컨트롤러 //////////////////////////////////////////////
-
 package com.project.spring.skillstack.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,7 +35,7 @@ public class PageController {
     @GetMapping("/profile")
     public String profile(@AuthenticationPrincipal UserDetails userDetails, Model model) {
         if (userDetails != null) {
-            UserEntity user = userRep.findByNameLike(userDetails.getUsername()).orElse(null);
+            UserEntity user = userRep.findByName(userDetails.getUsername()).orElse(null);
             if (user != null) {
                 model.addAttribute("user", user);
             }
