@@ -5,17 +5,22 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Controller;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.project.spring.skillstack.dao.UserRepository;
 import com.project.spring.skillstack.entity.UserEntity;
@@ -28,6 +33,8 @@ import jakarta.servlet.http.HttpServletResponse;
 @RequestMapping("/permit/auth")
 public class PermitPage {
 
+    private final PasswordEncoder passwordEncoder;
+
     @Autowired
     UserRepository userRep;
     @Autowired
@@ -36,6 +43,11 @@ public class PermitPage {
     CookieUtil cookieUtil;
     @Value("${spring.security.cors.site}")
     String corsOrigin;
+
+
+    PermitPage(PasswordEncoder passwordEncoder) {
+        this.passwordEncoder = passwordEncoder;
+    }
 
 
 
@@ -86,32 +98,52 @@ public class PermitPage {
         String token = jwtUtil.generateToken(user.getName());
         cookieUtil.GenerateJWTCookie(token, response);
 
-        return "redirect:/home";
+        return "redirect:" + corsOrigin + "/home";
         
     }
-
+    // redirect -> 브라우저용이라 api 테스트 오류 떠서 바꿈
     @PostMapping("/signin")
-    public String signin(
-        @RequestParam("userId") String userId,
-        @RequestParam("password") String password,
-        HttpServletResponse response
-    ) {
+    @ResponseBody
+    public ResponseEntity<?> signin(@RequestParam("userId") String userId,
+                                    @RequestParam("password") String password,
+                                    HttpServletResponse response) {
+
         UserEntity user = userRep.findByName(userId).orElse(null);
+        if (user == null || !passwordEncoder.matches(password, user.getPass())) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("error", "로그인 실패"));
+        }
+
+        String token = jwtUtil.generateToken(userId);
         
-        if (user == null) {
-            return "redirect:" + corsOrigin + "/signin?error=not_found";
-        }
-
-        BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
-        if (!encoder.matches(password, user.getPass())) {
-            return "redirect:" + corsOrigin + "/signin?error=wrong_password";
-        }
-
-        String token = jwtUtil.generateToken(user.getName());
+        // 선택: 쿠키에도 저장
         cookieUtil.GenerateJWTCookie(token, response);
 
-        return "redirect:" + corsOrigin + "/home";
+        // 본문에 JSON으로 토큰을 응답
+        return ResponseEntity.ok(Map.of("token", token));
     }
+
+    // @PostMapping("/signin")
+    // public String signin(
+    //     @RequestParam("userId") String userId,
+    //     @RequestParam("password") String password,
+    //     HttpServletResponse response
+    // ) {
+    //     UserEntity user = userRep.findByName(userId).orElse(null);
+        
+    //     if (user == null) {
+    //         return "redirect:" + corsOrigin + "/signin?error=not_found";
+    //     }
+
+    //     BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
+    //     if (!encoder.matches(password, user.getPass())) {
+    //         return "redirect:" + corsOrigin + "/signin?error=wrong_password";
+    //     }
+
+    //     String token = jwtUtil.generateToken(user.getName());
+    //     cookieUtil.GenerateJWTCookie(token, response);
+
+    //     return "redirect:" + corsOrigin + "/home";
+    // }
 
 
 
