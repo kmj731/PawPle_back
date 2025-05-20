@@ -32,6 +32,12 @@ public class PageController {
         return "signin";
     }
 
+    @GetMapping("/pet")
+    public String pet() {
+        return "pet";
+    }
+
+
     @GetMapping("/profile")
     public String profile(@AuthenticationPrincipal UserDetails userDetails, Model model) {
         if (userDetails != null) {

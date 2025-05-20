@@ -66,29 +66,29 @@ public class SecurityConfig {
             )
             .authorizeHttpRequests(auth->auth
                 .requestMatchers("/public/**", "/permit/**", "/docs", "/swagger-ui/**", "/v3/**", "/favicon.ico").permitAll()
-                .requestMatchers("/auth/signup", "/auth/login", "/auth/signin", "/oauth2/**", "/logout").permitAll()
-                .requestMatchers("/user/delete", "/user/update", "/user/profile").authenticated() 
+                .requestMatchers("/oauth2/**", "/logout").permitAll()
+                .requestMatchers("/auth/**", "/user/**", "/pet/**").authenticated() 
                 .requestMatchers("/admin/**").hasRole("ADMIN")
                 .anyRequest().authenticated()
             )
             .formLogin(form->form
-                .loginPage(corsOrigin + "/auth/signin") // 프론트에서 로그인을 만들경로
-                .loginProcessingUrl("/permit/signin") // 로그인 프로세싱 경로 수정 필요 X
-                .failureUrl(corsOrigin + "/auth/signin") // 실패시 이동 경로
-                .usernameParameter("id") // 프론트에서 input 태그에 적을 name
-                .passwordParameter("pw") // 프론트에서 input 태그에 적을 name
+                .loginPage(corsOrigin + "/login")
+                .loginProcessingUrl("/permit/signin") 
+                .failureUrl(corsOrigin + "/login")
+                .usernameParameter("userId")
+                .passwordParameter("password")
                 .successHandler((request, response, authentication)->{
                     String token = jwtUtil.generateToken((UserDetails)authentication.getPrincipal());
                     cookieUtil.GenerateJWTCookie(token, response);
-                    response.sendRedirect(corsOrigin + "/home"); // 로그인 성공시 이동 경로
+                    response.sendRedirect(corsOrigin + "/home");
                 })
                 .permitAll()
             )
             .logout(logout->logout
-                .logoutUrl("logout") // 백엔드 로그아웃 경로
+                .logoutUrl("logout")
                 .logoutSuccessHandler((request, response, authentication)->{
                     cookieUtil.RemoveJWTCookie(response);
-                    response.sendRedirect(corsOrigin + "/home"); // 로그아웃 성공시 이동 경로
+                    response.sendRedirect(corsOrigin + "/home");
                 })
                 .permitAll()
             )
@@ -117,7 +117,7 @@ public class SecurityConfig {
         return http.getOrBuild();
     }
 
-    ///////////////////////////////////////////// 백엔드 테스트용 ///////////////////////////////////////////////
+    /////////////////////////////////////// 백엔드 테스트용 ///////////////////////////////////////////////
     // @Bean
     // public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
     //     http
@@ -126,9 +126,9 @@ public class SecurityConfig {
     //         )
     //         .authorizeHttpRequests(auth->auth
     //             .requestMatchers("/public/**", "/permit/**", "/docs", "/swagger-ui/**", "/v3/**", "/favicon.ico").permitAll()
-    //             .requestMatchers("/auth/signup", "/auth/login", "/auth/signin", "/oauth2/**").permitAll()
+    //             .requestMatchers("/auth/signup", "/auth/login", "/auth/signin", "/oauth2/**", "/pet/**").permitAll()
     //             .requestMatchers("/signup", "/signin", "/home", "/profile").permitAll()
-    //             .requestMatchers("/user/delete").authenticated() 
+    //             .requestMatchers("/pet/**").authenticated() 
     //             .requestMatchers("/admin/**").hasRole("ADMIN")
     //             .anyRequest().authenticated()
     //         )
@@ -136,8 +136,8 @@ public class SecurityConfig {
     //             .loginPage("/signin")
     //             .loginProcessingUrl("/signin")
     //             .failureUrl("/signin")
-    //             .usernameParameter("id")
-    //             .passwordParameter("pw")
+    //             .usernameParameter("userId")
+    //             .passwordParameter("password")
     //             .successHandler((request, response, authentication)->{
     //                 String token = jwtUtil.generateToken((UserDetails)authentication.getPrincipal());
     //                 cookieUtil.GenerateJWTCookie(token, response);
