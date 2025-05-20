@@ -1,14 +1,18 @@
 package com.project.spring.skillstack.dto;
 
-import lombok.Getter;
-import lombok.Setter;
+import java.time.LocalDateTime;
+
+import lombok.*;
 
 @Getter
 @Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
 public class PostDto {
+    private Long id;
     private String title;
     private String content;
-    private String writerId;
+    private String socialName;
+    private LocalDateTime created;
 }
-
-

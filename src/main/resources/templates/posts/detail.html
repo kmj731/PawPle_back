@@ -1,0 +1,13 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+    <head>
+        <title>게시글 상세보기</title>
+    </head>
+    <body>
+        <h1 th:text="${post.title}">제목</h1>
+        <p th:text="${post.username}">작성자</p>
+        <p th:text="${post.createdAt}">작성일</p>
+        <p th:text="${post.content}">내용</p>
+        <a th:href="@{/posts}">목록으로</a>
+    </body>
+</html>

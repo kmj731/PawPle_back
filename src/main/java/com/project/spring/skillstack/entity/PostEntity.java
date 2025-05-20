@@ -2,10 +2,10 @@ package com.project.spring.skillstack.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
-import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
 
+import java.time.LocalDateTime;
+
+@Data
 @Entity
 @Getter
 @Setter
@@ -15,34 +15,22 @@ import java.util.List;
 public class PostEntity {
 
     @Id
-    @GeneratedValue(
-        strategy = GenerationType.SEQUENCE, 
-        generator = "PostSeq"
-    )
-    @SequenceGenerator(
-        name = "PostSeq", 
-        sequenceName = "PostSeq", 
-        allocationSize = 1
-    )
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     private String title;
 
-    @Lob
+    @Column(length = 5000)
     private String content;
 
-    private LocalDateTime createdAt;
+    private LocalDateTime created;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")
-    private UserEntity writer;
-
-    @Builder.Default
-    @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<CommentEntity> comments = new ArrayList<>();
+    private UserEntity user;
 
     @PrePersist
     public void prePersist() {
-        this.createdAt = this.createdAt == null ? LocalDateTime.now() : this.createdAt;
+        this.created = LocalDateTime.now();
     }
 }
