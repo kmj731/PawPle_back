@@ -5,9 +5,9 @@
 </head>
 <body>
     <h1>로그인</h1>
-    <form action="/signin" method="post">
-        <label>아이디: <input type="text" name="id" required></label><br>
-        <label>비밀번호: <input type="password" name="pw" required></label><br>
+    <form action="/permit/auth/signin" method="post">
+        <label>아이디: <input type="text" name="userId" required></label><br>
+        <label>비밀번호: <input type="password" name="password" required></label><br>
         <button type="submit">로그인</button>
     </form>
     <div th:if="${param.error}">

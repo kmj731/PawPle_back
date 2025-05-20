@@ -70,7 +70,7 @@ public class CustomUserDetailService extends DefaultOAuth2UserService implements
         if (getUser.isEmpty()) {
             user.setName(userId + "_" + provider);
             user.setPass("Unknown");
-            user.setSocialName(socialName);
+            user.setName(socialName);
             user.setRoles(List.of("USER"));
             user.setCreated(LocalDateTime.now());
             userRep.save(user);
