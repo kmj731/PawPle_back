@@ -12,13 +12,13 @@
     </div>
 
     <form th:action="@{/pet/register}" method="post">
-        <label>동물종:</label><br>
+        <label>동물:</label><br>
         <input type="radio" id="dog" name="petType" value="강아지" required>
         <label for="dog">강아지</label>
         <input type="radio" id="cat" name="petType" value="고양이" required>
         <label for="cat">고양이</label><br><br>
 
-        <label for="petBreed">이름:</label>
+        <label for="petBreed">종:</label>
         <input type="text" id="petBreed" name="petBreed" placeholder="예: 시츄" required><br><br>
 
         <label for="weight">체중 (kg):</label>
