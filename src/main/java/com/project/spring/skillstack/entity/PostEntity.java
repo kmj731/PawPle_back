@@ -21,7 +21,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Entity
-@Table(name = "post_table")
+@Table(name = "PostTable")
 @Data
 @Builder
 @NoArgsConstructor
@@ -44,7 +44,7 @@ public class PostEntity {
     @Column(nullable = false, length = 200)
     private String title;
     
-    @Column(nullable = false, columnDefinition = "TEXT")
+    @Column(nullable = false, columnDefinition = "CLOB")
     private String content;
     
     @Column(nullable = false)
