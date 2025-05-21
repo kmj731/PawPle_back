@@ -1,33 +1,33 @@
 package com.project.spring.skillstack.controller.permit;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.stereotype.Controller;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.RestController;
 
 import com.project.spring.skillstack.dao.UserRepository;
+import com.project.spring.skillstack.dto.UserDto;
 import com.project.spring.skillstack.entity.UserEntity;
 import com.project.spring.skillstack.utility.CookieUtil;
 import com.project.spring.skillstack.utility.JwtUtil;
 
 import jakarta.servlet.http.HttpServletResponse;
 
-@Controller
+@RestController
 @RequestMapping("/permit/auth")
 public class PermitPage {
 
@@ -40,58 +40,113 @@ public class PermitPage {
     @Value("${spring.security.cors.site}")
     String corsOrigin;
 
-
-
     @PostMapping("/signup")
+    @ResponseBody
     @Transactional
-    public String signup(
-        @RequestParam("id")String id,
-        @RequestParam("password1")String password1,
-        @RequestParam("password2")String password2,
-        @RequestParam("name") String name,
-        @RequestParam("email1") String email1,
-        @RequestParam("email2") String email2,
-        @RequestParam("phoneNumber2") String phoneNumber2,
-        @RequestParam("phoneNumber3") String phoneNumber3,
-        @RequestParam("birthDate") String birthDateStr,
-        @AuthenticationPrincipal UserDetails userDetails,
-        HttpServletResponse response
-    ) {
-        String email = email1 + "@" + email2;
-        String phoneNumber = "010" + phoneNumber2 + phoneNumber3;
-        LocalDate birthDate = LocalDate.parse(birthDateStr, DateTimeFormatter.ofPattern("yyyy-MM-dd"));
+    public ResponseEntity<?> signup(@RequestBody UserDto dto, HttpServletResponse response) {
 
-        if(userDetails != null) return "redirect:" + corsOrigin + "/home";
-        if(id.isEmpty() || 
-           password1.isEmpty() || 
-           password2.isEmpty() || 
-           name.isEmpty() || 
-           email1.isEmpty() || 
-           email2.isEmpty() || 
-           name.isEmpty() ||
-           phoneNumber2.isEmpty() ||
-           phoneNumber3.isEmpty() ||
-           birthDate==null
-         ) return "redirect:" + corsOrigin + "/auth/signup?error=empty_input";
-        if(userRep.findByName(id).isPresent()) return "redirect:" + corsOrigin + "/auth/signup?error=user_exists";
-        if(userRep.findByEmail(email).isPresent()) return "redirect:" + corsOrigin + "/auth/signup?error=user_exists";
-        if(userRep.findByPhoneNumber(phoneNumber).isPresent()) return "redirect:" + corsOrigin + "/auth/signup?error=user_exists";
-        if(!password1.equals(password2)) return "redirect:" + corsOrigin + "/auth/signup?error=password_mismatch";
+        // // ✅ 디버깅 로그 추가
+        // System.out.println("[회원가입 요청 DTO]");
+        // System.out.println("name: " + dto.getName());
+        // System.out.println("pass: " + dto.getPass());
+        // System.out.println("email: " + dto.getEmail());
+        // System.out.println("phone: " + dto.getPhoneNumber());
+        // System.out.println("birth: " + dto.getBirthDate());
+
+        if (dto.getName() == null || dto.getPass() == null || dto.getEmail() == null ||
+            dto.getPhoneNumber() == null || dto.getBirthDate() == null) {
+            return ResponseEntity.badRequest().body(Map.of("message", "empty_input"));
+        }
+
+        if (userRep.findByName(dto.getName()).isPresent()) {
+            return ResponseEntity.badRequest().body(Map.of("message", "user_exists"));
+        }
+
+        if (userRep.findByEmail(dto.getEmail()).isPresent()) {
+            return ResponseEntity.badRequest().body(Map.of("message", "user_exists"));
+        }
+
+        if (userRep.findByPhoneNumber(dto.getPhoneNumber()).isPresent()) {
+            return ResponseEntity.badRequest().body(Map.of("message", "user_exists"));
+        }
 
         List<String> roles = new ArrayList<>();
         roles.add("USER");
 
-        UserEntity user = new UserEntity(null, id, new BCryptPasswordEncoder().encode(password1),
-                            name, roles, email, phoneNumber, birthDate, LocalDateTime.now(),  null, null
-                            );
-                            
+        UserEntity user = new UserEntity(
+            null,
+            dto.getName(),
+            new BCryptPasswordEncoder().encode(dto.getPass()),
+            dto.getSocialName() != null ? dto.getSocialName() : dto.getName(),
+            roles,
+            dto.getEmail(),
+            dto.getPhoneNumber(),
+            dto.getBirthDate(),
+            LocalDateTime.now(),
+            null,
+            null
+        );
+
         userRep.save(user);
+
         String token = jwtUtil.generateToken(user.getName());
         cookieUtil.GenerateJWTCookie(token, response);
 
-        return "redirect:" + corsOrigin + "/home";
-        
+        return ResponseEntity.ok(Map.of("message", "success"));
     }
+
+
+
+    // @PostMapping("/signup")
+    // @Transactional
+    // public String signup(
+    //     @RequestParam("id")String id,
+    //     @RequestParam("password1")String password1,
+    //     @RequestParam("password2")String password2,
+    //     @RequestParam("name") String name,
+    //     @RequestParam("email1") String email1,
+    //     @RequestParam("email2") String email2,
+    //     @RequestParam("phoneNumber2") String phoneNumber2,
+    //     @RequestParam("phoneNumber3") String phoneNumber3,
+    //     @RequestParam("birthDate") String birthDateStr,
+    //     @AuthenticationPrincipal UserDetails userDetails,
+    //     HttpServletResponse response
+    // ) {
+    //     String email = email1 + "@" + email2;
+    //     String phoneNumber = "010" + phoneNumber2 + phoneNumber3;
+    //     LocalDate birthDate = LocalDate.parse(birthDateStr, DateTimeFormatter.ofPattern("yyyy-MM-dd"));
+
+    //     if(userDetails != null) return "redirect:" + corsOrigin + "/home";
+    //     if(id.isEmpty() || 
+    //        password1.isEmpty() || 
+    //        password2.isEmpty() || 
+    //        name.isEmpty() || 
+    //        email1.isEmpty() || 
+    //        email2.isEmpty() || 
+    //        name.isEmpty() ||
+    //        phoneNumber2.isEmpty() ||
+    //        phoneNumber3.isEmpty() ||
+    //        birthDate==null
+    //      ) return "redirect:" + corsOrigin + "/auth/signup?error=empty_input";
+    //     if(userRep.findByName(id).isPresent()) return "redirect:" + corsOrigin + "/auth/signup?error=user_exists";
+    //     if(userRep.findByEmail(email).isPresent()) return "redirect:" + corsOrigin + "/auth/signup?error=user_exists";
+    //     if(userRep.findByPhoneNumber(phoneNumber).isPresent()) return "redirect:" + corsOrigin + "/auth/signup?error=user_exists";
+    //     if(!password1.equals(password2)) return "redirect:" + corsOrigin + "/auth/signup?error=password_mismatch";
+
+    //     List<String> roles = new ArrayList<>();
+    //     roles.add("USER");
+
+    //     UserEntity user = new UserEntity(null, id, new BCryptPasswordEncoder().encode(password1),
+    //                         name, roles, email, phoneNumber, birthDate, LocalDateTime.now(),  null, null
+    //                         );
+                            
+    //     userRep.save(user);
+    //     String token = jwtUtil.generateToken(user.getName());
+    //     cookieUtil.GenerateJWTCookie(token, response);
+
+    //     return "redirect:" + corsOrigin + "/home";
+        
+    // }
 
     @PostMapping("/signin")
     public String signin(

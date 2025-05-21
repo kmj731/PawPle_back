@@ -24,6 +24,13 @@ public final class CookieUtil {
         cookie.setDomain(corsDomain);
         cookie.setAttribute("SameSite", "Lax");
         response.addCookie(cookie);
+
+        // ✅ 로그 추가
+        System.out.println("[쿠키 생성됨]");
+        System.out.println("  이름: " + jwtAuthCookieName);
+        System.out.println("  도메인: " + corsDomain);
+        System.out.println("  MaxAge: " + jwtExpire);
+        System.out.println("  값: " + token);
     }
 
     public void RemoveJWTCookie(HttpServletResponse response) {
@@ -35,4 +42,6 @@ public final class CookieUtil {
         cookie.setAttribute("SameSite", "Lax");
         response.addCookie(cookie);
     }
+
+
 }
