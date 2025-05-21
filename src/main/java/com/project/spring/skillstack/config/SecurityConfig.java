@@ -127,8 +127,8 @@ public class SecurityConfig {
     //         .authorizeHttpRequests(auth->auth
     //             .requestMatchers("/public/**", "/permit/**", "/docs", "/swagger-ui/**", "/v3/**", "/favicon.ico").permitAll()
     //             .requestMatchers("/auth/signup", "/auth/login", "/auth/signin", "/oauth2/**", "/pet/**").permitAll()
-    //             .requestMatchers("/signup", "/signin", "/home", "/profile").permitAll()
-    //             .requestMatchers("/pet/**").authenticated() 
+    //             .requestMatchers("/signup", "/signin", "/home", "/profile", "/findid", "/findpw", "/resetpw").permitAll()
+    //             .requestMatchers("/pet/**", "/user/**").authenticated() 
     //             .requestMatchers("/admin/**").hasRole("ADMIN")
     //             .anyRequest().authenticated()
     //         )

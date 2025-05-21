@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head><title>아이디 찾기 결과</title></head>
+<body>
+    <h1>아이디 찾기 결과</h1>
+
+    <div th:if="${result}">
+        <p>당신의 아이디는: <strong th:text="${result}"></strong> 입니다.</p>
+        <a th:href="@{/signin}">로그인 하러 가기</a>
+    </div>
+
+    <div th:if="${error}">
+        <p th:text="${error}"></p>
+        <a th:href="@{/findid}">다시 시도</a>
+    </div>
+</body>
+</html>

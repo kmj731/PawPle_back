@@ -66,6 +66,6 @@ public class UserEntity {
     private List<PetEntity> pets = new ArrayList<>();
 
     public UserDto toDto() {
-        return new UserDto(id, name, pass, socialName, getRoles().stream().map(String::toString).collect(Collectors.toList()), created, attr);
+        return new UserDto(id, name, pass, socialName, getRoles().stream().map(String::toString).collect(Collectors.toList()), email, phoneNumber, birthDate, created, attr);
     }
 }

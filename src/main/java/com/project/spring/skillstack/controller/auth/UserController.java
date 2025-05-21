@@ -1,21 +1,27 @@
 package com.project.spring.skillstack.controller.auth;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.project.spring.skillstack.dao.PetRepository;
 import com.project.spring.skillstack.dao.UserRepository;
+import com.project.spring.skillstack.dto.UserDto;
 import com.project.spring.skillstack.entity.PetEntity;
 import com.project.spring.skillstack.entity.UserEntity;
 import com.project.spring.skillstack.utility.CookieUtil;
@@ -42,6 +48,44 @@ public class UserController {
     @Autowired
     JwtUtil jwtUtil;
 
+
+
+
+
+    // 회원정보 조회
+    @ResponseBody
+    @GetMapping("/info")
+    public ResponseEntity<?> getUserInfo(@AuthenticationPrincipal UserDetails userDetails) {
+        if (userDetails == null || userDetails.getUsername() == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("message", "로그인 정보 없음"));
+        }
+
+        Optional<UserEntity> optionalUser = userRep.findByName(userDetails.getUsername());
+        if (optionalUser.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("message", "사용자 없음"));
+        }
+
+        UserDto userDto = optionalUser.get().toDto();
+        return ResponseEntity.ok(userDto);
+    }
+
+    // 펫정보 조회
+    @ResponseBody
+    @GetMapping("/petinfo")
+    public ResponseEntity<?> getMyPets(@AuthenticationPrincipal UserDetails userDetails) {
+        if (userDetails == null || userDetails.getUsername() == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("message", "로그인 정보 없음"));
+        }
+
+        Optional<UserEntity> optionalUser = userRep.findByName(userDetails.getUsername());
+        if (optionalUser.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("message", "사용자 없음"));
+        }
+
+        UserEntity user = optionalUser.get();
+        List<PetEntity> pets = petRep.findByOwner(user);
+        return ResponseEntity.ok(pets);
+    }
 
     // 회원삭제
     @PostMapping("/delete")

@@ -9,6 +9,7 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import lombok.NoArgsConstructor;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import java.time.LocalDate;
 
@@ -42,6 +43,7 @@ public class PetEntity {
     @Column(nullable = false)
     private LocalDate registrationDate;
 
+    @JsonIgnore
     @ManyToOne
     @JoinColumn(name = "owner_id")
     private UserEntity owner;
