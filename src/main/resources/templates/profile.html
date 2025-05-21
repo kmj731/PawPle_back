@@ -6,13 +6,15 @@
 <body>
     <h1>회원정보 수정</h1>
     
+    <!-- 수정 완료 메시지 -->
     <div th:if="${param.message}">
         <p th:text="'수정 완료: ' + ${param.message}"></p>
     </div>
 
+    <!-- 회원정보 수정 폼 -->
     <form action="/user/update" method="post">
 
-        <label>현재 이름: 
+        <label>현재 ID: 
             <input type="text" name="name" th:value="${user.name}" readonly>
         </label><br>
 
@@ -24,7 +26,7 @@
             <input type="password" name="password2" placeholder="새로운 비밀번호">
         </label><br>
 
-        <label>소셜 이름: 
+        <label>이름: 
             <input type="text" name="name" th:value="${user.socialName}">
         </label><br>
 
@@ -47,6 +49,7 @@
         <button type="submit">수정하기</button>
     </form>
 
+    <!-- 회원탈퇴 폼 -->
     <h2>회원탈퇴</h2>
     <form action="/user/delete" method="post">
         <label>현재 비밀번호: 
@@ -55,6 +58,7 @@
         <button type="submit">회원탈퇴</button>
     </form>
 
+    <!-- 홈으로 이동 -->
     <a th:href="@{/home}">홈으로</a>
 </body>
 </html>
