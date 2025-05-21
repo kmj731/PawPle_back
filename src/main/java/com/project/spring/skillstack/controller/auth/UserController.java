@@ -94,7 +94,7 @@ public class UserController {
         @AuthenticationPrincipal UserDetails userDetails,
         @RequestParam("password1") String password1,
         @RequestParam("password2") String password2,
-        @RequestParam("socialName") String socialName,
+        @RequestParam("name") String name,
         @RequestParam("email") String email,
         @RequestParam("phoneNumber") String phoneNumber,
         HttpServletResponse response
@@ -124,8 +124,8 @@ public class UserController {
             cookieUtil.GenerateJWTCookie(newToken, response);
         }
 
-        if (socialName != null && !socialName.isEmpty()) {
-            user.setSocialName(socialName);
+        if (name != null && !name.isEmpty()) {
+            user.setSocialName(name);
         }
         if (email != null && !email.isEmpty()) {
             user.setEmail(email);
