@@ -28,11 +28,13 @@ import lombok.RequiredArgsConstructor;
 public class HealthCheckController {
 
     private final HealthCheckService service;
-    private final List<String> categories = List.of("심장", "위/장", "피부/귀", "신장/방광", "면역력/호흡기", "치아", "뼈/관절", "눈", "행동");
+    private final List<String> categories = List.of("심장", "위/장", "피부/귀", "신장/방광", "면역력/호흡기", "치아", "뼈/관절", "눈", "행동","체중 및 비만도");
 
     @GetMapping("/check/{step}")
     public String showStep(@PathVariable int step, Model model) {
-        if (step >= categories.size()-1) { return "redirect:/health/result";}
+        if (step >= categories.size()) {
+            return "redirect:/health/result";
+        }
 
         model.addAttribute("category", categories.get(step));
         model.addAttribute("step", step);
@@ -104,14 +106,15 @@ public String showResult(HttpSession session, Model model) {
     private List<String> getOptionsFor(String category) {
         return switch (category) {
             case "심장" -> List.of("심장박동이 불규칙해요","숨이 가빠요","기절한 적이 있어요","쉽게 지쳐요","없어요");
-            case "위/장" -> List.of("구토를 자주 해요", "설사를 자주 해요", "없어요");
+            case "위/장" -> List.of("구토를 자주 해요", "설사를 자주 해요","밥을 잘 안 먹거나 식욕이 줄었어요", "변 상태가 자주 물처럼 묽어요", "없어요");
             case "피부/귀" -> List.of("피부에서 냄새가 나요","귀에서 분비물이 나와요","피부가 빨개요","가려워서 자주 긁어요","없어요");
-            case "신장/방광" -> List.of("소변을 자주 봐요", "소변 냄새가 강해요", "없어요");
-            case "면역력/호흡기" -> List.of("기침을 자주 해요", "열이 있어요", "없어요");
-            case "치아" -> List.of("입에서 냄새가 나요", "치아가 누렇게 변했어요", "없어요");
-            case "뼈/관절" -> List.of("절뚝거려요", "계단을 오르기 힘들어해요", "없어요");
-            case "눈" -> List.of("눈꼽이 많이 껴요", "눈이 빨개요", "없어요");
+            case "신장/방광" -> List.of("소변을 자주 봐요", "소변 냄새가 강해요", "소변을 볼 때 힘들어하거나 자주 실수해요", "소변 색이 평소보다 진하거나 붉어요", "없어요");
+            case "면역력/호흡기" -> List.of("기침을 자주 해요","콧물이 나고 코를 자주 문질러요","열이 있어요","숨이 차서 헐떡거려요","없어요");
+            case "치아" -> List.of("입에서 냄새가 나요", "딱딱한 사료를 잘 못 씹어요","이가 흔들리거나 빠졌어요", "잇몸이 붓고 피가 나요", "없어요");
+            case "뼈/관절" -> List.of("다리를 절뚝거려요","계단을 오르기 힘들어해요","일어나기 힘들어해요", "산책을 싫어해요","없어요");
+            case "눈" -> List.of("눈꼽이 많이 껴요","눈이 빨개요","빛에 민감하게 반응해요", "눈이 뿌옇게 보여요","없어요");
             case "행동" -> List.of("기운이 없어요", "짖는 횟수가 줄었어요", "숨는 일이 많아졌어요", "혼자 있으려고 해요", "없어요");
+            case "체중 및 비만도" -> List.of("최근 강아지의 체중이 눈에 띄게 늘었거나 줄었어요","허리 라인이 잘 안 보이거나 만져지지 않아요", "배를 만졌을 때 갈비뼈가 잘 느껴지지 않아요", "예전보다 덜 움직이고, 활동량이 줄었거나 쉽게 지쳐해요","없어요");
             default -> List.of("없어요");
         };
     }
