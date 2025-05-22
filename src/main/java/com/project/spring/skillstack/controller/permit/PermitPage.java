@@ -2,12 +2,14 @@ package com.project.spring.skillstack.controller.permit;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.transaction.annotation.Transactional;
@@ -151,27 +153,40 @@ public class PermitPage {
 
     // }
 
-    @PostMapping("/signin")
-    public String signin(
-            @RequestParam("userId") String userId,
-            @RequestParam("password") String password,
-            HttpServletResponse response) {
-        UserEntity user = userRep.findByName(userId).orElse(null);
+@PostMapping("/signin")
+public ResponseEntity<Map<String, String>> signin(
+        @RequestBody Map<String, String> credentials,
+        HttpServletResponse response) {
 
-        if (user == null) {
-            return "redirect:" + corsOrigin + "/signin?error=not_found";
-        }
+    String userId = credentials.get("userId");
+    String password = credentials.get("password");
 
-        BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
-        if (!encoder.matches(password, user.getPass())) {
-            return "redirect:" + corsOrigin + "/signin?error=wrong_password";
-        }
+    UserEntity user = userRep.findByName(userId).orElse(null);
 
-        String token = jwtUtil.generateToken(user.getName());
-        cookieUtil.GenerateJWTCookie(token, response);
-
-        return "redirect:" + corsOrigin + "/home";
+    if (user == null) {
+        // 리다이렉션 URL을 JSON 형식으로 반환
+        Map<String, String> responseMap = new HashMap<>();
+        responseMap.put("error", "not_found");
+        return ResponseEntity.status(HttpStatus.OK).body(responseMap); // 200 OK 상태로 JSON 반환
     }
+
+    BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
+    if (!encoder.matches(password, user.getPass())) {
+        // 비밀번호가 틀린 경우 JSON 형식으로 반환
+        Map<String, String> responseMap = new HashMap<>();
+        responseMap.put("error", "wrong_password");
+        return ResponseEntity.status(HttpStatus.OK).body(responseMap);
+    }
+
+    String token = jwtUtil.generateToken(user.getName());
+    cookieUtil.GenerateJWTCookie(token, response);
+
+    // 로그인 성공 시 리다이렉션 URL을 JSON 형식으로 반환
+    Map<String, String> successResponse = new HashMap<>();
+    successResponse.put("redirect", corsOrigin + "/home");
+    return ResponseEntity.status(HttpStatus.OK).body(successResponse); // 200 OK 상태로 JSON 반환
+}
+
 
     @PostMapping("/findid")
     @ResponseBody
