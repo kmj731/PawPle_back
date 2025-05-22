@@ -69,7 +69,7 @@ public class SecurityConfig {
             .authorizeHttpRequests(auth->auth
                 .requestMatchers("/posts/**", "/public/**", "/permit/**", "/docs", "/swagger-ui/**", "/v3/**", "/favicon.ico").permitAll()
                 .requestMatchers("/oauth2/**", "/logout").permitAll()
-                .requestMatchers("/auth/**", "/user/**", "/pet/**", "/api/comments/**").authenticated() 
+                .requestMatchers("/auth/**", "/user/**", "/pet/**", "/api/**").authenticated() 
                 .requestMatchers("/admin/**").hasRole("ADMIN")
                 .requestMatchers("/health/**", "/", "/css/**", "/js/**", "/images/**").permitAll()
                 .anyRequest().authenticated()

@@ -108,4 +108,27 @@ public class Permit {
         List<PostEntity> posts = postRep.findByUserOrderByCreatedAtDesc(optionalUser.get());
         return ResponseEntity.ok(posts);
     }
+
+    @GetMapping("/test/myinfo")
+    public ResponseEntity<?> getMyPage(@AuthenticationPrincipal CustomUserDetails userDetails) {
+        if (userDetails == null) {
+            return ResponseEntity.status(401).body(Map.of("message", "로그인 정보 없음"));
+        }
+
+        Optional<UserEntity> optionalUser = userRep.findByName(userDetails.getUsername());
+        if (optionalUser.isEmpty()) {
+            return ResponseEntity.status(404).body(Map.of("message", "사용자 없음"));
+        }
+
+        UserEntity user = optionalUser.get();
+
+        List<PostEntity> posts = postRep.findByUserOrderByCreatedAtDesc(user); // 유저의 게시글 목록
+
+        Map<String, Object> response = Map.of(
+            "user", user,
+            "posts", posts
+        );
+
+        return ResponseEntity.ok(response);
+    }
 }

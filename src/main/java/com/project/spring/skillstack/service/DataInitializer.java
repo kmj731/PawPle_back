@@ -28,7 +28,7 @@ public class DataInitializer implements CommandLineRunner {
 
 
         UserEntity root = new UserEntity(null, "root", passwordEncoder.encode("1234"), "root", List.of("ADMIN"), null, null, null, LocalDateTime.now(), null, new ArrayList<>());
-        UserEntity abcd = new UserEntity(null, "abcd", passwordEncoder.encode("1234"), "abcd", List.of("USER"), null, null, null, LocalDateTime.now(), null, new ArrayList<>());
+        UserEntity abcd = new UserEntity(null, "abcd", passwordEncoder.encode("1234"), "abcd", List.of("USER"), "abc123@pawple.com", "01012345678", null, LocalDateTime.now(), null, new ArrayList<>());
 
         PetEntity abcdPet = new PetEntity("고양이", 4.0, "나비", 2, "수컷", "코숏", LocalDate.now(), abcd);
         abcd.getPets().add(abcdPet);
