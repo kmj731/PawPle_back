@@ -65,9 +65,9 @@ public class SecurityConfig {
                 .disable()
             )
             .authorizeHttpRequests(auth->auth
-                .requestMatchers("/public/**", "/permit/**", "/docs", "/swagger-ui/**", "/v3/**", "/favicon.ico").permitAll()
+                .requestMatchers("/posts/**", "/public/**", "/permit/**", "/docs", "/swagger-ui/**", "/v3/**", "/favicon.ico").permitAll()
                 .requestMatchers("/oauth2/**", "/logout").permitAll()
-                .requestMatchers("/auth/**", "/user/**", "/pet/**").authenticated() 
+                .requestMatchers("/auth/**", "/user/**", "/pet/**", "/api/comments/**").authenticated() 
                 .requestMatchers("/admin/**").hasRole("ADMIN")
                 .anyRequest().authenticated()
             )

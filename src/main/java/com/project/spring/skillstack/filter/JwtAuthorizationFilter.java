@@ -26,8 +26,10 @@ public class JwtAuthorizationFilter extends OncePerRequestFilter {
 
     @Autowired
     JwtUtil jwtUtil;
+
     @Autowired
     CookieUtil cookieUtil;
+
     @Autowired
     CustomUserDetailService customUserDetailService;
 
@@ -37,26 +39,40 @@ public class JwtAuthorizationFilter extends OncePerRequestFilter {
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
             throws ServletException, IOException {
-        
-        String authorizationHeader = "";
-        if(request.getCookies() != null) {
-            for(Cookie cookie : request.getCookies()){
-                if(cookie.getName().equals(jwtAuthCookieName))
-                    authorizationHeader = cookie.getValue();
+
+        String token = null;
+
+        // 쿠키에서 JWT 토큰 추출
+        if (request.getCookies() != null) {
+            for (Cookie cookie : request.getCookies()) {
+                if (jwtAuthCookieName.equals(cookie.getName())) {
+                    token = cookie.getValue();
+                    break;
+                }
             }
         }
-        String username = "";
 
-        if(StringUtils.hasText(authorizationHeader)) {
-            username = jwtUtil.extractUsername(authorizationHeader);
+        if (StringUtils.hasText(token)) {
+            try {
+                String username = jwtUtil.extractUsername(token);
+
+                if (StringUtils.hasText(username) && SecurityContextHolder.getContext().getAuthentication() == null) {
+                    UserDetails userDetails = customUserDetailService.loadUserByUsername(username);
+
+                    if (jwtUtil.validateToken(token, userDetails)) {
+                        UsernamePasswordAuthenticationToken authentication =
+                                new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
+                        SecurityContextHolder.getContext().setAuthentication(authentication);
+                    } else {
+                        cookieUtil.RemoveJWTCookie(response); // 토큰이 유효하지 않으면 삭제
+                    }
+                }
+            } catch (Exception e) {
+                // 예외 발생 시 무시하고 필터 체인 진행
+            }
         }
-        if(StringUtils.hasText(username) && SecurityContextHolder.getContext().getAuthentication() == null) {
-            UserDetails userDetails = this.customUserDetailService.loadUserByUsername(username);
-            if(jwtUtil.validateToken(authorizationHeader, userDetails)) {
-                UsernamePasswordAuthenticationToken usernamePasswordAuthenticationToken = new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
-                SecurityContextHolder.getContext().setAuthentication(usernamePasswordAuthenticationToken);
-            } else cookieUtil.RemoveJWTCookie(response);
-        }
+
         filterChain.doFilter(request, response);
     }
+
 }

@@ -183,8 +183,4 @@ public class UserController {
         return "redirect:" + corsOrigin + "/mypage?message=update_success";
     }
 
-
-
-
-
 }
