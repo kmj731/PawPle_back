@@ -5,6 +5,8 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 
+import com.project.spring.skillstack.entity.PetEntity;
+
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -14,7 +16,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class UserDto {
 
-    private Long id;
+private Long id;
 
     private String name;
     private String pass;
@@ -31,4 +33,6 @@ public class UserDto {
     private LocalDateTime created;
 
     private Map<String, Object> attr;
+
+    private List<PetEntity> pets;
 }

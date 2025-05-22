@@ -2,18 +2,18 @@ package com.project.spring.skillstack.controller.permit;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -41,6 +41,8 @@ public class PermitPage {
     CookieUtil cookieUtil;
     @Value("${spring.security.cors.site}")
     String corsOrigin;
+    @Autowired
+    private PasswordEncoder passwordEncoder;
 
     @PostMapping("/signup")
     @ResponseBody
@@ -48,18 +50,16 @@ public class PermitPage {
     public ResponseEntity<?> signup(@RequestBody UserDto dto, HttpServletResponse response) {
 
         if (dto.getName() == null || dto.getPass() == null || dto.getEmail() == null ||
-                dto.getPhoneNumber() == null || dto.getBirthDate() == null) {
+            dto.getPhoneNumber() == null || dto.getBirthDate() == null) {
             return ResponseEntity.badRequest().body(Map.of("message", "empty_input"));
         }
 
         if (userRep.findByName(dto.getName()).isPresent()) {
             return ResponseEntity.badRequest().body(Map.of("message", "username_exists"));
         }
-
         if (userRep.findByEmail(dto.getEmail()).isPresent()) {
             return ResponseEntity.badRequest().body(Map.of("message", "email_exists"));
         }
-
         if (userRep.findByPhoneNumber(dto.getPhoneNumber()).isPresent()) {
             return ResponseEntity.badRequest().body(Map.of("message", "phone_exists"));
         }
@@ -70,7 +70,7 @@ public class PermitPage {
         UserEntity user = new UserEntity(
                 null,
                 dto.getName(),
-                new BCryptPasswordEncoder().encode(dto.getPass()),
+                passwordEncoder.encode(dto.getPass()), 
                 dto.getSocialName() != null ? dto.getSocialName() : dto.getName(),
                 roles,
                 dto.getEmail(),
@@ -88,36 +88,43 @@ public class PermitPage {
         return ResponseEntity.ok(Map.of("message", "success"));
     }
 
-    @PostMapping("/signin")
-    public ResponseEntity<Map<String, String>> signin(
-            @RequestBody Map<String, String> credentials,
-            HttpServletResponse response) {
 
-        String userId = credentials.get("userId");
-        String password = credentials.get("password");
-
-        UserEntity user = userRep.findByName(userId).orElse(null);
-
-        if (user == null) {
-            Map<String, String> responseMap = new HashMap<>();
-            responseMap.put("error", "not_found");
-            return ResponseEntity.status(HttpStatus.OK).body(responseMap);
-        }
-
-        BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
-        if (!encoder.matches(password, user.getPass())) {
-            Map<String, String> responseMap = new HashMap<>();
-            responseMap.put("error", "wrong_password");
-            return ResponseEntity.status(HttpStatus.OK).body(responseMap);
-        }
-
-        String token = jwtUtil.generateToken(user.getName());
-        cookieUtil.GenerateJWTCookie(token, response);
-
-        Map<String, String> successResponse = new HashMap<>();
-        successResponse.put("redirect", corsOrigin + "/home");
-        return ResponseEntity.status(HttpStatus.OK).body(successResponse);
+    @GetMapping("/check-id")
+    public ResponseEntity<?> checkId(@RequestParam("username") String username) {
+        boolean exists = userRep.findByName(username).isPresent();
+        return ResponseEntity.ok(Map.of("exists", exists));
     }
+
+    // @PostMapping("/signin")
+    // public ResponseEntity<Map<String, String>> signin(
+    //         @RequestBody Map<String, String> credentials,
+    //         HttpServletResponse response) {
+
+    //     String userId = credentials.get("userId");
+    //     String password = credentials.get("password");
+
+    //     UserEntity user = userRep.findByName(userId).orElse(null);
+
+    //     if (user == null) {
+    //         Map<String, String> responseMap = new HashMap<>();
+    //         responseMap.put("error", "not_found");
+    //         return ResponseEntity.status(HttpStatus.OK).body(responseMap);
+    //     }
+
+    //     BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
+    //     if (!encoder.matches(password, user.getPass())) {
+    //         Map<String, String> responseMap = new HashMap<>();
+    //         responseMap.put("error", "wrong_password");
+    //         return ResponseEntity.status(HttpStatus.OK).body(responseMap);
+    //     }
+
+    //     String token = jwtUtil.generateToken(user.getName());
+    //     cookieUtil.GenerateJWTCookie(token, response);
+
+    //     Map<String, String> successResponse = new HashMap<>();
+    //     successResponse.put("redirect", corsOrigin + "/home");
+    //     return ResponseEntity.status(HttpStatus.OK).body(successResponse);
+    // }
 
     @PostMapping("/findid")
     @ResponseBody
