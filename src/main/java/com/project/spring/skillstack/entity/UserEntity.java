@@ -8,6 +8,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import com.project.spring.skillstack.dto.UserDto;
+import com.project.spring.skillstack.dto.UserDtoWithoutPass;
 
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.ElementCollection;
@@ -69,4 +70,18 @@ public class UserEntity {
     public UserDto toDto() {
         return new UserDto(id, name, pass, socialName, getRoles().stream().map(String::toString).collect(Collectors.toList()), email, phoneNumber, birthDate, created, attr, pets);
     }
+
+    public UserDtoWithoutPass toDtoWithoutPass(){
+        return new UserDtoWithoutPass(
+            id, name, socialName, roles.stream().map(String::toString).collect(Collectors.toList()),
+            email,
+            phoneNumber,
+            birthDate,
+            created,
+            attr
+        );
+
+    }
+
+
 }
