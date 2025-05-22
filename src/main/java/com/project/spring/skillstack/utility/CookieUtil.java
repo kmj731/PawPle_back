@@ -18,11 +18,11 @@ public final class CookieUtil {
     
     public void GenerateJWTCookie(String token, HttpServletResponse response) {
         Cookie cookie = new Cookie(jwtAuthCookieName, token);
-        cookie.setHttpOnly(true);
+        // cookie.setHttpOnly(true); -> 백엔드 지워야할것
         cookie.setPath("/");
         cookie.setMaxAge(jwtExpire);
         cookie.setDomain(corsDomain);
-        cookie.setAttribute("SameSite", "Lax");
+        // cookie.setAttribute("SameSite", "Lax"); -> 백엔드 지워야할것
         response.addCookie(cookie);
 
         // ✅ 로그 추가
