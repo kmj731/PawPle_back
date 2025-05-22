@@ -88,36 +88,36 @@ public class PermitPage {
         return ResponseEntity.ok(Map.of("message", "success"));
     }
 
-    @PostMapping("/signin")
-    public ResponseEntity<Map<String, String>> signin(
-            @RequestBody Map<String, String> credentials,
-            HttpServletResponse response) {
+    // @PostMapping("/signin")
+    // public ResponseEntity<Map<String, String>> signin(
+    //         @RequestBody Map<String, String> credentials,
+    //         HttpServletResponse response) {
 
-        String userId = credentials.get("userId");
-        String password = credentials.get("password");
+    //     String userId = credentials.get("userId");
+    //     String password = credentials.get("password");
 
-        UserEntity user = userRep.findByName(userId).orElse(null);
+    //     UserEntity user = userRep.findByName(userId).orElse(null);
 
-        if (user == null) {
-            Map<String, String> responseMap = new HashMap<>();
-            responseMap.put("error", "not_found");
-            return ResponseEntity.status(HttpStatus.OK).body(responseMap);
-        }
+    //     if (user == null) {
+    //         Map<String, String> responseMap = new HashMap<>();
+    //         responseMap.put("error", "not_found");
+    //         return ResponseEntity.status(HttpStatus.OK).body(responseMap);
+    //     }
 
-        BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
-        if (!encoder.matches(password, user.getPass())) {
-            Map<String, String> responseMap = new HashMap<>();
-            responseMap.put("error", "wrong_password");
-            return ResponseEntity.status(HttpStatus.OK).body(responseMap);
-        }
+    //     BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
+    //     if (!encoder.matches(password, user.getPass())) {
+    //         Map<String, String> responseMap = new HashMap<>();
+    //         responseMap.put("error", "wrong_password");
+    //         return ResponseEntity.status(HttpStatus.OK).body(responseMap);
+    //     }
 
-        String token = jwtUtil.generateToken(user.getName());
-        cookieUtil.GenerateJWTCookie(token, response);
+    //     String token = jwtUtil.generateToken(user.getName());
+    //     cookieUtil.GenerateJWTCookie(token, response);
 
-        Map<String, String> successResponse = new HashMap<>();
-        successResponse.put("redirect", corsOrigin + "/home");
-        return ResponseEntity.status(HttpStatus.OK).body(successResponse);
-    }
+    //     Map<String, String> successResponse = new HashMap<>();
+    //     successResponse.put("redirect", corsOrigin + "/home");
+    //     return ResponseEntity.status(HttpStatus.OK).body(successResponse);
+    // }
 
 
     @PostMapping("/findid")
