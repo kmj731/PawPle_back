@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>건강 체크 결과</title>
+    <style>
+        body {
+            font-family: "Arial", sans-serif;
+            background-color: #e0f2fe;
+            margin: 0;
+            padding: 30px;
+        }
+        .container {
+            max-width: 700px;
+            margin: auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+            padding: 40px;
+        }
+        .title {
+            text-align: center;
+            font-size: 28px;
+            font-weight: bold;
+            margin-bottom: 20px;
+        }
+        .summary {
+            text-align: center;
+            font-size: 20px;
+            margin-bottom: 30px;
+        }
+        .score {
+            font-size: 24px;
+            font-weight: bold;
+        }
+        .score.good {
+            color: #16a34a;
+        }
+        .score.warning {
+            color: #facc15;
+        }
+        .score.danger {
+            color: #dc2626;
+        }
+        .section {
+            margin-bottom: 30px;
+        }
+        .section h3 {
+            margin-bottom: 10px;
+            color: #2563eb;
+        }
+        .section ul {
+            list-style-type: disc;
+            padding-left: 20px;
+            margin: 0;
+        }
+        .section ul li {
+            margin-bottom: 5px;
+        }
+        .icon {
+            text-align: center;
+            font-size: 32px;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="icon">🐾</div>
+    <div class="title">종합 건강 체크 결과</div>
+
+    <div class="summary">
+        <div>
+            총점: 
+            <span class="score" th:classappend="${result.status == '양호'} ? ' good' : (${result.status == '경고'} ? ' warning' : ' danger')" 
+                  th:text="${result.score} + '점'"></span>
+        </div>
+        <div th:text="'건강 상태: ' + ${result.status}"></div>
+    </div>
+
+    <div class="section" th:if="${result.warnings != null} and ${result.warnings.size()} > 0">
+        <h3>관리 필요한 부위</h3>
+        <ul>
+            <li th:each="warn : ${result.warnings}" th:text="${warn}"></li>
+        </ul>
+    </div>
+
+    <div class="section">
+        <h3>선택한 항목별 답변</h3>
+        <div th:if="${selected != null} and ${selected.size()} > 0">
+            <div th:each="entry : ${selected.entrySet()}">
+                <h4 th:text="${entry.key}">항목명</h4>
+                <ul>
+                    <li th:each="ans : ${entry.value}" th:text="${ans}"></li>
+                </ul>
+            </div>
+        </div>
+        <p th:if="${selected == null} or ${selected.size()} == 0">선택한 항목이 없습니다.</p>
+    </div>
+</div>
+</body>
+</html>
