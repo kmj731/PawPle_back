@@ -1,5 +1,7 @@
 package com.project.spring.skillstack.dao;
 
+import java.util.List;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -29,6 +31,9 @@ public interface PostRepository extends JpaRepository<PostEntity, Long> {
     // 제목 또는 내용으로 게시글 검색
     Page<PostEntity> findByTitleContainingOrContentContainingOrderByCreatedAtDesc(String title, String content, Pageable pageable);
     
+    // 페이징 없이, 유저의 글 전체를 최신순으로 조회
+    List<PostEntity> findByUserOrderByCreatedAtDesc(UserEntity user);
+
     // 조회수 증가
     @Modifying
     @Query("UPDATE PostEntity p SET p.viewCount = p.viewCount + 1 WHERE p.id = :id")
