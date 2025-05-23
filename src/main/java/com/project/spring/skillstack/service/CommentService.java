@@ -44,6 +44,14 @@ public class CommentService {
         return mapToDto(comment);
     }
     
+    // 전체 댓글 조회
+    @Transactional(readOnly = true)
+    public List<CommentDto> getAllComments() {
+        return commentRepository.findAll().stream()
+                .map(this::mapToDto)
+                .collect(Collectors.toList());
+    }
+
     @Transactional(readOnly = true)
     public List<CommentDto> getCommentsByPostId(Long postId) {
         return commentRepository.findByPostId(postId).stream()

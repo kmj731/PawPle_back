@@ -2,7 +2,7 @@ package com.project.spring.skillstack.controller.permit;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.HashMap;
+// import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -12,6 +12,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -88,36 +89,58 @@ public class PermitPage {
         return ResponseEntity.ok(Map.of("message", "success"));
     }
 
+    private final PasswordEncoder passwordEncoder;
+    PermitPage(PasswordEncoder passwordEncoder) {
+        this.passwordEncoder = passwordEncoder;
+    }
     @PostMapping("/signin")
-    public ResponseEntity<Map<String, String>> signin(
-            @RequestBody Map<String, String> credentials,
-            HttpServletResponse response) {
-
-        String userId = credentials.get("userId");
-        String password = credentials.get("password");
+    @ResponseBody
+    public ResponseEntity<?> signin(@RequestParam("userId") String userId,
+                                    @RequestParam("password") String password,
+                                    HttpServletResponse response) {
 
         UserEntity user = userRep.findByName(userId).orElse(null);
-
-        if (user == null) {
-            Map<String, String> responseMap = new HashMap<>();
-            responseMap.put("error", "not_found");
-            return ResponseEntity.status(HttpStatus.OK).body(responseMap);
+        if (user == null || !passwordEncoder.matches(password, user.getPass())) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("error", "로그인 실패"));
         }
 
-        BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
-        if (!encoder.matches(password, user.getPass())) {
-            Map<String, String> responseMap = new HashMap<>();
-            responseMap.put("error", "wrong_password");
-            return ResponseEntity.status(HttpStatus.OK).body(responseMap);
-        }
-
-        String token = jwtUtil.generateToken(user.getName());
+        String token = jwtUtil.generateToken(userId);
+        
+        // 선택: 쿠키에도 저장
         cookieUtil.GenerateJWTCookie(token, response);
 
-        Map<String, String> successResponse = new HashMap<>();
-        successResponse.put("redirect", corsOrigin + "/home");
-        return ResponseEntity.status(HttpStatus.OK).body(successResponse);
+        // 본문에 JSON으로 토큰을 응답
+        return ResponseEntity.ok(Map.of("token", token));
     }
+    // public ResponseEntity<Map<String, String>> signin(
+    //         @RequestBody Map<String, String> credentials,
+    //         HttpServletResponse response) {
+
+    //     String userId = credentials.get("userId");
+    //     String password = credentials.get("password");
+
+    //     UserEntity user = userRep.findByName(userId).orElse(null);
+
+    //     if (user == null) {
+    //         Map<String, String> responseMap = new HashMap<>();
+    //         responseMap.put("error", "not_found");
+    //         return ResponseEntity.status(HttpStatus.OK).body(responseMap);
+    //     }
+
+    //     BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
+    //     if (!encoder.matches(password, user.getPass())) {
+    //         Map<String, String> responseMap = new HashMap<>();
+    //         responseMap.put("error", "wrong_password");
+    //         return ResponseEntity.status(HttpStatus.OK).body(responseMap);
+    //     }
+
+    //     String token = jwtUtil.generateToken(user.getName());
+    //     cookieUtil.GenerateJWTCookie(token, response);
+
+    //     Map<String, String> successResponse = new HashMap<>();
+    //     successResponse.put("redirect", corsOrigin + "/home");
+    //     return ResponseEntity.status(HttpStatus.OK).body(successResponse);
+    // }
 
     @PostMapping("/findid")
     @ResponseBody
