@@ -1,6 +1,6 @@
 package com.project.spring.skillstack.controller;
 
-import java.time.LocalDateTime;
+
 import java.util.List;
 
 import org.springframework.data.domain.Page;
@@ -8,7 +8,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PatchMapping;
+
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -16,10 +16,9 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.project.spring.skillstack.dto.PostDto;
-import com.project.spring.skillstack.dto.UpdatePostDto;
-import com.project.spring.skillstack.dto.UpdateUserDto;
+
 import com.project.spring.skillstack.dto.UserDtoWithoutPass;
-import com.project.spring.skillstack.entity.PostEntity;
+
 
 import com.project.spring.skillstack.service.PostService;
 import com.project.spring.skillstack.service.UserService;
@@ -42,7 +41,7 @@ public class ManagerController {
     }
 
     // 전체 회원 조회
-    // @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/user")
     public ResponseEntity<List<UserDtoWithoutPass>> getAllUsers() {
         return ResponseEntity.ok(userService.getAllUsersWithoutPass());
@@ -51,7 +50,7 @@ public class ManagerController {
 
 
     // ✅ 이름으로 회원 검색 (관리자만)
-    // @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/user/name")
     public ResponseEntity<List<UserDtoWithoutPass>> searchUserByName(@RequestParam String name){
         
@@ -59,15 +58,15 @@ public class ManagerController {
     }
 
     // ✅ 이메일로 회원 검색 (관리자만)
-    // @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/user/email")
     public ResponseEntity<List<UserDtoWithoutPass>> searchUsersByEmail(@RequestParam String email) {
         return ResponseEntity.ok(userService.searchUsersByEmail(email));
     }
 
     // ✅ 소셜 이름으로 회원 검색 (관리자만)
-    // @PreAuthorize("hasRole('ADMIN')")
-    @GetMapping("/user/socail")
+    @PreAuthorize("hasRole('ADMIN')")
+    @GetMapping("/user/social")
     public ResponseEntity<List<UserDtoWithoutPass>> searchUsersBySocialName(@RequestParam String socialName) {
         return ResponseEntity.ok(userService.searchUsersBySocialName(socialName));
     }
@@ -112,7 +111,7 @@ public class ManagerController {
 
     
     // 회원 삭제
-    // @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasRole('ADMIN')")
     @DeleteMapping("/user/delete")
     public ResponseEntity<Void> deleteUser(@PathVariable Long id){
         userService.deleteUser(id);
