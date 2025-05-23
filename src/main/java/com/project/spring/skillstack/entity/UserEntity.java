@@ -8,6 +8,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import com.project.spring.skillstack.dto.UserDto;
+import com.project.spring.skillstack.dto.UserDtoWithoutPass;
 
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.ElementCollection;
@@ -62,10 +63,25 @@ public class UserEntity {
     @Transient
     private Map<String, Object> attr;
 
-    @OneToMany(mappedBy = "owner", cascade = CascadeType.REMOVE, orphanRemoval = true, fetch = FetchType.EAGER)
+    
+    @OneToMany(mappedBy = "owner", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
     private List<PetEntity> pets = new ArrayList<>();
 
     public UserDto toDto() {
-        return new UserDto(id, name, pass, socialName, getRoles().stream().map(String::toString).collect(Collectors.toList()), email, phoneNumber, birthDate, created, attr);
+        return new UserDto(id, name, pass, socialName, getRoles().stream().map(String::toString).collect(Collectors.toList()), email, phoneNumber, birthDate, created, attr, pets);
     }
+
+    public UserDtoWithoutPass toDtoWithoutPass(){
+        return new UserDtoWithoutPass(
+            id, name, socialName, roles.stream().map(String::toString).collect(Collectors.toList()),
+            email,
+            phoneNumber,
+            birthDate,
+            created,
+            attr
+        );
+
+    }
+
+
 }

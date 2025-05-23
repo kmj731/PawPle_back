@@ -21,6 +21,8 @@ import com.project.spring.skillstack.service.CustomUserDetailService;
 import com.project.spring.skillstack.utility.CookieUtil;
 import com.project.spring.skillstack.utility.JwtUtil;
 
+import jakarta.servlet.http.HttpServletResponse;
+
 @Configuration
 public class SecurityConfig {
 
@@ -67,14 +69,15 @@ public class SecurityConfig {
             .authorizeHttpRequests(auth->auth
                 .requestMatchers("/posts/**", "/public/**", "/permit/**", "/docs", "/swagger-ui/**", "/v3/**", "/favicon.ico").permitAll()
                 .requestMatchers("/oauth2/**", "/logout").permitAll()
-                .requestMatchers("/auth/**", "/user/**", "/pet/**", "/api/comments/**").authenticated() 
+                .requestMatchers("/auth/**", "/user/**", "/pet/**", "/api/**").authenticated() 
                 .requestMatchers("/admin/**").hasRole("ADMIN")
+                .requestMatchers("/health/**", "/", "/css/**", "/js/**", "/images/**").permitAll()
                 .anyRequest().authenticated()
             )
             .formLogin(form->form
                 .loginPage(corsOrigin + "/login")
                 .loginProcessingUrl("/permit/signin") 
-                .failureUrl(corsOrigin + "/login")
+                .failureUrl(corsOrigin + "/login?error=true")
                 .usernameParameter("userId")
                 .passwordParameter("password")
                 .successHandler((request, response, authentication)->{
@@ -85,10 +88,11 @@ public class SecurityConfig {
                 .permitAll()
             )
             .logout(logout->logout
-                .logoutUrl("logout")
+                .logoutUrl("/logout")
                 .logoutSuccessHandler((request, response, authentication)->{
                     cookieUtil.RemoveJWTCookie(response);
-                    response.sendRedirect(corsOrigin + "/home");
+                    response.setStatus(HttpServletResponse.SC_OK);
+                    // response.sendRedirect(corsOrigin + "/home");
                 })
                 .permitAll()
             )
@@ -106,6 +110,8 @@ public class SecurityConfig {
             )
             .exceptionHandling(error->error
                 .authenticationEntryPoint((request, response, authException)->{
+                    response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                    response.setContentType("application/json");
                     response.getWriter().write("{\"message\":\"Authentication Error\",\"type\":\"Failed Authenticate\"}");
                 })
             )

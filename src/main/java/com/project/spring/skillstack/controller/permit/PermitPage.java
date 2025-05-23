@@ -9,12 +9,12 @@ import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -42,6 +42,8 @@ public class PermitPage {
     CookieUtil cookieUtil;
     @Value("${spring.security.cors.site}")
     String corsOrigin;
+    @Autowired
+    private PasswordEncoder passwordEncoder;
 
     @PostMapping("/signup")
     @ResponseBody
@@ -49,18 +51,16 @@ public class PermitPage {
     public ResponseEntity<?> signup(@RequestBody UserDto dto, HttpServletResponse response) {
 
         if (dto.getName() == null || dto.getPass() == null || dto.getEmail() == null ||
-                dto.getPhoneNumber() == null || dto.getBirthDate() == null) {
+            dto.getPhoneNumber() == null || dto.getBirthDate() == null) {
             return ResponseEntity.badRequest().body(Map.of("message", "empty_input"));
         }
 
         if (userRep.findByName(dto.getName()).isPresent()) {
             return ResponseEntity.badRequest().body(Map.of("message", "username_exists"));
         }
-
         if (userRep.findByEmail(dto.getEmail()).isPresent()) {
             return ResponseEntity.badRequest().body(Map.of("message", "email_exists"));
         }
-
         if (userRep.findByPhoneNumber(dto.getPhoneNumber()).isPresent()) {
             return ResponseEntity.badRequest().body(Map.of("message", "phone_exists"));
         }
@@ -71,7 +71,7 @@ public class PermitPage {
         UserEntity user = new UserEntity(
                 null,
                 dto.getName(),
-                new BCryptPasswordEncoder().encode(dto.getPass()),
+                passwordEncoder.encode(dto.getPass()), 
                 dto.getSocialName() != null ? dto.getSocialName() : dto.getName(),
                 roles,
                 dto.getEmail(),

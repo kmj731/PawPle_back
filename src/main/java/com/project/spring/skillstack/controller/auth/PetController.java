@@ -2,16 +2,21 @@ package com.project.spring.skillstack.controller.auth;
 
 import com.project.spring.skillstack.dao.PetRepository;
 import com.project.spring.skillstack.dao.UserRepository;
+import com.project.spring.skillstack.dto.PetDto;
 import com.project.spring.skillstack.entity.PetEntity;
 import com.project.spring.skillstack.entity.UserEntity;
 import com.project.spring.skillstack.service.CustomUserDetails;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
+import java.util.Map;
 import java.util.Optional;
 
 @RestController
@@ -20,62 +25,52 @@ public class PetController {
 
     @Autowired
     private PetRepository petRepository;
+
     @Autowired
     private UserRepository userRepository;
+
     @Value("${spring.security.cors.site}")
-    String corsOrigin;
+    private String corsOrigin;
 
     @PostMapping("/register")
-    public String registerPet(
-            @RequestParam("petType") String petType,
-            @RequestParam("weight") double weight,
-            @RequestParam("petName") String petName,
-            @RequestParam("petAge") int petAge,
-            @RequestParam("petGender") String petGender,
-            @RequestParam("petBreed") String petBreed,
+    @Transactional
+    public ResponseEntity<?> registerPet(
+            @RequestBody PetDto dto,
             @AuthenticationPrincipal CustomUserDetails userDetails) {
 
         if (userDetails == null) {
-            return "redirect:" + corsOrigin + "/mypage?error=not_logged_in";
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(Map.of("message", "로그인 정보 없음"));
         }
 
-        String username = userDetails.getUsername();
-        Optional<UserEntity> optionalUser = userRepository.findByName(username);
+        Optional<UserEntity> optionalUser = userRepository.findByName(userDetails.getUsername());
         if (optionalUser.isEmpty()) {
-            return "redirect:" + corsOrigin + "/mypage?error=user_not_found";
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(Map.of("message", "사용자 없음"));
         }
 
         UserEntity owner = optionalUser.get();
 
-        Optional<PetEntity> existingPet = petRepository.findByOwnerAndPetName(owner, petName);
+        Optional<PetEntity> existingPet = petRepository.findByOwnerAndPetName(owner, dto.getPetName());
         if (existingPet.isPresent()) {
-            return "redirect:" + corsOrigin + "/mypage?error=duplicate_pet";
+            return ResponseEntity.status(HttpStatus.CONFLICT)
+                    .body(Map.of("message", "이미 등록된 반려동물 이름입니다."));
         }
 
+        PetEntity pet = new PetEntity(
+                dto.getPetType(),
+                dto.getWeight(),
+                dto.getPetName(),
+                dto.getPetAge(),
+                dto.getPetGender(),
+                dto.getPetBreed(),
+                LocalDate.now(),
+                owner
+        );
 
-        try {
-            PetEntity pet = new PetEntity(
-                    petType,
-                    weight,
-                    petName,
-                    petAge,
-                    petGender,
-                    petBreed,
-                    LocalDate.now(),
-                    owner
-            );
+        PetEntity savedPet = petRepository.save(pet);
+        PetDto petDto = new PetDto(savedPet);
 
-            petRepository.save(pet);
-            return "redirect:" + corsOrigin + "/mypage?message=register_success";
-        } catch (Exception e) {
-            e.printStackTrace();
-            return "redirect:" + corsOrigin + "/mypage?error=registration_failed";
-        }
-
+        return ResponseEntity.ok(petDto);
     }
-
-
-
-
-
 }

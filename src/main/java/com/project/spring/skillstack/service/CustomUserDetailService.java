@@ -1,9 +1,11 @@
 package com.project.spring.skillstack.service;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -68,10 +70,15 @@ public class CustomUserDetailService extends DefaultOAuth2UserService implements
 
         Optional<UserEntity> getUser = userRep.findByName(userId + "_" + provider);
         if (getUser.isEmpty()) {
+
+            List<String> roles = new ArrayList<>();
+            roles.add("USER");
+
             user.setName(userId + "_" + provider);
-            user.setPass("Unknown");
+            // user.setPass("Unknown");
+            user.setPass(UUID.randomUUID().toString());
             user.setName(socialName);
-            user.setRoles(List.of("USER"));
+            user.setRoles(roles);
             user.setCreated(LocalDateTime.now());
             userRep.save(user);
         } else {
