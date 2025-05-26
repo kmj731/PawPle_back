@@ -24,7 +24,7 @@ import com.project.spring.skillstack.dto.PostDto;
 import com.project.spring.skillstack.service.PostService;
 
 @RestController
-@RequestMapping("/api/posts")
+@RequestMapping("/posts")
 public class PostController {
 
     @Autowired

@@ -25,7 +25,7 @@ import com.project.spring.skillstack.service.CommentService;
 import lombok.RequiredArgsConstructor;
 
 @RestController
-@RequestMapping("/api/comments")
+@RequestMapping("/comments")
 @RequiredArgsConstructor
 public class CommentController {
     
