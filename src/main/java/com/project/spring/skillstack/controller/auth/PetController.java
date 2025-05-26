@@ -73,4 +73,50 @@ public class PetController {
 
         return ResponseEntity.ok(petDto);
     }
+
+
+    @PutMapping("/update/{id}")
+    @Transactional
+    public ResponseEntity<?> updatePet(
+            @PathVariable Long id,
+            @RequestBody PetDto dto,
+            @AuthenticationPrincipal CustomUserDetails userDetails) {
+
+        if (userDetails == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(Map.of("message", "로그인 정보 없음"));
+        }
+
+        Optional<UserEntity> optionalUser = userRepository.findByName(userDetails.getUsername());
+        if (optionalUser.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(Map.of("message", "사용자 없음"));
+        }
+
+        Optional<PetEntity> optionalPet = petRepository.findById(id);
+        if (optionalPet.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(Map.of("message", "반려동물 정보 없음"));
+        }
+
+        PetEntity pet = optionalPet.get();
+
+        // 소유자 검증
+        if (!pet.getOwner().getId().equals(optionalUser.get().getId())) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                    .body(Map.of("message", "수정 권한 없음"));
+        }
+
+        pet.setPetType(dto.getPetType());
+        pet.setWeight(dto.getWeight());
+        pet.setPetName(dto.getPetName());
+        pet.setPetAge(dto.getPetAge());
+        pet.setPetGender(dto.getPetGender());
+        pet.setPetBreed(dto.getPetBreed());
+
+        petRepository.save(pet);
+
+        return ResponseEntity.ok(new PetDto(pet));
+    }
+
 }

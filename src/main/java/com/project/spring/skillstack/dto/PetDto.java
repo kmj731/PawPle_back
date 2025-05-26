@@ -36,4 +36,11 @@ public class PetDto {
     public String getPetBreed() { return petBreed; }
     public Double getWeight() { return weight; }
     public LocalDate getRegistrationDate() { return registrationDate; }
+
+    public void setPetType(String petType) { this.petType = petType; }
+    public void setWeight(Double weight) { this.weight = weight; }
+    public void setPetName(String petName) { this.petName = petName; }
+    public void setPetAge(Integer petAge) { this.petAge = petAge; }
+    public void setPetGender(String petGender) { this.petGender = petGender; }
+    public void setPetBreed(String petBreed) { this.petBreed = petBreed; }
 }
