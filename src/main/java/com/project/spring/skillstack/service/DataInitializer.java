@@ -10,8 +10,10 @@ import org.springframework.boot.CommandLineRunner;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
+import com.project.spring.skillstack.dao.PostRepository;
 import com.project.spring.skillstack.dao.UserRepository;
 import com.project.spring.skillstack.entity.PetEntity;
+import com.project.spring.skillstack.entity.PostEntity;
 import com.project.spring.skillstack.entity.UserEntity;
 
 @Component
@@ -19,9 +21,10 @@ public class DataInitializer implements CommandLineRunner {
 
     @Autowired
     UserRepository userRep;
-
     @Autowired
     PasswordEncoder passwordEncoder;
+    @Autowired
+    PostRepository postRep;
 
     @Override
     public void run(String... args) throws Exception {
@@ -35,8 +38,24 @@ public class DataInitializer implements CommandLineRunner {
         PetEntity abcdPet2 = new PetEntity("강아지", 4.0, "바둑이", 3, "암컷", "진돗개", LocalDate.now(), abcd);
         abcd.getPets().add(abcdPet2);
 
+        PostEntity abcdPost1 = PostEntity.builder()
+            .title("abcd의 첫 번째 게시글")
+            .content("안녕하세요. abcd입니다. 첫 글을 올립니다!")
+            .category("건강")
+            .user(abcd)
+            .build();
+
+        PostEntity abcdPost2 = PostEntity.builder()
+            .title("abcd의 두 번째 게시글")
+            .content("반려동물 건강 관련해서 궁금한 점이 있습니다.")
+            .category("Q&A")
+            .user(abcd)
+            .build();
+
         userRep.save(root);
         userRep.save(abcd);
+        postRep.save(abcdPost1);
+        postRep.save(abcdPost2);
         
 
         // 유저 초기화 데이터
@@ -87,6 +106,32 @@ public class DataInitializer implements CommandLineRunner {
         }
 
         userRep.saveAll(userList);
+
+        // 게시글 초기화
+        List<PostEntity> postList = new ArrayList<>();
+        for (int i = 0; i < userList.size(); i++) {
+            UserEntity user = userList.get(i);
+            String suffix = String.format("%02d", i + 1);
+
+            PostEntity post1 = PostEntity.builder()
+                .title("제목 예시 A - user" + suffix)
+                .content("user" + suffix + "의 첫 번째 게시글입니다.")
+                .category("건강")
+                .user(user)
+                .build();
+
+            PostEntity post2 = PostEntity.builder()
+                .title("제목 예시 B - user" + suffix)
+                .content("user" + suffix + "의 두 번째 게시글입니다.")
+                .category("자유")
+                .user(user)
+                .build();
+
+            postList.add(post1);
+            postList.add(post2);
+        }
+
+        postRep.saveAll(postList);
 
         // userRep.save(new UserEntity(null, "root", passwordEncoder.encode("1234"), "root", List.of("ADMIN"), null, null, null, LocalDateTime.now(), null, null));
         // userRep.save(new UserEntity(null, "abcd", passwordEncoder.encode("1234"), "abcd", List.of("USER"), null, null, null, LocalDateTime.now(), null, null));
