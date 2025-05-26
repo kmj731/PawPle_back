@@ -24,6 +24,7 @@ public class PostDto {
     private LocalDateTime updatedAt;
     private Integer viewCount;
     private String category;
+    private Boolean isPublic;
     
     // 요청 데이터용 생성자
     public PostDto(String title, String content, String category) {
@@ -53,13 +54,7 @@ public class PostDto {
                 .title(this.title)
                 .content(this.content)
                 .category(this.category)
-<<<<<<< Updated upstream
-<<<<<<< Updated upstream
-=======
-=======
->>>>>>> Stashed changes
                 .isPublic(this.isPublic != null ? this.isPublic : true)
->>>>>>> Stashed changes
                 .build();
     }
 }
