@@ -55,7 +55,6 @@ public class PostDto {
                 .title(this.title)
                 .content(this.content)
                 .category(this.category)
-                .isPublic(this.isPublic)
                 .isPublic(this.isPublic != null ? this.isPublic : true)
                 .build();
     }
