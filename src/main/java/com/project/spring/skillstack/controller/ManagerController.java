@@ -188,11 +188,11 @@ public class ManagerController {
     //     return ResponseEntity.noContent().build();
     // }
 
-    // DOCTOR 접근 
-    @PreAuthorize("hasRole('DOCTOR')")
-    @GetMapping("/doctor-only")
-    public ResponseEntity<String> doctorOnlyAccess(){
-        return ResponseEntity.ok("의사만 접근 가능한 리소스 입니다.");
+    // vet 접근 
+    @PreAuthorize("hasRole('vet')")
+    @GetMapping("/vet-only")
+    public ResponseEntity<String> vetOnlyAccess(){
+        return ResponseEntity.ok("수의사만 접근 가능한 리소스 입니다.");
     }
 
 
