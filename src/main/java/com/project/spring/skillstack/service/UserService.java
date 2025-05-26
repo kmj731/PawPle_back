@@ -2,7 +2,7 @@ package com.project.spring.skillstack.service;
 
 
 import java.util.List;
-
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.springframework.security.access.AccessDeniedException;
@@ -22,12 +22,13 @@ public class UserService {
     
     private final UserRepository userRepository;
 
+
     public UserService(UserRepository userRepository) {
         this.userRepository = userRepository;
     }
 
-    public void addAdminRole(Long userId){
-        UserEntity user = userRepository.findById(userId)
+    public void addAdminRole(String name){
+        UserEntity user = userRepository.findByName(name)
                 .orElseThrow(()-> new RuntimeException("User가 존재하지 않습니다."));
         
         List<String> roles = user.getRoles();
@@ -112,6 +113,10 @@ public class UserService {
         
         targetUser.setRoles(roles);  // 변경사항 저장
         userRepository.save(targetUser);
+    }
+
+    public Optional<UserEntity> findByName(String name){
+        return userRepository.findByName(name);
     }
 }
 

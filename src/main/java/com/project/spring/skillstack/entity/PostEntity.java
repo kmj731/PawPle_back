@@ -1,6 +1,7 @@
 package com.project.spring.skillstack.entity;
 
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -67,6 +68,9 @@ public class PostEntity {
     // 게시글 수정 (비공개 처리)
     @Column(nullable = false)
     private Boolean isPublic = true;
+
+    @Column(unique = true, nullable = false, updatable = false)
+    private String postKey = UUID.randomUUID().toString();
     
     @PrePersist
     protected void onCreate() {

@@ -17,6 +17,7 @@ import com.project.spring.skillstack.dto.UpdatePostDto;
 import com.project.spring.skillstack.entity.PostEntity;
 import com.project.spring.skillstack.entity.UserEntity;
 
+import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 
 @Service
@@ -90,24 +91,24 @@ public class PostManagerService {
     //     post.setContent(content);
     //     postRepository.save(post);
     // }
-
     @Transactional
-    public void updatePost(Long postId, PostDto postDto, String username ){
-        PostEntity post = postRepository.findById(postId)
-            .orElseThrow(()-> new RuntimeException("게시글을 찾을 수 없습니다."));
-        
-        if(!post.getUser().getName().equals(username) && !isAdmin(username)){
+    public void updatePost(String title, UserEntity user, PostDto postDto, String username) {
+        PostEntity post = postRepository.findByTitleAndUser(title, user)
+            .orElseThrow(() -> new RuntimeException("해당 사용자의 게시글을 찾을 수 없습니다."));
+    
+        // 작성자가 아니고 관리자도 아닐 경우 권한 없음
+        if (!post.getUser().getName().equals(username) && !isAdmin(username)) {
             throw new AccessDeniedException("수정 권한이 없습니다.");
         }
-
+    
         post.setTitle(postDto.getTitle());
         post.setContent(postDto.getContent());
-    post.setCategory(postDto.getCategory());
-    post.setIsPublic(postDto.getIsPublic());
-    post.setUpdatedAt(LocalDateTime.now());
-
-    postRepository.save(post);
-}
+        post.setCategory(postDto.getCategory());
+        post.setIsPublic(postDto.getIsPublic());
+        post.setUpdatedAt(LocalDateTime.now());
+    
+        postRepository.save(post); // 선택사항: save 생략해도 JPA가 영속성 컨텍스트에서 자동 반영
+    }
 
     private boolean isAdmin(String username) {
         UserEntity user = userRepository.findByName(username)
@@ -115,12 +116,14 @@ public class PostManagerService {
         return user.getRoles() != null && user.getRoles().contains("ADMIN");
     }
 
+    
+}
 
 
 
 
 
-    }
+    
     
     
 

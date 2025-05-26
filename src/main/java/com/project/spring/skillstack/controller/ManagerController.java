@@ -24,6 +24,7 @@ import com.project.spring.skillstack.dto.UpdateUserDto;
 import com.project.spring.skillstack.dto.UserDto;
 import com.project.spring.skillstack.dto.UserDtoWithoutPass;
 import com.project.spring.skillstack.entity.PostEntity;
+import com.project.spring.skillstack.entity.UserEntity;
 import com.project.spring.skillstack.service.PostManagerService;
 import com.project.spring.skillstack.service.PostService;
 import com.project.spring.skillstack.service.UserService;
@@ -79,14 +80,25 @@ public class ManagerController {
         return ResponseEntity.ok(userService.searchUsersBySocialName(socialName));
     }
 
-    // 게시글 수정 (비공개 처리)
-    @PutMapping("/posts/{id}")
-    public ResponseEntity<?> updatePost(@PathVariable Long id,
-                                        @RequestBody PostDto postDto,
-                                        @AuthenticationPrincipal UserDetails userDetails) {
-        postManagerService.updatePost(id, postDto, userDetails.getUsername());
+    // 게시글 수정
+    @PreAuthorize("hasRole('ADMIN')")
+    @PutMapping("/posts/update")
+    public ResponseEntity<?> updatePost(
+        @RequestBody PostDto postDto,
+        @AuthenticationPrincipal UserDetails userDetails
+    ) {
+        String name = userDetails.getUsername();
+
+        UserEntity user = userService.findByName(name)
+            .orElseThrow(() -> new RuntimeException("사용자를 찾을 수 없습니다."));
+
+        postManagerService.updatePost(postDto.getTitle(), user, postDto, user.getName());
+
         return ResponseEntity.ok("게시글이 수정되었습니다.");
     }
+
+
+    // 유저 삭제
     @DeleteMapping("/userDel{id}")
     public ResponseEntity<?> deleteUser(@PathVariable String name,@AuthenticationPrincipal UserDetails userDetails){
         userService.deleteUser(name, userDetails.getUsername());
@@ -273,13 +285,16 @@ public class ManagerController {
         return ResponseEntity.noContent().build();
     }
 
-    // 게시글 수정 (관리자도 가능)
     @PutMapping("/posts/{id}")
     public ResponseEntity<PostDto> updatePost(
-            @PathVariable Long id,
-            @RequestBody PostDto dto,
-            @RequestParam String username) {
-        return ResponseEntity.ok(postService.updatePost(id, dto, username));
+        @PathVariable Long id,
+        @RequestBody PostDto postDto,
+        @AuthenticationPrincipal UserDetails userDetails) {
+    
+        String username = userDetails.getUsername();
+        PostDto updatedPostDto = postService.updatePost(id, postDto, username);
+    
+        return ResponseEntity.ok(updatedPostDto);
     }
 
     // 의사 역할 변경
