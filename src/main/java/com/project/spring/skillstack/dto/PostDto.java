@@ -25,6 +25,7 @@ public class PostDto {
     private Integer viewCount;
     private String category;
     private Boolean isPublic;
+    // private String postKey;
     
     // 요청 데이터용 생성자
     public PostDto(String title, String content, String category) {

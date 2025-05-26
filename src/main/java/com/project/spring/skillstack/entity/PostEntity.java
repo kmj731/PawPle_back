@@ -70,7 +70,7 @@ public class PostEntity {
     private Boolean isPublic = true;
 
     @Column(unique = true, nullable = false, updatable = false)
-    private String postKey = UUID.randomUUID().toString();
+    // private String postKey = UUID.randomUUID().toString();
     
     @PrePersist
     protected void onCreate() {

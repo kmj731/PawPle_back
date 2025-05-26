@@ -34,11 +34,16 @@ import io.swagger.v3.oas.annotations.parameters.RequestBody;
 
 // 관리자 Controller 
 @RestController
+<<<<<<< Updated upstream
 // @RequestMapping("/admin")
 <<<<<<< Updated upstream
 @RequestMapping("/management")
 =======
 @RequestMapping("/admin")
+>>>>>>> Stashed changes
+=======
+@RequestMapping("/admin")
+// @RequestMapping("/management")
 >>>>>>> Stashed changes
 public class ManagerController {
 

@@ -71,7 +71,7 @@ public class SecurityConfig {
                 .requestMatchers("/oauth2/**", "/logout").permitAll()
                 .requestMatchers("/auth/**", "/user/**", "/pet/**", "/api/**").authenticated() 
                 .requestMatchers("/admin/**").hasRole("ADMIN")
-                .requestMatchers("/health/**", "/", "/css/**", "/js/**", "/images/**").permitAll()
+                .requestMatchers("/health/**", "/", "/css/**", "/js/**", "/images/**", "/test/**").permitAll()
                 .anyRequest().authenticated()
             )
             .formLogin(form->form
