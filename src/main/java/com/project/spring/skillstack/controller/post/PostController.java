@@ -24,7 +24,7 @@ import com.project.spring.skillstack.service.PostService;
 
 @RestController
 @RequestMapping("/api/posts")
-public class PostController {
+public class PostController {       
 
     @Autowired
     private PostService postService;
