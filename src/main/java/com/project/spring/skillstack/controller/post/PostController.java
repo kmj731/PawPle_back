@@ -1,6 +1,7 @@
 package com.project.spring.skillstack.controller.post;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,7 +24,7 @@ import com.project.spring.skillstack.dto.PostDto;
 import com.project.spring.skillstack.service.PostService;
 
 @RestController
-@RequestMapping("/api/posts")
+@RequestMapping("/posts")
 public class PostController {
 
     @Autowired
@@ -48,6 +49,53 @@ public class PostController {
         return ResponseEntity.ok(posts);
     }
     
+    // 인기글 조회 (조회수 기준)
+    @GetMapping("/popular/views")
+    public ResponseEntity<Page<PostDto>> getPopularPostsByViews(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(required = false) String category) {
+        Page<PostDto> posts;
+        if (category != null && !category.isEmpty()) {
+            posts = postService.getPopularPostsByViewsInCategory(category, page, size);
+        } else {
+            posts = postService.getPopularPostsByViews(page, size);
+        }
+        return ResponseEntity.ok(posts);
+    }
+    
+    // 인기글 조회 (댓글수 기준) - 댓글 기능이 있다면
+    @GetMapping("/popular/comments")
+    public ResponseEntity<Page<PostDto>> getPopularPostsByComments(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(required = false) String category) {
+        Page<PostDto> posts;
+        if (category != null && !category.isEmpty()) {
+            posts = postService.getPopularPostsByCommentsInCategory(category, page, size);
+        } else {
+            posts = postService.getPopularPostsByComments(page, size);
+        }
+        return ResponseEntity.ok(posts);
+    }
+
+    // 카테고리별 게시글 목록 조회
+    @GetMapping("/category/{category}")
+    public ResponseEntity<Page<PostDto>> getPostsByCategory(
+            @PathVariable String category,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size) {
+        Page<PostDto> posts = postService.getPostsByCategory(category, page, size);
+        return ResponseEntity.ok(posts);
+    }
+
+    // 사용 가능한 카테고리 목록 조회
+    @GetMapping("/categories")
+    public ResponseEntity<List<String>> getAvailableCategories() {
+        List<String> categories = postService.getAvailableCategories();
+        return ResponseEntity.ok(categories);
+    }
+
     // 게시글 상세 조회
     @GetMapping("/{id}")
     public ResponseEntity<PostDto> getPostById(@PathVariable Long id) {
@@ -96,14 +144,31 @@ public class PostController {
         Page<PostDto> posts = postService.getPostsByUser(username, page, size);
         return ResponseEntity.ok(posts);
     }
+
+    // 특정 사용자의 카테고리별 게시글 조회
+    @GetMapping("/user/{username}/category/{category}")
+    public ResponseEntity<Page<PostDto>> getPostsByUserAndCategory(
+            @PathVariable String username,
+            @PathVariable String category,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size) {
+        Page<PostDto> posts = postService.getPostsByUserAndCategory(username, category, page, size);
+        return ResponseEntity.ok(posts);
+    }
     
     // 게시글 검색 (제목 또는 내용)
     @GetMapping("/search")
     public ResponseEntity<Page<PostDto>> searchPosts(
             @RequestParam String keyword,
             @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size) {
-        Page<PostDto> posts = postService.searchPosts(keyword, page, size);
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(required = false) String category) {
+        Page<PostDto> posts;
+        if (category != null && !category.isEmpty()) {
+            posts = postService.searchPostsInCategory(keyword, category, page, size);
+        } else {
+            posts = postService.searchPosts(keyword, page, size);
+        }
         return ResponseEntity.ok(posts);
     }
     
@@ -111,11 +176,17 @@ public class PostController {
     @GetMapping("/my-posts")
     public ResponseEntity<Page<PostDto>> getMyPosts(
             @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size) {
+            @RequestParam(defaultValue = "10") int size, 
+            @RequestParam(required = false) String category) {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         String username = auth.getName();
         
-        Page<PostDto> posts = postService.getPostsByUser(username, page, size);
+        Page<PostDto> posts;
+        if (category != null && !category.isEmpty()) {
+            posts = postService.getPostsByUserAndCategory(username, category, page, size);
+        } else {
+            posts = postService.getPostsByUser(username, page, size);
+        }
         return ResponseEntity.ok(posts);
     }
 }
