@@ -54,7 +54,10 @@ public class PostDto {
                 .content(this.content)
                 .category(this.category)
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
 =======
+=======
+>>>>>>> Stashed changes
                 .isPublic(this.isPublic != null ? this.isPublic : true)
 >>>>>>> Stashed changes
                 .build();
