@@ -1,6 +1,8 @@
 package com.project.spring.skillstack.service;
 
 
+import java.time.LocalDateTime;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -78,6 +80,7 @@ public class PostService {
         post.setContent(postDto.getContent());
         post.setCategory(postDto.getCategory());
         
+        
         PostEntity updatedPost = postRepository.save(post);
         return PostDto.fromEntity(updatedPost);
     }
@@ -130,4 +133,7 @@ public class PostService {
         Page<PostEntity> postPage = postRepository.findByTitleContainingOrContentContainingOrderByCreatedAtDesc(keyword, keyword, pageable);
         return postPage.map(PostDto::fromEntity);
     }
+
+    
+
 }
