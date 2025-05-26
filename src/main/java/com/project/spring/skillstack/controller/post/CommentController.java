@@ -52,13 +52,14 @@ public class CommentController {
         return new ResponseEntity<>(comments, HttpStatus.OK);
     }
     
-
+    // 게시글 번호 별 댓글 조회
     @GetMapping("/post/{postId}")
     public ResponseEntity<List<CommentDto>> getCommentsByPostId(@PathVariable Long postId) {
         List<CommentDto> comments = commentService.getCommentsByPostId(postId);
         return new ResponseEntity<>(comments, HttpStatus.OK);
     }
     
+    // 댓글 번호 별 댓글 수정
     @PutMapping("/{commentId}")
     public ResponseEntity<?> updateComment(
             @PathVariable Long commentId,
@@ -81,6 +82,7 @@ public class CommentController {
         }
     }
     
+    // 댓글 삭제
     @DeleteMapping("/{commentId}")
     public ResponseEntity<?> deleteComment(@PathVariable Long commentId) {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();

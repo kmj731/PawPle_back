@@ -38,4 +38,44 @@ public interface PostRepository extends JpaRepository<PostEntity, Long> {
     @Modifying
     @Query("UPDATE PostEntity p SET p.viewCount = p.viewCount + 1 WHERE p.id = :id")
     void increaseViewCount(@Param("id") Long id);
+
+    // 카테고리별 게시글 조회 (최신순)
+    Page<PostEntity> findByCategoryOrderByCreatedAtDesc(String category, Pageable pageable);
+
+    // 특정 사용자의 카테고리별 게시글 조회 (최신순)
+    Page<PostEntity> findByUserAndCategoryOrderByCreatedAtDesc(UserEntity user, String category, Pageable pageable);
+
+    // 카테고리 내에서 제목 또는 내용으로 검색 (최신순)
+    Page<PostEntity> findByTitleContainingOrContentContainingAndCategoryOrderByCreatedAtDesc(
+        String title, String content, String category, Pageable pageable
+    );
+
+    /**
+     * 인기글 조회 (조회수 기준, 조회수 같으면 최신순)
+     */
+    Page<PostEntity> findAllByOrderByViewCountDescCreatedAtDesc(Pageable pageable);
+
+    /**
+     * 카테고리별 인기글 조회 (조회수 기준, 조회수 같으면 최신순)
+     */
+    Page<PostEntity> findByCategoryOrderByViewCountDescCreatedAtDesc(String category, Pageable pageable);
+
+    /**
+     * 인기글 조회 (댓글수 기준) - 댓글 테이블과 조인 필요
+     */
+    @Query("SELECT p FROM PostEntity p LEFT JOIN CommentEntity c ON p.id = c.post.id " +
+        "GROUP BY p.id ORDER BY COUNT(c.id) DESC, p.createdAt DESC")
+    Page<PostEntity> findAllOrderByCommentCountDesc(Pageable pageable);
+
+    /**
+     * 카테고리별 인기글 조회 (댓글수 기준) - 댓글 테이블과 조인 필요
+     */
+    @Query("SELECT p FROM PostEntity p LEFT JOIN CommentEntity c ON p.id = c.post.id " +
+        "WHERE p.category = :category " +
+        "GROUP BY p.id ORDER BY COUNT(c.id) DESC, p.createdAt DESC")
+    Page<PostEntity> findByCategoryOrderByCommentCountDesc(@Param("category") String category, Pageable pageable);
+
+    // 데이터베이스에서 실제 사용중인 카테고리 목록 조회 (선택사항)
+    @Query("SELECT DISTINCT p.category FROM PostEntity p WHERE p.category IS NOT NULL ORDER BY p.category")
+    List<String> findDistinctCategories();
 }
