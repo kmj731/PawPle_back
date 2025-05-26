@@ -44,6 +44,10 @@ public class PermitPage {
     @Value("${spring.security.cors.site}")
     String corsOrigin;
     
+    private final PasswordEncoder passwordEncoder;
+    PermitPage(PasswordEncoder passwordEncoder) {
+        this.passwordEncoder = passwordEncoder;
+    }
 
     @PostMapping("/signup")
     @ResponseBody
@@ -88,59 +92,6 @@ public class PermitPage {
 
         return ResponseEntity.ok(Map.of("message", "success"));
     }
-
-    private final PasswordEncoder passwordEncoder;
-    PermitPage(PasswordEncoder passwordEncoder) {
-        this.passwordEncoder = passwordEncoder;
-    }
-    @PostMapping("/signin")
-    @ResponseBody
-    public ResponseEntity<?> signin(@RequestParam("userId") String userId,
-                                    @RequestParam("password") String password,
-                                    HttpServletResponse response) {
-
-        UserEntity user = userRep.findByName(userId).orElse(null);
-        if (user == null || !passwordEncoder.matches(password, user.getPass())) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("error", "로그인 실패"));
-        }
-
-        String token = jwtUtil.generateToken(userId);
-        
-        // 선택: 쿠키에도 저장
-        cookieUtil.GenerateJWTCookie(token, response);
-
-        // 본문에 JSON으로 토큰을 응답
-        return ResponseEntity.ok(Map.of("token", token));
-    }
-    // public ResponseEntity<Map<String, String>> signin(
-    //         @RequestBody Map<String, String> credentials,
-    //         HttpServletResponse response) {
-
-    //     String userId = credentials.get("userId");
-    //     String password = credentials.get("password");
-
-    //     UserEntity user = userRep.findByName(userId).orElse(null);
-
-    //     if (user == null) {
-    //         Map<String, String> responseMap = new HashMap<>();
-    //         responseMap.put("error", "not_found");
-    //         return ResponseEntity.status(HttpStatus.OK).body(responseMap);
-    //     }
-
-    //     BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
-    //     if (!encoder.matches(password, user.getPass())) {
-    //         Map<String, String> responseMap = new HashMap<>();
-    //         responseMap.put("error", "wrong_password");
-    //         return ResponseEntity.status(HttpStatus.OK).body(responseMap);
-    //     }
-
-    //     String token = jwtUtil.generateToken(user.getName());
-    //     cookieUtil.GenerateJWTCookie(token, response);
-
-    //     Map<String, String> successResponse = new HashMap<>();
-    //     successResponse.put("redirect", corsOrigin + "/home");
-    //     return ResponseEntity.status(HttpStatus.OK).body(successResponse);
-    // }
 
     @PostMapping("/findid")
     @ResponseBody
