@@ -34,8 +34,8 @@ import io.swagger.v3.oas.annotations.parameters.RequestBody;
 
 // 관리자 Controller 
 @RestController
-// @RequestMapping("/admin")
-@RequestMapping("/management")
+@RequestMapping("/admin")
+// @RequestMapping("/management")
 public class ManagerController {
 
     private final PostManagerService postManagerService;
