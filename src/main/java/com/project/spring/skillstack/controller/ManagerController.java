@@ -279,13 +279,13 @@ public class ManagerController {
     }
 
     // 게시글 삭제 (관리자도 가능)
-    @DeleteMapping("/posts/{id}")
+    @DeleteMapping("/posts/delete/{id}")
     public ResponseEntity<Void> deletePost(@PathVariable Long id, @RequestParam String username) {
         postService.deletePost(id, username);
         return ResponseEntity.noContent().build();
     }
 
-    @PutMapping("/posts/{id}")
+    @PutMapping("/posts/update/{id}")
     public ResponseEntity<PostDto> updatePost(
         @PathVariable Long id,
         @RequestBody PostDto postDto,
