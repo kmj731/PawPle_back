@@ -4,16 +4,26 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 import org.apache.tomcat.util.net.openssl.ciphers.Authentication;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
+import com.project.spring.skillstack.classes.Role;
 import com.project.spring.skillstack.dao.PostRepository;
+import com.project.spring.skillstack.dao.UserRepository;
+import com.project.spring.skillstack.dto.PostDto;
 import com.project.spring.skillstack.dto.UpdatePostDto;
 import com.project.spring.skillstack.entity.PostEntity;
+import com.project.spring.skillstack.entity.UserEntity;
+
+import jakarta.transaction.Transactional;
 
 @Service
 public class PostManagerService {
     
+    @Autowired
+    private UserRepository userRepository;
 
     private final PostRepository postRepository;
 
@@ -72,17 +82,48 @@ public class PostManagerService {
     }
 
 
-    // 게시글 수정
-    public void updatePost(Long postId, String title, String content) {
+    // // 게시글 수정
+    // public void updatePost(Long postId, String title, String content) {
+    //     PostEntity post = postRepository.findById(postId)
+    //             .orElseThrow(() -> new RuntimeException("Post not found"));
+    //     post.setTitle(title);
+    //     post.setContent(content);
+    //     postRepository.save(post);
+    // }
+
+    @Transactional
+    public void updatePost(Long postId, PostDto postDto, String username ){
         PostEntity post = postRepository.findById(postId)
-                .orElseThrow(() -> new RuntimeException("Post not found"));
-        post.setTitle(title);
-        post.setContent(content);
-        postRepository.save(post);
+            .orElseThrow(()-> new RuntimeException("게시글을 찾을 수 없습니다."));
+        
+        if(!post.getUser().getName().equals(username) && !isAdmin(username)){
+            throw new AccessDeniedException("수정 권한이 없습니다.");
+        }
+
+        post.setTitle(postDto.getTitle());
+        post.setContent(postDto.getContent());
+    post.setCategory(postDto.getCategory());
+    post.setIsPublic(postDto.getIsPublic());
+    post.setUpdatedAt(LocalDateTime.now());
+
+    postRepository.save(post);
+}
+
+    private boolean isAdmin(String username) {
+        UserEntity user = userRepository.findByName(username)
+            .orElseThrow(() -> new RuntimeException("유저를 찾을 수 없습니다."));
+        return user.getRoles() != null && user.getRoles().contains("ADMIN");
     }
 
+
+
+
+
+
+    }
     
-}
+    
+
 
     
 

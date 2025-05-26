@@ -63,6 +63,10 @@ public class PostEntity {
     // 카테고리 추가 (반려동물 건강 관련 커뮤니티이므로 카테고리 유용)
     @Column(length = 50)
     private String category;
+
+    // 게시글 수정 (비공개 처리)
+    @Column(nullable = false)
+    private Boolean isPublic = true;
     
     @PrePersist
     protected void onCreate() {

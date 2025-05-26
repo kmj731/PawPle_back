@@ -1,9 +1,11 @@
 package com.project.spring.skillstack.service;
 
+
 import java.util.List;
 
 import java.util.stream.Collectors;
 
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
@@ -73,14 +75,46 @@ public class UserService {
 
     // 회원 삭제
     @Transactional
-    public void deleteUser(Long userId){
-        UserEntity user = userRepository.findById(userId)
-            .orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다."));
-            userRepository.delete(user);
+    public void deleteUser(String name, String currentUserName ){
+        UserEntity currentUser = userRepository.findByName(currentUserName)
+            .orElseThrow(() -> new RuntimeException("현재 사용자를 찾을 수 없습니다."));
+        
+        if (!currentUser.getRoles().contains("ADMIN")){
+            throw new AccessDeniedException("권한이 없습니다.");
         }
 
+        UserEntity targetUser = userRepository.findByName(name)
+            .orElseThrow(() -> new RuntimeException("삭제할 회원을 찾을 수 없습니다."));
+        
+        userRepository.delete(targetUser);
+        
+    }
 
 
-    
-    
+    // 역할 변경 메서드
+    @Transactional
+    public void updateRoleToDoctor(String name, String currentUsername) {
+        UserEntity currentUser = userRepository.findByName(currentUsername)
+            .orElseThrow(() -> new RuntimeException("현재 사용자를 찾을 수 없습니다."));
+
+        if (!currentUser.getRoles().contains("ADMIN")) {
+            throw new AccessDeniedException("권한이 없습니다.");
+        }
+
+        UserEntity targetUser = userRepository.findByName(name)
+            .orElseThrow(() -> new RuntimeException("대상 사용자를 찾을 수 없습니다."));
+
+        List<String> roles = targetUser.getRoles();
+
+        if (!roles.contains("DOCTOR")) {
+            roles.add("DOCTOR");
+        }
+        
+        targetUser.setRoles(roles);  // 변경사항 저장
+        userRepository.save(targetUser);
+    }
 }
+
+
+
+

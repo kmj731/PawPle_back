@@ -3,9 +3,12 @@ package com.project.spring.skillstack.controller;
 import java.time.LocalDateTime;
 import java.util.List;
 
+import org.apache.catalina.connector.Response;
 import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -18,9 +21,10 @@ import org.springframework.web.bind.annotation.RestController;
 import com.project.spring.skillstack.dto.PostDto;
 import com.project.spring.skillstack.dto.UpdatePostDto;
 import com.project.spring.skillstack.dto.UpdateUserDto;
+import com.project.spring.skillstack.dto.UserDto;
 import com.project.spring.skillstack.dto.UserDtoWithoutPass;
 import com.project.spring.skillstack.entity.PostEntity;
-
+import com.project.spring.skillstack.service.PostManagerService;
 import com.project.spring.skillstack.service.PostService;
 import com.project.spring.skillstack.service.UserService;
 
@@ -30,19 +34,22 @@ import io.swagger.v3.oas.annotations.parameters.RequestBody;
 // 관리자 Controller 
 @RestController
 // @RequestMapping("/admin")
-@RequestMapping("/api")
+@RequestMapping("/management")
 public class ManagerController {
+
+    private final PostManagerService postManagerService;
     
     private final UserService userService;
     private final PostService postService;
 
-    public ManagerController(UserService userService, PostService postService){
+    public ManagerController(UserService userService, PostService postService, PostManagerService postManagerService){
         this.userService = userService;
         this.postService = postService;
+        this.postManagerService = postManagerService;
     }
 
     // 전체 회원 조회
-    // @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/user")
     public ResponseEntity<List<UserDtoWithoutPass>> getAllUsers() {
         return ResponseEntity.ok(userService.getAllUsersWithoutPass());
@@ -51,7 +58,7 @@ public class ManagerController {
 
 
     // ✅ 이름으로 회원 검색 (관리자만)
-    // @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/user/name")
     public ResponseEntity<List<UserDtoWithoutPass>> searchUserByName(@RequestParam String name){
         
@@ -59,18 +66,35 @@ public class ManagerController {
     }
 
     // ✅ 이메일로 회원 검색 (관리자만)
-    // @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/user/email")
     public ResponseEntity<List<UserDtoWithoutPass>> searchUsersByEmail(@RequestParam String email) {
         return ResponseEntity.ok(userService.searchUsersByEmail(email));
     }
 
     // ✅ 소셜 이름으로 회원 검색 (관리자만)
-    // @PreAuthorize("hasRole('ADMIN')")
-    @GetMapping("/user/socail")
+    @PreAuthorize("hasRole('ADMIN')")
+    @GetMapping("/user/social")
     public ResponseEntity<List<UserDtoWithoutPass>> searchUsersBySocialName(@RequestParam String socialName) {
         return ResponseEntity.ok(userService.searchUsersBySocialName(socialName));
     }
+
+    // 게시글 수정 (비공개 처리)
+    @PutMapping("/posts/{id}")
+    public ResponseEntity<?> updatePost(@PathVariable Long id,
+                                        @RequestBody PostDto postDto,
+                                        @AuthenticationPrincipal UserDetails userDetails) {
+        postManagerService.updatePost(id, postDto, userDetails.getUsername());
+        return ResponseEntity.ok("게시글이 수정되었습니다.");
+    }
+    @DeleteMapping("/userDel{id}")
+    public ResponseEntity<?> deleteUser(@PathVariable String name,@AuthenticationPrincipal UserDetails userDetails){
+        userService.deleteUser(name, userDetails.getUsername());
+        return ResponseEntity.ok("회원이 성공적으로 탈퇴되었습니다.");
+    }
+
+    // 회원 삭제(관리자만)
+
 
     // // 회원 정보 수정 (관리자만)
     // // @PreAuthorize("hasRole('ADMIN')")
@@ -111,13 +135,13 @@ public class ManagerController {
     // }
 
     
-    // 회원 삭제
+    // // 회원 삭제
     // @PreAuthorize("hasRole('ADMIN')")
-    @DeleteMapping("/user/delete")
-    public ResponseEntity<Void> deleteUser(@PathVariable Long id){
-        userService.deleteUser(id);
-        return ResponseEntity.noContent().build();
-    }
+    // @DeleteMapping("/user/delete")
+    // public ResponseEntity<Void> deleteUser(@PathVariable Long id){
+    //     userService.deleteUser(id);
+    //     return ResponseEntity.noContent().build();
+    // }
 
     // // 전체 게시글 조회
     // // @PreAuthorize("hasRole('ADMIN')")
@@ -193,7 +217,7 @@ public class ManagerController {
 
 
     // 전체 게시글 조회 (페이징)
-    @GetMapping
+    @GetMapping("/posts")
     public ResponseEntity<Page<PostDto>> getAllPosts(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size) {
@@ -201,7 +225,7 @@ public class ManagerController {
     }
 
     // 게시글 상세 조회
-    @GetMapping("/{id}")
+    @GetMapping("/posts/{id}")
     public ResponseEntity<PostDto> getPostById(@PathVariable Long id) {
         return ResponseEntity.ok(postService.getPostById(id));
     }
@@ -243,20 +267,28 @@ public class ManagerController {
     }
 
     // 게시글 삭제 (관리자도 가능)
-    @DeleteMapping("/{id}")
+    @DeleteMapping("/posts/{id}")
     public ResponseEntity<Void> deletePost(@PathVariable Long id, @RequestParam String username) {
         postService.deletePost(id, username);
         return ResponseEntity.noContent().build();
     }
 
     // 게시글 수정 (관리자도 가능)
-    @PutMapping("/{id}")
+    @PutMapping("/posts/{id}")
     public ResponseEntity<PostDto> updatePost(
             @PathVariable Long id,
             @RequestBody PostDto dto,
             @RequestParam String username) {
         return ResponseEntity.ok(postService.updatePost(id, dto, username));
     }
+
+    // 의사 역할 변경
+    @PutMapping("/posts/{id}/role/doctor")
+    public ResponseEntity<?> promoteToDoctor(@PathVariable String name, @AuthenticationPrincipal UserDetails userDetails ){
+        userService.updateRoleToDoctor(name, userDetails.getUsername());
+        return ResponseEntity.ok("사용자의 역할이 Doctor로 변경되었습니다.");
+    }
+
 }
     
 
