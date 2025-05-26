@@ -2,18 +2,20 @@ package com.project.spring.skillstack.controller.permit;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+// import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
+
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -41,8 +43,7 @@ public class PermitPage {
     CookieUtil cookieUtil;
     @Value("${spring.security.cors.site}")
     String corsOrigin;
-    @Autowired
-    private PasswordEncoder passwordEncoder;
+    
 
     @PostMapping("/signup")
     @ResponseBody
@@ -88,37 +89,59 @@ public class PermitPage {
         return ResponseEntity.ok(Map.of("message", "success"));
     }
 
-    // 커뮤니티 테스트용
-    // PermitPage(PasswordEncoder passwordEncoder) {
-    //     this.passwordEncoder = passwordEncoder;
-    // }
+    private final PasswordEncoder passwordEncoder;
+    PermitPage(PasswordEncoder passwordEncoder) {
+        this.passwordEncoder = passwordEncoder;
+    }
+    @PostMapping("/signin")
+    @ResponseBody
+    public ResponseEntity<?> signin(@RequestParam("userId") String userId,
+                                    @RequestParam("password") String password,
+                                    HttpServletResponse response) {
 
-    // @ResponseBody
-    // public ResponseEntity<?> signin(@RequestParam("userId") String userId,
-    //                                 @RequestParam("password") String password,
-    //                                 HttpServletResponse response) {
+        UserEntity user = userRep.findByName(userId).orElse(null);
+        if (user == null || !passwordEncoder.matches(password, user.getPass())) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("error", "로그인 실패"));
+        }
+
+        String token = jwtUtil.generateToken(userId);
+        
+        // 선택: 쿠키에도 저장
+        cookieUtil.GenerateJWTCookie(token, response);
+
+        // 본문에 JSON으로 토큰을 응답
+        return ResponseEntity.ok(Map.of("token", token));
+    }
+    // public ResponseEntity<Map<String, String>> signin(
+    //         @RequestBody Map<String, String> credentials,
+    //         HttpServletResponse response) {
+
+    //     String userId = credentials.get("userId");
+    //     String password = credentials.get("password");
 
     //     UserEntity user = userRep.findByName(userId).orElse(null);
-    //     if (user == null || !passwordEncoder.matches(password, user.getPass())) {
-    //         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("error", "로그인 실패"));
+
+    //     if (user == null) {
+    //         Map<String, String> responseMap = new HashMap<>();
+    //         responseMap.put("error", "not_found");
+    //         return ResponseEntity.status(HttpStatus.OK).body(responseMap);
     //     }
 
-    //     String token = jwtUtil.generateToken(userId);
-        
-    //     // 선택: 쿠키에도 저장
+    //     BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
+    //     if (!encoder.matches(password, user.getPass())) {
+    //         Map<String, String> responseMap = new HashMap<>();
+    //         responseMap.put("error", "wrong_password");
+    //         return ResponseEntity.status(HttpStatus.OK).body(responseMap);
+    //     }
+
+    //     String token = jwtUtil.generateToken(user.getName());
     //     cookieUtil.GenerateJWTCookie(token, response);
 
-    //     // 본문에 JSON으로 토큰을 응답
-    //     return ResponseEntity.ok(Map.of("token", token));
+    //     Map<String, String> successResponse = new HashMap<>();
+    //     successResponse.put("redirect", corsOrigin + "/home");
+    //     return ResponseEntity.status(HttpStatus.OK).body(successResponse);
     // }
 
-
-    @GetMapping("/check-id")
-    public ResponseEntity<?> checkId(@RequestParam("username") String username) {
-        boolean exists = userRep.findByName(username).isPresent();
-        return ResponseEntity.ok(Map.of("exists", exists));
-    }
-    
     @PostMapping("/findid")
     @ResponseBody
     public String findUserId(
