@@ -13,6 +13,7 @@ import com.project.spring.skillstack.dao.UserRepository;
 import com.project.spring.skillstack.dto.UpdateUserDto;
 
 import com.project.spring.skillstack.dto.UserDtoWithoutPass;
+import com.project.spring.skillstack.entity.PetEntity;
 import com.project.spring.skillstack.entity.UserEntity;
 
 import jakarta.transaction.Transactional;
@@ -91,6 +92,12 @@ public class UserService {
         
     }
 
+    // 유저 펫 조회
+    public List<PetEntity> getPetsByUserId(Long userId) {
+        UserEntity user = userRepository.findById(userId)
+            .orElseThrow(() -> new RuntimeException("사용자 없음"));
+        return user.getPets();
+    }
 
     // 역할 변경 메서드
     @Transactional

@@ -29,9 +29,12 @@ public class DataInitializer implements CommandLineRunner {
     @Override
     public void run(String... args) throws Exception {
 
+        List<String> roles = new ArrayList<>();
+        roles.add("USER");
 
         UserEntity root = new UserEntity(null, "root", passwordEncoder.encode("1234"), "root", List.of("ADMIN"), null, null, null, LocalDateTime.now(), null, new ArrayList<>());
-        UserEntity abcd = new UserEntity(null, "abcd", passwordEncoder.encode("1234"), "abcd", List.of("USER"), "abc123@pawple.com", "01012345678", null, LocalDateTime.now(), null, new ArrayList<>());
+        UserEntity abcd = new UserEntity(null, "abcd", passwordEncoder.encode("1234"), "abcd", roles, "abc123@pawple.com", "010-1234-5678", null, LocalDateTime.now(), null, new ArrayList<>());
+        UserEntity vet = new UserEntity(null, "vet", passwordEncoder.encode("1234"), "vet", roles, "vet123@pawple.com", "010-4321-8765", null, LocalDateTime.now(), null, new ArrayList<>());
 
         PetEntity abcdPet = new PetEntity("고양이", 4.0, "나비", 2, "수컷", "코숏", LocalDate.now(), abcd);
         abcd.getPets().add(abcdPet);
@@ -41,7 +44,7 @@ public class DataInitializer implements CommandLineRunner {
         PostEntity abcdPost1 = PostEntity.builder()
             .title("abcd의 첫 번째 게시글")
             .content("안녕하세요. abcd입니다. 첫 글을 올립니다!")
-            .category("건강")
+            .category("건강토픽")
             .user(abcd)
             .build();
 
@@ -54,6 +57,7 @@ public class DataInitializer implements CommandLineRunner {
 
         userRep.save(root);
         userRep.save(abcd);
+        userRep.save(vet);
         postRep.save(abcdPost1);
         postRep.save(abcdPost2);
         
@@ -69,9 +73,9 @@ public class DataInitializer implements CommandLineRunner {
                 "user" + suffix,
                 passwordEncoder.encode("1234"),
                 "User " + suffix,
-                List.of("USER"),
+                roles,
                 "user" + suffix + "@pawple.com",
-                "0101234" + String.format("%04d", i),
+                "010-1234-" + String.format("%04d", i),
                 null,
                 LocalDateTime.now(),
                 null,
@@ -116,14 +120,14 @@ public class DataInitializer implements CommandLineRunner {
             PostEntity post1 = PostEntity.builder()
                 .title("제목 예시 A - user" + suffix)
                 .content("user" + suffix + "의 첫 번째 게시글입니다.")
-                .category("건강")
+                .category("건강토픽")
                 .user(user)
                 .build();
 
             PostEntity post2 = PostEntity.builder()
                 .title("제목 예시 B - user" + suffix)
                 .content("user" + suffix + "의 두 번째 게시글입니다.")
-                .category("자유")
+                .category("일상")
                 .user(user)
                 .build();
 
