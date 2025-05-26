@@ -67,7 +67,7 @@ public class PostEntity {
 
     // 게시글 수정 (비공개 처리)
     @Builder.Default
-    @Column(nullable = false)
+    // @Column(nullable = false)
     private Boolean isPublic = true;
 
     // @Column(unique = true, nullable = false, updatable = false)

@@ -19,6 +19,7 @@ import com.project.spring.skillstack.dto.PostDto;
 import com.project.spring.skillstack.dto.UpdatePostDto;
 import com.project.spring.skillstack.dto.UpdateUserDto;
 import com.project.spring.skillstack.dto.UserDtoWithoutPass;
+import com.project.spring.skillstack.entity.PetEntity;
 import com.project.spring.skillstack.entity.PostEntity;
 
 import com.project.spring.skillstack.service.PostService;
@@ -48,7 +49,11 @@ public class ManagerController {
         return ResponseEntity.ok(userService.getAllUsersWithoutPass());
     }
 
-
+    @PreAuthorize("hasRole('ADMIN')")
+    @GetMapping("/user/{userId}/pets")
+    public ResponseEntity<List<PetEntity>> getUserPets(@PathVariable Long userId) {
+        return ResponseEntity.ok(userService.getPetsByUserId(userId));
+    }
 
     // ✅ 이름으로 회원 검색 (관리자만)
     // @PreAuthorize("hasRole('ADMIN')")
