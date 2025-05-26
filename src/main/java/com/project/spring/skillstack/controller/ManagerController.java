@@ -35,7 +35,11 @@ import io.swagger.v3.oas.annotations.parameters.RequestBody;
 // 관리자 Controller 
 @RestController
 // @RequestMapping("/admin")
+<<<<<<< Updated upstream
 @RequestMapping("/management")
+=======
+@RequestMapping("/admin")
+>>>>>>> Stashed changes
 public class ManagerController {
 
     private final PostManagerService postManagerService;
@@ -74,7 +78,11 @@ public class ManagerController {
     }
 
     // ✅ 소셜 이름으로 회원 검색 (관리자만)
+<<<<<<< Updated upstream
     @PreAuthorize("hasRole('ADMIN')")
+=======
+    // @PreAuthorize("hasRole('ADMIN')")
+>>>>>>> Stashed changes
     @GetMapping("/user/social")
     public ResponseEntity<List<UserDtoWithoutPass>> searchUsersBySocialName(@RequestParam String socialName) {
         return ResponseEntity.ok(userService.searchUsersBySocialName(socialName));
@@ -237,7 +245,11 @@ public class ManagerController {
     }
 
     // 게시글 상세 조회
+<<<<<<< Updated upstream
     @GetMapping("/posts/{id}")
+=======
+    @GetMapping("/post/{id}")
+>>>>>>> Stashed changes
     public ResponseEntity<PostDto> getPostById(@PathVariable Long id) {
         return ResponseEntity.ok(postService.getPostById(id));
     }
@@ -279,13 +291,22 @@ public class ManagerController {
     }
 
     // 게시글 삭제 (관리자도 가능)
+<<<<<<< Updated upstream
     @DeleteMapping("/posts/delete/{id}")
+=======
+    @DeleteMapping("/delete/{id}")
+>>>>>>> Stashed changes
     public ResponseEntity<Void> deletePost(@PathVariable Long id, @RequestParam String username) {
         postService.deletePost(id, username);
         return ResponseEntity.noContent().build();
     }
 
+<<<<<<< Updated upstream
     @PutMapping("/posts/update/{id}")
+=======
+    // 게시글 수정 (관리자도 가능)
+    @PutMapping("/update/{id}")
+>>>>>>> Stashed changes
     public ResponseEntity<PostDto> updatePost(
         @PathVariable Long id,
         @RequestBody PostDto postDto,
