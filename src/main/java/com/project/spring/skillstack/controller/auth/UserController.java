@@ -1,5 +1,6 @@
 package com.project.spring.skillstack.controller.auth;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -9,14 +10,14 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.RequestBody; 
 import org.springframework.web.bind.annotation.RestController;
 
 import com.project.spring.skillstack.dao.PetRepository;
@@ -47,7 +48,8 @@ public class UserController {
     PasswordEncoder passwordEncoder;
     @Autowired
     JwtUtil jwtUtil;
-
+    @Value("${spring.security.jwt.cookie.name}")
+    String jwtCookieName;
 
 
 
@@ -87,100 +89,71 @@ public class UserController {
         return ResponseEntity.ok(pets);
     }
 
-    // 회원삭제
-    @PostMapping("/delete")
-    @Transactional
-    public String deleteUser(
-        @AuthenticationPrincipal UserDetails userDetails,
-        @RequestParam("password") String password,
-        HttpServletResponse response
-    ) {
-        if (userDetails == null) {
-            return "redirect:" + corsOrigin + "/signin?error=not_logged_in";
+    // 비밀번호 확인
+    @PostMapping("/checkpw")
+    public ResponseEntity<?> checkPassword(@AuthenticationPrincipal UserDetails userDetails,
+                                        @RequestBody Map<String, String> body) {
+        if (userDetails == null || userDetails.getUsername() == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("message", "로그인 정보 없음"));
         }
 
-        String loggedInUsername = userDetails.getUsername();
+        String inputPassword = body.get("password");
+        Optional<UserEntity> optionalUser = userRep.findByName(userDetails.getUsername());
 
-        if (!passwordEncoder.matches(password, userDetails.getPassword())) {
-            return "redirect:" + corsOrigin + "/mypage?error=wrong_password";
+        if (optionalUser.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("message", "사용자 없음"));
         }
 
-        try {
-            Optional<UserEntity> optionalUser = userRep.findByName(loggedInUsername);
-            if (optionalUser.isEmpty()) {
-                return "redirect:/auth/signin?error=user_not_found";
-            }
+        UserEntity user = optionalUser.get();
 
-            UserEntity user = optionalUser.get();
-
-            List<PetEntity> pets = petRep.findByOwner(user);
-            if (!pets.isEmpty()) {
-                petRep.deleteAll(pets);
-            }
-
-            userRep.delete(user);
-            SecurityContextHolder.clearContext();
-            cookieUtil.RemoveJWTCookie(response);
-
-            return "redirect:" + corsOrigin + "/home?message=delete_success";
-        } catch (Exception e) {
-            e.printStackTrace();
-            return "redirect:" + corsOrigin + "/mypage?error=delete_failed";
+        if (!passwordEncoder.matches(inputPassword, user.getPass())) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("message", "비밀번호가 일치하지 않습니다."));
         }
 
+        return ResponseEntity.ok(Map.of("message", "비밀번호 확인 성공"));
     }
-    
 
-    // 정보수정
-    @PostMapping("/update")
+    // 회원정보 수정
+    @PutMapping("/update")
     @Transactional
-    public String updateUser(
-        @AuthenticationPrincipal UserDetails userDetails,
-        @RequestParam("password1") String password1,
-        @RequestParam("password2") String password2,
-        @RequestParam("name") String name,
-        @RequestParam("email") String email,
-        @RequestParam("phoneNumber") String phoneNumber,
-        HttpServletResponse response
-    ) {
-        if (userDetails == null) {
-            return "redirect:" + corsOrigin + "/signin?error=not_logged_in";
+    public ResponseEntity<?> updateUser(@AuthenticationPrincipal UserDetails userDetails,
+                                        @RequestBody Map<String, String> updateData,
+                                        HttpServletResponse response) {
+        if (userDetails == null || userDetails.getUsername() == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("message", "로그인 정보 없음"));
         }
 
-        String loggedInUsername = userDetails.getUsername();
+        Optional<UserEntity> optionalUser = userRep.findByName(userDetails.getUsername());
 
-        if (!passwordEncoder.matches(password1, userDetails.getPassword())) {
-            return "redirect:" + corsOrigin + "/mypage?error=wrong_password";
+        if (optionalUser.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("message", "사용자 없음"));
         }
+
+        UserEntity user = optionalUser.get();
+
+        String name = updateData.get("name");
+        String password = updateData.get("pass");
+        String phone = updateData.get("phone");
+        String birthDate = updateData.get("birthDate");
+        String email = updateData.get("email");
         
-
-        Optional<UserEntity> userOptional = userRep.findByName(loggedInUsername);
-        if (userOptional.isEmpty()) {
-            return "redirect:" + corsOrigin + "signin?error=user_not_found";
+        if (name != null) user.setSocialName(name);
+        if (password != null && !password.isBlank()) user.setPass(passwordEncoder.encode(password));
+        if (phone != null) user.setPhoneNumber(phone);
+        if (birthDate != null && !birthDate.isBlank()) {
+            user.setBirthDate(LocalDate.parse(birthDate));
         }
-
-        UserEntity user = userOptional.get();
-
-        if (password2 != null && !password2.isEmpty()) {
-            user.setPass(passwordEncoder.encode(password2));
-            
-            String newToken = jwtUtil.generateToken(user.getName());
-            cookieUtil.GenerateJWTCookie(newToken, response);
-        }
-
-        if (name != null && !name.isEmpty()) {
-            user.setSocialName(name);
-        }
-        if (email != null && !email.isEmpty()) {
-            user.setEmail(email);
-        }
-        if (phoneNumber != null && !phoneNumber.isEmpty()) {
-            user.setPhoneNumber(phoneNumber);
-        }
+        if (email != null) user.setEmail(email);
 
         userRep.save(user);
 
-        return "redirect:" + corsOrigin + "/mypage?message=update_success";
+        return ResponseEntity.ok(Map.of("message", "회원정보 수정 완료"));
     }
+
+
+
+
+
+
 
 }
