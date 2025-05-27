@@ -1,6 +1,7 @@
 package com.project.spring.skillstack.controller;
 
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -83,13 +84,13 @@ public class ManagerController {
     }
 
     
-    // 회원 삭제
-    // @PreAuthorize("hasRole('ADMIN')")
-    @DeleteMapping("/user/delete")
-    public ResponseEntity<Void> deleteUser(@PathVariable Long id){
-        userService.deleteUser(id);
-        return ResponseEntity.noContent().build();
-    }
+    // // 회원 삭제
+    // // @PreAuthorize("hasRole('ADMIN')")
+    // @DeleteMapping("/user/delete")
+    // public ResponseEntity<Void> deleteUser(@PathVariable Long id){
+    //     userService.deleteUser(id);
+    //     return ResponseEntity.noContent().build();
+    // }
 
 
     // 전체 게시글 조회
@@ -208,6 +209,31 @@ public class ManagerController {
         return ResponseEntity.ok(PostDto.fromEntity(updatedPost));
     }
 
+
+    // 회원 삭제 API
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteUser(@PathVariable Long id) {
+        boolean deleted = userService.deleteUserById(id);
+        if (deleted) {
+            return ResponseEntity.noContent().build(); // 204 No Content
+        } else {
+            return ResponseEntity.notFound().build(); // 404 Not Found
+        }
+    }
+
+
+    // 게시글, 회원 수 조회
+    @GetMapping("/stats")
+    public ResponseEntity<Map<String, Long>> getStats() {
+        long userCount = userService.getUserCount();
+        long postCount = postService.getPostCount();
+
+        Map<String, Long> result = new HashMap<>();
+        result.put("userCount", userCount);
+        result.put("postCount", postCount);
+
+        return ResponseEntity.ok(result);
+    }
 }
     
 

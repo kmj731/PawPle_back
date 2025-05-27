@@ -7,6 +7,7 @@ import java.util.stream.Collectors;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
+import com.project.spring.skillstack.controller.ManagerController;
 import com.project.spring.skillstack.dao.UserRepository;
 
 
@@ -20,9 +21,10 @@ import jakarta.transaction.Transactional;
 public class UserService {
     
     private final UserRepository userRepository;
-
+    
     public UserService(UserRepository userRepository) {
         this.userRepository = userRepository;
+        
     }
 
     public void addAdminRole(Long userId){
@@ -71,14 +73,14 @@ public class UserService {
             .collect(Collectors.toList());
     }
 
-
     // 회원 삭제
-    @Transactional
-    public void deleteUser(Long userId){
-        UserEntity user = userRepository.findById(userId)
-            .orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다."));
-            userRepository.delete(user);
+    public boolean deleteUserById(Long id) {
+        if (!userRepository.existsById(id)) {
+            return false;
         }
+        userRepository.deleteById(id);
+        return true;
+    }
 
 
     // 유저 펫 조회
@@ -88,6 +90,11 @@ public class UserService {
         return user.getPets();
     }
 
+
+    // 회원 수 조회
+    public long getUserCount(){
+        return userRepository.count();
+    }
     
     
 }
