@@ -56,12 +56,15 @@ public class PostEntity {
     
     @Column
     private Integer viewCount;
+
+    @Builder.Default
+    @Column(name = "COMMENT_COUNT")
+    private Integer commentCount = 0;
     
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "user_id")
     private UserEntity user;
     
-    // 카테고리 추가 (반려동물 건강 관련 커뮤니티이므로 카테고리 유용)
     @Column(length = 50)
     private String category;
 
@@ -77,6 +80,7 @@ public class PostEntity {
     protected void onCreate() {
         this.createdAt = LocalDateTime.now();
         this.viewCount = 0;
+        this.commentCount = 0;
     }
     
     @PreUpdate

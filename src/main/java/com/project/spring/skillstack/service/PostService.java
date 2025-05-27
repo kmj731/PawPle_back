@@ -195,4 +195,20 @@ public class PostService {
         Page<PostEntity> postPage = postRepository.findByCategoryOrderByViewCountDescCreatedAtDesc(category, pageable);
         return postPage.map(PostDto::fromEntity);
     }
+
+    // 댓글 수 기준 인기글 조회
+    @Transactional(readOnly = true)
+    public Page<PostDto> getPopularPostsByComments(int page, int size) {
+        Pageable pageable = PageRequest.of(page, size);
+        Page<PostEntity> postPage = postRepository.findAllByOrderByCommentCountDescCreatedAtDesc(pageable);
+        return postPage.map(PostDto::fromEntity);
+    }
+    
+    // 카테고리별 댓글 수 기준 인기글 조회
+    @Transactional(readOnly = true)
+    public Page<PostDto> getPopularPostsByCommentsInCategory(String category, int page, int size) {
+        Pageable pageable = PageRequest.of(page, size);
+        Page<PostEntity> postPage = postRepository.findByCategoryOrderByCommentCountDescCreatedAtDesc(category, pageable);
+        return postPage.map(PostDto::fromEntity);
+    }
 }
