@@ -2,6 +2,7 @@ package com.project.spring.skillstack.service;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
 import org.apache.tomcat.util.net.openssl.ciphers.Authentication;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,8 +29,10 @@ public class PostManagerService {
 
     private final PostRepository postRepository;
 
-    public PostManagerService(PostRepository postRepository){
+    public PostManagerService(UserRepository userRepository,PostRepository postRepository){
+        this.userRepository = userRepository;
         this.postRepository = postRepository;
+        
     }
 
     // 전체 게시글 조회
@@ -55,11 +58,7 @@ public class PostManagerService {
         return postRepository.save(post);
     }
 
-    // 게시글 삭제
-    public void deletePost(Long id) {
-        if (!postRepository.existsById(id)) {
-            throw new IllegalArgumentException("해당 게시글이 존재하지 않습니다.");
-        }
+    public void deletePostById(Long id){
         postRepository.deleteById(id);
     }
 
@@ -87,6 +86,36 @@ public class PostManagerService {
         UserEntity user = userRepository.findByName(username)
             .orElseThrow(() -> new RuntimeException("유저를 찾을 수 없습니다."));
         return user.getRoles() != null && user.getRoles().contains("ADMIN");
+    }
+
+    // 제목만 수정
+    @Transactional
+    public PostEntity updatePostTitle(Long postId, String newTitle) {
+        Optional<PostEntity> optionalPost = postRepository.findById(postId);
+        if (optionalPost.isEmpty()) {
+            return null;
+        }
+        PostEntity post = optionalPost.get();
+        post.setTitle(newTitle);
+        return postRepository.save(post);
+    }
+
+    // 공지로 이동
+    @Transactional
+    public PostEntity setPostAsNotice(Long postId) {
+        Optional<PostEntity> optionalPost = postRepository.findById(postId);
+        if (optionalPost.isEmpty()) {
+            return null;
+        }
+        PostEntity post = optionalPost.get();
+        
+        // 방법1: category 필드를 "공지"로 변경
+        post.setCategory("공지");
+        
+        // 방법2: 만약 isNotice Boolean 필드가 있다면
+        // post.setIsNotice(true);
+
+        return postRepository.save(post);
     }
 
     
