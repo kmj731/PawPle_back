@@ -86,6 +86,8 @@ public class ManagerController {
     
 
 
+    
+
     // 전체 게시글 조회
     @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/post")
@@ -95,7 +97,6 @@ public class ManagerController {
                 .collect(Collectors.toList());
         return ResponseEntity.ok(postDto);
     }
-
 
 
     // vet 접근 
