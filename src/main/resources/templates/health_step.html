@@ -121,6 +121,7 @@
         <form method="post" th:action="@{/health/next}" th:object="${checkForm}">
             <input type="hidden" name="category" th:value="${category}" />
             <input type="hidden" name="step" th:value="${step}" />
+            <input type="hidden" name="petId" th:value="${pet.id}"> <!-- ✨ 추가 -->
 
             <div th:each="option : ${options}">
                 <label class="checkbox-label">

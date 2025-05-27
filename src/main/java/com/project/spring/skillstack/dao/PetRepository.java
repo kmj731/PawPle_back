@@ -12,4 +12,6 @@ import java.util.Optional;
 public interface PetRepository extends JpaRepository<PetEntity, Long> {
     Optional<PetEntity> findByOwnerAndPetName(UserEntity owner, String petName);
     List<PetEntity> findByOwner(UserEntity owner);
+    
 }
+

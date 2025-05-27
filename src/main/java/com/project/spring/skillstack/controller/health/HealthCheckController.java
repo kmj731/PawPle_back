@@ -13,11 +13,13 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.SessionAttribute;
 
 import com.project.spring.skillstack.dto.HealthCheckRequest;
 import com.project.spring.skillstack.dto.HealthCheckResultResponse;
 import com.project.spring.skillstack.service.HealthCheckService;
+import com.project.spring.skillstack.service.PetService;
 
 import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
@@ -27,6 +29,7 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class HealthCheckController {
 
+    private final PetService petService;  // ✅ 이 줄 추가!
     private final HealthCheckService service;
     private final List<String> categories = List.of("심장", "위/장", "피부/귀", "신장/방광", "면역력/호흡기", "치아", "뼈/관절", "눈", "행동","체중 및 비만도");
 
@@ -48,12 +51,17 @@ public class HealthCheckController {
                            @RequestParam(required = false) List<String> answers,
                            @SessionAttribute(value = "userId", required = false) Long userId,
                            @RequestParam int step,
+                           @RequestParam Long petId, // ✨ petId도 같이 받기
                            HttpSession session) {
 
     Map<String, List<String>> saved = (Map<String, List<String>>) session.getAttribute("healthData");
     if (saved == null) saved = new HashMap<>();
     saved.put(category, answers != null ? answers : List.of("없어요"));
     session.setAttribute("healthData", saved);
+
+    // ✨ 여기 추가!! petId를 세션에 저장
+    session.setAttribute("petId", petId);
+
 
     if (step >= categories.size() - 1) {
         return "redirect:/health/result";  // ✅ 정확한 주소
@@ -68,8 +76,32 @@ public class HealthCheckController {
 public String showResult(HttpSession session, Model model) {
     System.out.println("✅ /health/result 컨트롤러 진입 성공");
 
+    
     // 세션에 저장된 건강 체크 데이터 꺼내기
     Map<String, List<String>> saved = (Map<String, List<String>>) session.getAttribute("healthData");
+
+     // 2️⃣ ✨ 여기에 추가: petId를 세션에서 꺼낸다
+    Long petId = (Long) session.getAttribute("petId");
+
+    if (petId != null) {
+        long dday = petService.getPetCheckupDday(petId); // ✅ 오류 해결됨!
+        model.addAttribute("dday", dday);                // 💬 뷰로 넘겨서 표시
+    } else {
+        System.out.println("❗ petId가 세션에 없어요!");
+        model.addAttribute("dday", null);
+    }
+
+    // 추가 코드: 2개 이상 체크한 항목만 추출
+    Map<String, List<String>> needsAttention = new HashMap<>();
+        for (Map.Entry<String, List<String>> entry : saved.entrySet()) {
+        List<String> answers = entry.getValue();
+    // '없어요'만 체크된 경우 제외 + 2개 이상 선택된 경우만 필터링
+    long validCount = answers.stream().filter(answer -> !"없어요".equals(answer)).count();
+        if (validCount >= 2) {
+            needsAttention.put(entry.getKey(), answers);
+        }
+    }
+    model.addAttribute("needsAttention", needsAttention); // 👉 결과 템플릿에서 사용할 데이터
 
     // 세션에 데이터가 없다면 처음으로 리다이렉트
     if (saved == null || saved.isEmpty()) {
@@ -118,4 +150,19 @@ public String showResult(HttpSession session, Model model) {
             default -> List.of("없어요");
         };
     }
+
+    @GetMapping("/dday/{petId}")
+    @ResponseBody
+    public String getDday(@PathVariable Long petId) {
+    long dday = petService.getPetCheckupDday(petId); // ✅ 객체로 호출
+
+    if (dday > 0) {
+        return "다음 건강검진까지 D-" + dday;
+    } else if (dday == 0) {
+        return "오늘 건강검진일이에요!";
+    } else {
+        return "건강검진이 " + Math.abs(dday) + "일 지났어요. 검진이 필요해요!";
+    }
+}
+
 }

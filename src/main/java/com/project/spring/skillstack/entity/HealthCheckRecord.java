@@ -5,7 +5,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 import jakarta.persistence.Id; // ✅ JPA용 올바른 임포트
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.CascadeType;
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.OneToMany;
@@ -26,8 +29,15 @@ public class HealthCheckRecord {
     private Long userId;
     private int totalScore;
     private String resultStatus;
-    private LocalDateTime checkedAt;
 
     @OneToMany(mappedBy = "record", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<HealthCheckDetail> details = new ArrayList<>();
+
+    @ManyToOne
+    @JoinColumn(name = "pet_id", nullable = false)
+    private PetEntity pet;
+
+    @Column(nullable = false)
+    private LocalDateTime checkedAt;
+
 }

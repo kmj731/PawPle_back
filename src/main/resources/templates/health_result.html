@@ -79,9 +79,14 @@
 
     <div class="section" th:if="${result.warnings != null} and ${result.warnings.size()} > 0">
         <h3>관리 필요한 부위</h3>
-        <ul>
-            <li th:each="warn : ${result.warnings}" th:text="${warn}"></li>
-        </ul>
+    <ul>
+        <th:block th:if="${needsAttention != null}">
+            <li th:each="entry : ${needsAttention}">
+                <strong th:text="${entry.key}"></strong>
+                <!-- <span th:text="${#strings.arrayJoin(entry.value.toArray(), ', ')}"></span> -->
+            </li>
+        </th:block>
+    </ul>
     </div>
 
     <div class="section">
@@ -97,5 +102,13 @@
         <p th:if="${selected == null} or ${selected.size()} == 0">선택한 항목이 없습니다.</p>
     </div>
 </div>
+
+    <p>
+    건강검진 디데이: 
+    <span th:text="'D-' + ${dday}" th:if="${dday > 0}"></span>
+    <span th:text="'오늘 건강검진일이에요!'" th:if="${dday == 0}"></span>
+    <span th:text="'검진이 ' + ${#numbers.formatInteger(-dday)} + '일 지났어요!'" th:if="${dday < 0}"></span>
+    </p>
+
 </body>
 </html>

@@ -1,5 +1,6 @@
 package com.project.spring.skillstack.entity;
 
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -7,11 +8,13 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import lombok.NoArgsConstructor;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import java.time.LocalDate;
+import java.util.List;
 
 @NoArgsConstructor
 @Entity
@@ -42,6 +45,11 @@ public class PetEntity {
 
     @Column(nullable = false)
     private LocalDate registrationDate;
+
+    @OneToMany(mappedBy = "pet")
+    @JsonIgnore  // 순환참조 방지 (중요!)
+    private List<HealthCheckRecord> healthRecords;
+
 
     @JsonIgnore
     @ManyToOne
@@ -77,5 +85,10 @@ public class PetEntity {
     public void setPetAge(Integer petAge) { this.petAge = petAge; }
     public void setPetGender(String petGender) { this.petGender = petGender; }
     public void setPetBreed(String petBreed) { this.petBreed = petBreed; }
+
+    @OneToMany(mappedBy = "pet", cascade = CascadeType.ALL)
+    @JsonIgnore
+    private List<HealthCheckRecord> healthCheckRecords;
+
 
 }

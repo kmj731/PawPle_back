@@ -1,5 +1,6 @@
 package com.project.spring.skillstack.service;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -7,9 +8,11 @@ import java.util.Map;
 
 import org.springframework.stereotype.Service;
 
-
+import com.project.spring.skillstack.dao.PetRepository;
 import com.project.spring.skillstack.dto.HealthCheckRequest;
 import com.project.spring.skillstack.dto.HealthCheckResultResponse;
+import com.project.spring.skillstack.entity.HealthCheckRecord;
+import com.project.spring.skillstack.entity.PetEntity;
 import com.project.spring.skillstack.repository.HealthCheckRecordRepository;
 
 import lombok.RequiredArgsConstructor;
@@ -21,6 +24,9 @@ import lombok.RequiredArgsConstructor;
 public class HealthCheckService {
 
     private final HealthCheckRecordRepository healthCheckRecordRepository;
+    private final PetRepository petRepository;
+   
+
 
     // 임시 메모리 저장소
     private final Map<Long, HealthCheckResultResponse> resultMap = new HashMap<>();
@@ -67,4 +73,18 @@ public class HealthCheckService {
         if (score >= 50) return "경고";
         return "위험";
     }
+
+    public void saveHealthCheck(Long petId, int totalScore, String resultStatus) {
+    PetEntity pet = petRepository.findById(petId)
+        .orElseThrow(() -> new IllegalArgumentException("Pet not found"));
+
+    HealthCheckRecord record = new HealthCheckRecord();
+    record.setPet(pet);
+    record.setTotalScore(totalScore);
+    record.setResultStatus(resultStatus);
+    record.setCheckedAt(LocalDateTime.now()); // ✅ 현재 날짜/시간 자동 저장
+
+    healthCheckRecordRepository.save(record);
+}
+    
 }
