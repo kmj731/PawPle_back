@@ -37,25 +37,6 @@ public class PostManagerService {
         return postRepository.findAll();
     }
 
-    // // 제목으로 게시글 검색
-    // public List<PostEntity> searchPostByTitle(String title){
-    //     return postRepository.findByTitleContainingIgnoreCase(title);
-    // }
-
-    // // 내용으로 검색
-    // public List<PostEntity> searchPostByContent(String content){
-    //     return postRepository.findByContentContainingIgnoreCase(content);
-    // }
-
-    // // socialName으로 검색
-    // public List<PostEntity> searchPostBySocialName(String socialName){
-    //     return postRepository.findBySocialNameContainingIgnoreCase(socialName);
-    // }
-
-    // // 날짜로 검색
-    // public List<PostEntity> searchPostByLocalDateTime(LocalDateTime startDate, LocalDateTime endDate){
-    //     return postRepository.findByCreatedBetween(startDate, endDate);
-    // }
 
     // 게시글 상세 조회(이동)
     public PostEntity getPostById(Long id) {
@@ -83,14 +64,6 @@ public class PostManagerService {
     }
 
 
-    // // 게시글 수정
-    // public void updatePost(Long postId, String title, String content) {
-    //     PostEntity post = postRepository.findById(postId)
-    //             .orElseThrow(() -> new RuntimeException("Post not found"));
-    //     post.setTitle(title);
-    //     post.setContent(content);
-    //     postRepository.save(post);
-    // }
     @Transactional
     public void updatePost(String title, UserEntity user, PostDto postDto, String username) {
         PostEntity post = postRepository.findByTitleAndUser(title, user)
