@@ -91,6 +91,11 @@ public class ManagerController {
     //     userService.deleteUser(id);
     //     return ResponseEntity.noContent().build();
     // }
+    
+
+
+    
+
 
 
     // 전체 게시글 조회
