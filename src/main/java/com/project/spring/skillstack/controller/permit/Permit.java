@@ -109,6 +109,7 @@ public class Permit {
         return ResponseEntity.ok(posts);
     }
 
+    // 현재 로그인한 유저의 정보 조회
     @GetMapping("/test/myinfo")
     public ResponseEntity<?> getMyPage(@AuthenticationPrincipal CustomUserDetails userDetails) {
         if (userDetails == null) {

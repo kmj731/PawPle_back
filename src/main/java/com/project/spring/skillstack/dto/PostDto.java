@@ -15,7 +15,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class PostDto {
     
-    private Long id;
+    private Long id;    
     private String title;
     private String content;
     private String authorName;
@@ -55,7 +55,7 @@ public class PostDto {
                 .title(this.title)
                 .content(this.content)
                 .category(this.category)
-                .isPublic(this.isPublic)
+                .isPublic(this.isPublic != null ? this.isPublic : true)
                 .build();
     }
 }

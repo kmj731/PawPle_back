@@ -20,7 +20,8 @@ public interface UserRepository extends JpaRepository<UserEntity, Long> {
     List<UserEntity> findByNameContainingIgnoreCase(String name); // 이름을 포함한 사용자 검색(대소문자 구분 x)
     List<UserEntity> findByEmailContainingIgnoreCase(String email); // 이메일을 포함한 사용자 검색(대소문자 구분 X)
     List<UserEntity> findBySocialNameContainingIgnoreCase(String socialName);// 소셜이름을 포함한 사용자 검색 (대소문자 구분 x)
-    
+    Optional<UserEntity> findByNameAndEmailAndPhoneNumber(String name, String email, String phoneNumber);
+
     
 }
 

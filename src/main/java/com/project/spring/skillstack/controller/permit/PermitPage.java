@@ -2,7 +2,6 @@ package com.project.spring.skillstack.controller.permit;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
-// import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -11,14 +10,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.ui.Model;
 
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
@@ -44,6 +40,10 @@ public class PermitPage {
     @Value("${spring.security.cors.site}")
     String corsOrigin;
     
+    private final PasswordEncoder passwordEncoder;
+    PermitPage(PasswordEncoder passwordEncoder) {
+        this.passwordEncoder = passwordEncoder;
+    }
 
     @PostMapping("/signup")
     @ResponseBody
@@ -89,121 +89,47 @@ public class PermitPage {
         return ResponseEntity.ok(Map.of("message", "success"));
     }
 
-    private final PasswordEncoder passwordEncoder;
-    PermitPage(PasswordEncoder passwordEncoder) {
-        this.passwordEncoder = passwordEncoder;
-    }
-    @PostMapping("/signin")
+    @PostMapping("/find-id")
     @ResponseBody
-    public ResponseEntity<?> signin(@RequestParam("userId") String userId,
-                                    @RequestParam("password") String password,
-                                    HttpServletResponse response) {
+    public ResponseEntity<?> findId(@RequestBody Map<String, String> request) {
+        String name = request.get("name");
+        String email = request.get("email");
+        String phoneNumber = request.get("phoneNumber");
 
-        UserEntity user = userRep.findByName(userId).orElse(null);
-        if (user == null || !passwordEncoder.matches(password, user.getPass())) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("error", "로그인 실패"));
+        if (name == null || email == null || phoneNumber == null) {
+            return ResponseEntity.badRequest().body(Map.of("message", "empty_input"));
         }
 
-        String token = jwtUtil.generateToken(userId);
-        
-        // 선택: 쿠키에도 저장
-        cookieUtil.GenerateJWTCookie(token, response);
-
-        // 본문에 JSON으로 토큰을 응답
-        return ResponseEntity.ok(Map.of("token", token));
-    }
-    // public ResponseEntity<Map<String, String>> signin(
-    //         @RequestBody Map<String, String> credentials,
-    //         HttpServletResponse response) {
-
-    //     String userId = credentials.get("userId");
-    //     String password = credentials.get("password");
-
-    //     UserEntity user = userRep.findByName(userId).orElse(null);
-
-    //     if (user == null) {
-    //         Map<String, String> responseMap = new HashMap<>();
-    //         responseMap.put("error", "not_found");
-    //         return ResponseEntity.status(HttpStatus.OK).body(responseMap);
-    //     }
-
-    //     BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
-    //     if (!encoder.matches(password, user.getPass())) {
-    //         Map<String, String> responseMap = new HashMap<>();
-    //         responseMap.put("error", "wrong_password");
-    //         return ResponseEntity.status(HttpStatus.OK).body(responseMap);
-    //     }
-
-    //     String token = jwtUtil.generateToken(user.getName());
-    //     cookieUtil.GenerateJWTCookie(token, response);
-
-    //     Map<String, String> successResponse = new HashMap<>();
-    //     successResponse.put("redirect", corsOrigin + "/home");
-    //     return ResponseEntity.status(HttpStatus.OK).body(successResponse);
-    // }
-
-    @PostMapping("/findid")
-    @ResponseBody
-    public String findUserId(
-            @RequestParam("email1") String email1,
-            @RequestParam("email2") String email2,
-            @RequestParam("phoneNumber2") String phoneNumber2,
-            @RequestParam("phoneNumber3") String phoneNumber3) {
-        String email = email1 + "@" + email2;
-        String phoneNumber = "010" + phoneNumber2 + phoneNumber3;
-
-        Optional<UserEntity> optUser = userRep.findByEmail(email)
-                .filter(user -> phoneNumber.equals(user.getPhoneNumber()));
-
-        return optUser.map(UserEntity::getName)
-                .orElse("일치하는 회원 정보가 없습니다.");
-    }
-
-    @PostMapping("/findpw")
-    public String findpw(
-            @RequestParam("userId") String userId,
-            @RequestParam("email1") String email1,
-            @RequestParam("email2") String email2,
-            @RequestParam("phone2") String phone2,
-            @RequestParam("phone3") String phone3,
-            Model model) {
-        String email = email1 + "@" + email2;
-        String phone = "010" + phone2 + phone3;
-
-        Optional<UserEntity> opt = userRep.findByName(userId)
-                .filter(u -> email.equals(u.getEmail()) && phone.equals(u.getPhoneNumber()));
-
-        if (opt.isPresent()) {
-            model.addAttribute("userId", userId);
-            return "redirect:" + corsOrigin + "/resetpw";
+        Optional<UserEntity> userOpt = userRep.findByNameAndEmailAndPhoneNumber(name, email, phoneNumber);
+        if (userOpt.isPresent()) {
+            return ResponseEntity.ok(Map.of("username", userOpt.get().getName()));
         } else {
-            model.addAttribute("error", "일치하는 회원 정보가 없습니다.");
-            return "redirect:" + corsOrigin + "/findpw";
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("message", "not_found"));
         }
     }
 
-    @PostMapping("/resetpw")
+    @PostMapping("/reset-password")
+    @ResponseBody
     @Transactional
-    public String resetpw(
-            @RequestParam("userId") String userId,
-            @RequestParam("newPassword1") String pw1,
-            @RequestParam("newPassword2") String pw2,
-            Model model) {
-        if (!pw1.equals(pw2)) {
-            model.addAttribute("error", "비밀번호가 일치하지 않습니다.");
-            model.addAttribute("userId", userId);
-            return "redirect:" + corsOrigin + "/resetpw";
+    public ResponseEntity<?> resetPassword(@RequestBody Map<String, String> request) {
+        String userId = request.get("userId"); // 사용자 이름 기준
+        String newPassword = request.get("newPassword");
+
+        if (userId == null || newPassword == null) {
+            return ResponseEntity.badRequest().body(Map.of("message", "empty_input"));
         }
 
-        Optional<UserEntity> opt = userRep.findByName(userId);
-        if (opt.isPresent()) {
-            UserEntity user = opt.get();
-            user.setPass(new BCryptPasswordEncoder().encode(pw1));
-            userRep.save(user);
-            return "redirect:" + corsOrigin + "/signin?reset=success";
-        } else {
-            return "redirect:" + corsOrigin + "/findpw?error=유저를 찾을 수 없습니다.";
+        Optional<UserEntity> userOpt = userRep.findByName(userId);
+        if (userOpt.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("message", "user_not_found"));
         }
+
+        UserEntity user = userOpt.get();
+        user.setPass(passwordEncoder.encode(newPassword));
+        userRep.save(user); // 변경사항 저장
+
+        return ResponseEntity.ok(Map.of("message", "password_reset_success"));
     }
+
 
 }
