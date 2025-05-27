@@ -12,6 +12,7 @@ import org.springframework.stereotype.Component;
 
 import com.project.spring.skillstack.dao.PostRepository;
 import com.project.spring.skillstack.dao.UserRepository;
+import com.project.spring.skillstack.entity.HealthCheckRecord;
 import com.project.spring.skillstack.entity.PetEntity;
 import com.project.spring.skillstack.entity.PostEntity;
 import com.project.spring.skillstack.entity.UserEntity;
@@ -54,6 +55,25 @@ public class DataInitializer implements CommandLineRunner {
             .category("Q&A")
             .user(abcd)
             .build();
+            
+        HealthCheckRecord record1 = new HealthCheckRecord();
+        record1.setUserId(abcd.getId()); // 아직 ID는 null이지만 persist 시 자동 반영됨
+        record1.setTotalScore(80);
+        record1.setResultStatus("양호");
+        record1.setCheckedAt(LocalDateTime.now().minusDays(5));
+        record1.setPet(abcdPet); // 연결
+        abcdPet.getHealthRecords().add(record1);
+
+        HealthCheckRecord record2 = new HealthCheckRecord();
+        record2.setUserId(abcd.getId());
+        record2.setTotalScore(45);
+        record2.setResultStatus("경고");
+        record2.setCheckedAt(LocalDateTime.now().minusDays(2));
+        record2.setPet(abcdPet2);
+        abcdPet2.getHealthRecords().add(record2);
+
+        abcd.getPets().add(abcdPet);
+        abcd.getPets().add(abcdPet2);
 
         userRep.save(root);
         userRep.save(abcd);
