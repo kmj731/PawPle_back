@@ -81,19 +81,6 @@ public class ManagerController {
         return ResponseEntity.ok(userService.searchUsersBySocialName(socialName));
     }
 
-    
-    // // 회원 삭제
-    // // @PreAuthorize("hasRole('ADMIN')")
-    // @DeleteMapping("/user/delete")
-    // public ResponseEntity<Void> deleteUser(@PathVariable Long id){
-    //     userService.deleteUser(id);
-    //     return ResponseEntity.noContent().build();
-    // }
-    
-
-
-    
-
 
 
     // 전체 게시글 조회
