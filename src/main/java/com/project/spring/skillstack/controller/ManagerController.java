@@ -97,6 +97,7 @@ public class ManagerController {
     }
 
 
+
     // vet 접근 
     @PreAuthorize("hasRole('vet')")
     @GetMapping("/vet-only")
