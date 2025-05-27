@@ -83,6 +83,9 @@ public class ManagerController {
 
 
 
+    
+
+
     // 전체 게시글 조회
     @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/post")
