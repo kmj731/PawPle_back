@@ -22,8 +22,6 @@ import com.project.spring.skillstack.dto.PostDto;
 
 import com.project.spring.skillstack.dto.UserDtoWithoutPass;
 import com.project.spring.skillstack.entity.PetEntity;
-
-
 import com.project.spring.skillstack.entity.PostEntity;
 import com.project.spring.skillstack.service.PostManagerService;
 import com.project.spring.skillstack.service.PostService;
