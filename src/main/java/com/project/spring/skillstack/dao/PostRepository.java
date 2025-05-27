@@ -54,32 +54,10 @@ public interface PostRepository extends JpaRepository<PostEntity, Long> {
         String title, String content, String category, Pageable pageable
     );
 
-    /**
-     * 인기글 조회 (조회수 기준, 조회수 같으면 최신순)
-     */
+    // 인기글 조회 (조회수 기준, 조회수 같으면 최신순)
     Page<PostEntity> findAllByOrderByViewCountDescCreatedAtDesc(Pageable pageable);
 
-    /**
-     * 카테고리별 인기글 조회 (조회수 기준, 조회수 같으면 최신순)
-     */
+    // 카테고리별 인기글 조회 (조회수 기준, 조회수 같으면 최신순)
     Page<PostEntity> findByCategoryOrderByViewCountDescCreatedAtDesc(String category, Pageable pageable);
 
-    /**
-     * 인기글 조회 (댓글수 기준) - 댓글 테이블과 조인 필요
-     */
-    @Query("SELECT p FROM PostEntity p LEFT JOIN CommentEntity c ON p.id = c.post.id " +
-        "GROUP BY p.id ORDER BY COUNT(c.id) DESC, p.createdAt DESC")
-    Page<PostEntity> findAllOrderByCommentCountDesc(Pageable pageable);
-
-    /**
-     * 카테고리별 인기글 조회 (댓글수 기준) - 댓글 테이블과 조인 필요
-     */
-    @Query("SELECT p FROM PostEntity p LEFT JOIN CommentEntity c ON p.id = c.post.id " +
-        "WHERE p.category = :category " +
-        "GROUP BY p.id ORDER BY COUNT(c.id) DESC, p.createdAt DESC")
-    Page<PostEntity> findByCategoryOrderByCommentCountDesc(@Param("category") String category, Pageable pageable);
-
-    // 데이터베이스에서 실제 사용중인 카테고리 목록 조회 (선택사항)
-    @Query("SELECT DISTINCT p.category FROM PostEntity p WHERE p.category IS NOT NULL ORDER BY p.category")
-    List<String> findDistinctCategories();
 }
