@@ -57,11 +57,11 @@ public class DataInitializer implements CommandLineRunner {
             .build();
             
         HealthCheckRecord record1 = new HealthCheckRecord();
-        record1.setUserId(abcd.getId()); // 아직 ID는 null이지만 persist 시 자동 반영됨
+        record1.setUserId(abcd.getId()); 
         record1.setTotalScore(80);
         record1.setResultStatus("양호");
         record1.setCheckedAt(LocalDateTime.now().minusDays(5));
-        record1.setPet(abcdPet); // 연결
+        record1.setPet(abcdPet); 
         abcdPet.getHealthRecords().add(record1);
 
         HealthCheckRecord record2 = new HealthCheckRecord();

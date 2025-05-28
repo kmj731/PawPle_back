@@ -3,6 +3,8 @@ package com.project.spring.skillstack.entity;
 
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import jakarta.persistence.Id;
 import jakarta.persistence.CollectionTable;
 import jakarta.persistence.Column;
@@ -36,6 +38,7 @@ public class HealthCheckDetail {
 
     private int score;
 
+    @JsonIgnore
     @ManyToOne
     @JoinColumn(name = "record_id")
     private HealthCheckRecord record;
