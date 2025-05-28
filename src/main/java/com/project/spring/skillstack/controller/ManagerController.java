@@ -205,16 +205,17 @@ public class ManagerController {
     }
 
 
-    // 회원 삭제 API
-    @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteUser(@PathVariable Long id) {
-        boolean deleted = userService.deleteUserById(id);
-        if (deleted) {
-            return ResponseEntity.noContent().build(); // 204 No Content
-        } else {
-            return ResponseEntity.notFound().build(); // 404 Not Found
-        }
-    }
+     // 회원 삭제 API
+     @PreAuthorize("hasRole('ADMIN')")
+     @DeleteMapping("/{id}")
+     public ResponseEntity<Void> deleteUser(@PathVariable Long id) {
+         boolean deleted = userService.deleteUserById(id);
+         if (deleted) {
+             return ResponseEntity.noContent().build(); // 204 No Content
+         } else {
+             return ResponseEntity.notFound().build(); // 404 Not Found
+         }
+     }
 
 
     // 게시글, 회원 수 조회

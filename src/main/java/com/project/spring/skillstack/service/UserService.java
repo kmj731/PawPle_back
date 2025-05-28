@@ -1,8 +1,9 @@
 package com.project.spring.skillstack.service;
 
 import java.util.List;
-
+import java.util.Optional;
 import java.util.stream.Collectors;
+
 
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
@@ -75,9 +76,13 @@ public class UserService {
 
     // 회원 삭제
     public boolean deleteUserById(Long id) {
-        if (!userRepository.existsById(id)) {
-            return false;
+        // 회원 존재 여부 확인
+        Optional<UserEntity> userOpt = userRepository.findById(id);
+        if (userOpt.isEmpty()) {
+            return false; // 회원이 없으면 false 리턴
         }
+
+        // 회원이 있으면 삭제
         userRepository.deleteById(id);
         return true;
     }
