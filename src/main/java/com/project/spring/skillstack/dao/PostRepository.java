@@ -82,4 +82,6 @@ public interface PostRepository extends JpaRepository<PostEntity, Long> {
     // 데이터베이스에서 실제 사용중인 카테고리 목록 조회 (선택사항)
     @Query("SELECT DISTINCT p.category FROM PostEntity p WHERE p.category IS NOT NULL ORDER BY p.category")
     List<String> findDistinctCategories();
+
+    
 }

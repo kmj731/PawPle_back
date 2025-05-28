@@ -94,7 +94,7 @@ public class PostController {
     public ResponseEntity<List<String>> getAvailableCategories() {
         List<String> categories = postService.getAvailableCategories();
         return ResponseEntity.ok(categories);
-    }
+    }   
 
     // 게시글 상세 조회
     @GetMapping("/{id}")
