@@ -18,8 +18,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.project.spring.skillstack.dto.PetDto;
 import com.project.spring.skillstack.dto.PostDto;
-
+import com.project.spring.skillstack.dto.UserDto;
 import com.project.spring.skillstack.dto.UserDtoWithoutPass;
 import com.project.spring.skillstack.entity.PetEntity;
 import com.project.spring.skillstack.entity.PostEntity;
@@ -52,7 +53,7 @@ public class ManagerController {
     public ResponseEntity<List<UserDtoWithoutPass>> getAllUsers() {
         return ResponseEntity.ok(userService.getAllUsersWithoutPass());
     }
-
+ 
     @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/user/{userId}/pets")
     public ResponseEntity<List<PetEntity>> getUserPets(@PathVariable Long userId) {
@@ -206,16 +207,16 @@ public class ManagerController {
 
 
      // 회원 삭제 API
-     @PreAuthorize("hasRole('ADMIN')")
-     @DeleteMapping("/{id}")
-     public ResponseEntity<Void> deleteUser(@PathVariable Long id) {
-         boolean deleted = userService.deleteUserById(id);
-         if (deleted) {
+    @PreAuthorize("hasRole('ADMIN')")
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteUser(@PathVariable Long id) {
+        boolean deleted = userService.deleteUserById(id);
+        if (deleted) {
              return ResponseEntity.noContent().build(); // 204 No Content
-         } else {
+        } else {
              return ResponseEntity.notFound().build(); // 404 Not Found
-         }
-     }
+        }
+    }
 
 
     // 게시글, 회원 수 조회
@@ -232,7 +233,9 @@ public class ManagerController {
     }
 
 
+
+
+
     
 }
     
-
