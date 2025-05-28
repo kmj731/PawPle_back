@@ -63,6 +63,10 @@ public class UserEntity {
     @Transient
     private Map<String, Object> attr;
 
+    // private int point;
+    // public void addPoint(int amount){
+    //     this.point += amount;
+    // }
     
     @OneToMany(mappedBy = "owner", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
     private List<PetEntity> pets = new ArrayList<>();
