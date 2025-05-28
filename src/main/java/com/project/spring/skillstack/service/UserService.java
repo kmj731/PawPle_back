@@ -1,14 +1,16 @@
 package com.project.spring.skillstack.service;
 
 import java.util.List;
-
+import java.util.Optional;
 import java.util.stream.Collectors;
+
 
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
+import com.project.spring.skillstack.controller.ManagerController;
 import com.project.spring.skillstack.dao.UserRepository;
-import com.project.spring.skillstack.dto.UpdateUserDto;
+
 
 import com.project.spring.skillstack.dto.UserDtoWithoutPass;
 import com.project.spring.skillstack.entity.PetEntity;
@@ -20,9 +22,10 @@ import jakarta.transaction.Transactional;
 public class UserService {
     
     private final UserRepository userRepository;
-
+    
     public UserService(UserRepository userRepository) {
         this.userRepository = userRepository;
+        
     }
 
     public void addAdminRole(Long userId){
@@ -71,14 +74,18 @@ public class UserService {
             .collect(Collectors.toList());
     }
 
-
     // 회원 삭제
-    @Transactional
-    public void deleteUser(Long userId){
-        UserEntity user = userRepository.findById(userId)
-            .orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다."));
-            userRepository.delete(user);
+    public boolean deleteUserById(Long id) {
+        // 회원 존재 여부 확인
+        Optional<UserEntity> userOpt = userRepository.findById(id);
+        if (userOpt.isEmpty()) {
+            return false; // 회원이 없으면 false 리턴
         }
+
+        // 회원이 있으면 삭제
+        userRepository.deleteById(id);
+        return true;
+    }
 
 
     // 유저 펫 조회
@@ -88,6 +95,11 @@ public class UserService {
         return user.getPets();
     }
 
+
+    // 회원 수 조회
+    public long getUserCount(){
+        return userRepository.count();
+    }
     
     
 }

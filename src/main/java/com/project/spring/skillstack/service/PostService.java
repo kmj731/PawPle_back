@@ -219,4 +219,9 @@ public class PostService {
         Page<PostEntity> postPage = postRepository.findByCategoryOrderByCommentCountDesc(category, pageable);
         return postPage.map(PostDto::fromEntity);
     }
+
+    // 게시글 개수 조회
+    public long getPostCount(){
+        return postRepository.count();
+    }
 }
