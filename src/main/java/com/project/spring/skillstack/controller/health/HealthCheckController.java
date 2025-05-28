@@ -71,21 +71,24 @@ public class HealthCheckController {
 
         PetEntity pet = optionalPet.get();
 
-        // 총점 계산: 항목 위치 기반 점수 부여 후 * 2
-        int totalScore = request.getSelectedOptions().entrySet().stream()
-            .mapToInt(entry -> {
-                String category = entry.getKey();
-                List<String> selectedItems = entry.getValue();
-                List<String> questions = QUESTION_SCORES.getOrDefault(category, List.of());
+        // ❗ '없어요'와 다른 항목이 동시에 선택되었는지 검사
+        for (Map.Entry<String, List<String>> entry : request.getSelectedOptions().entrySet()) {
+            List<String> selected = entry.getValue();
+            if (selected.contains("없어요") && selected.size() > 1) {
+                return ResponseEntity.badRequest().body(Map.of(
+                    "message", String.format("'%s' 항목에서 '없어요'는 다른 보기와 함께 선택할 수 없습니다.", entry.getKey())
+                ));
+            }
+        }
 
-                return selectedItems.stream()
-                        .mapToInt(answer -> {
-                            int index = questions.indexOf(answer);
-                            return index >= 0 ? index + 1 : 0; // 1점부터 시작
-                        })
-                        .sum();
-            })
-            .sum() * 2;
+        // ✅ 감점 방식: 기본 100점 - (2점 * '없어요' 제외 선택 개수)
+        int deduction = request.getSelectedOptions().values().stream()
+            .flatMap(List::stream)
+            .filter(answer -> !"없어요".equals(answer))
+            .mapToInt(answer -> 2)
+            .sum();
+
+        int totalScore = 100 - deduction;
 
         String status;
         if (totalScore >= 70) status = "양호";
@@ -110,6 +113,7 @@ public class HealthCheckController {
 
         return ResponseEntity.ok(response);
     }
+
 
     /**
      * 특정 펫의 건강검진 이력 조회
