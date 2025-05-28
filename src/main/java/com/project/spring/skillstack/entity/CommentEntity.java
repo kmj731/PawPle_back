@@ -2,19 +2,7 @@ package com.project.spring.skillstack.entity;
 
 import java.time.LocalDateTime;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.FetchType;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.PrePersist;
-import jakarta.persistence.PreUpdate;
-import jakarta.persistence.SequenceGenerator;
-import jakarta.persistence.Table;
-
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -33,36 +21,36 @@ import lombok.NoArgsConstructor;
     sequenceName = "CommentSeq"
 )
 public class CommentEntity {
-    
+
     @Id
     @GeneratedValue(
         strategy = GenerationType.SEQUENCE,
         generator = "CommentSeq"
     )
     private Long id;
-    
+
     @Column(nullable = false, columnDefinition = "CLOB")
     private String content;
-    
+
     @Column(nullable = false)
     private LocalDateTime createdAt;
-    
+
     @Column
     private LocalDateTime updatedAt;
-    
+
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "user_id")
     private UserEntity user;
-    
+
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "post_id")
     private PostEntity post;
-    
+
     @PrePersist
     protected void onCreate() {
         this.createdAt = LocalDateTime.now();
     }
-    
+
     @PreUpdate
     protected void onUpdate() {
         this.updatedAt = LocalDateTime.now();

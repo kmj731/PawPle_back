@@ -133,6 +133,7 @@ public class DataInitializer implements CommandLineRunner {
 
         // 게시글 초기화
         List<PostEntity> postList = new ArrayList<>();
+
         for (int i = 0; i < userList.size(); i++) {
             UserEntity user = userList.get(i);
             String suffix = String.format("%02d", i + 1);
@@ -142,6 +143,7 @@ public class DataInitializer implements CommandLineRunner {
                 .content("user" + suffix + "의 첫 번째 게시글입니다.")
                 .category("건강토픽")
                 .user(user)
+                .comments(new ArrayList<>())  // ✅ 댓글 리스트 초기화
                 .build();
 
             PostEntity post2 = PostEntity.builder()
@@ -149,6 +151,7 @@ public class DataInitializer implements CommandLineRunner {
                 .content("user" + suffix + "의 두 번째 게시글입니다.")
                 .category("일상")
                 .user(user)
+                .comments(new ArrayList<>())  // ✅ 댓글 리스트 초기화
                 .build();
 
             postList.add(post1);
