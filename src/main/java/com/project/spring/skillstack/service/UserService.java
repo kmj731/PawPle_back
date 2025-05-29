@@ -15,9 +15,11 @@ import com.project.spring.skillstack.dao.UserRepository;
 
 
 import com.project.spring.skillstack.dto.UserDtoWithoutPass;
+import com.project.spring.skillstack.entity.HealthCheckRecord;
 import com.project.spring.skillstack.entity.PetEntity;
 import com.project.spring.skillstack.entity.UserEntity;
 
+import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 
 
@@ -85,6 +87,8 @@ public class UserService {
             .collect(Collectors.toList());
     }
 
+
+    // 게시글 삭제
     @Transactional
     public boolean deleteUserById(Long userId) {
     if (!userRepository.existsById(userId)) {
@@ -125,5 +129,24 @@ public class UserService {
         return userRepository.count();
     }
     
+
+    public void deleteUserByID(Long userId) {
+        UserEntity user = userRepository.findById(userId)
+            .orElseThrow(() -> new EntityNotFoundException("User not found"));
+
+        // 1. PetEntity의 healthRecords 자식 삭제
+        for (PetEntity pet : user.getPets()) {
+            pet.getHealthRecords().clear(); // HealthCheckRecord 삭제 (orphanRemoval)
+        }
+
+        // 2. User의 pets 컬렉션에서 PetEntity 제거 (orphanRemoval에 의해 pet 삭제)
+        user.getPets().clear();
+
+        // 3. User 삭제
+        userRepository.delete(user);
+    }
+
+
+
     
 }
