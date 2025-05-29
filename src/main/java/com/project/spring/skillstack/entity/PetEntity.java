@@ -50,6 +50,9 @@ public class PetEntity {
     @Column
     private String imageUrl;
 
+    @Column
+    private String thumbnailUrl;
+
     @JsonIgnore
     @ManyToOne
     @JoinColumn(name = "owner_id")
@@ -81,6 +84,7 @@ public class PetEntity {
     public UserEntity getOwner() { return owner; }
     public List<HealthCheckRecord> getHealthRecords() { return healthRecords; }
     public String getImageUrl() { return imageUrl; }
+    public String getThumbnailUrl() { return thumbnailUrl; }
 
     public void setPetType(String petType) { this.petType = petType; }
     public void setWeight(Double weight) { this.weight = weight; }
@@ -90,5 +94,5 @@ public class PetEntity {
     public void setPetBreed(String petBreed) { this.petBreed = petBreed; }
     public void setHealthRecords(List<HealthCheckRecord> healthRecords) { this.healthRecords = healthRecords; }
     public void setImageUrl(String imageUrl) { this.imageUrl = imageUrl; }
-
+    public void setThumbnailUrl(String thumbnailUrl) { this.thumbnailUrl = thumbnailUrl; }
 }
