@@ -12,6 +12,8 @@ import com.project.spring.skillstack.entity.HealthCheckRecord;
 public interface HealthCheckRecordRepository extends JpaRepository<HealthCheckRecord, Long> {
     Optional<HealthCheckRecord> findTopByUserIdOrderByCheckedAtDesc(Long userId);
     List<HealthCheckRecord> findByPetId(Long petId);
+    Optional<HealthCheckRecord> findTopByPetIdOrderByCheckedAtDesc(Long petId);
+    
 }
 
 

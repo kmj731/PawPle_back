@@ -16,6 +16,7 @@ public class PetDto {
     private String petBreed;
     private Double weight;
     private LocalDate registrationDate;
+    private String imageUrl;
     private List<HealthCheckRecord> healthRecords;
 
     public PetDto() {}
@@ -29,6 +30,7 @@ public class PetDto {
         this.petBreed = pet.getPetBreed();
         this.weight = pet.getWeight();
         this.registrationDate = pet.getRegistrationDate();
+        this.imageUrl = pet.getImageUrl();
         this.healthRecords = pet.getHealthRecords();
         
     }
@@ -42,6 +44,7 @@ public class PetDto {
     public Double getWeight() { return weight; }
     public LocalDate getRegistrationDate() { return registrationDate; }
     public List<HealthCheckRecord> getHealthRecords() { return healthRecords; }
+    public String getImageUrl() { return imageUrl; }
 
     public void setPetType(String petType) { this.petType = petType; }
     public void setWeight(Double weight) { this.weight = weight; }
