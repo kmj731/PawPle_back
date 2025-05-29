@@ -3,9 +3,14 @@ package com.project.spring.skillstack.controller.auth;
 import com.project.spring.skillstack.dao.PetRepository;
 import com.project.spring.skillstack.dao.UserRepository;
 import com.project.spring.skillstack.dto.PetDto;
+import com.project.spring.skillstack.entity.HealthCheckRecord;
 import com.project.spring.skillstack.entity.PetEntity;
 import com.project.spring.skillstack.entity.UserEntity;
+import com.project.spring.skillstack.repository.HealthCheckRecordRepository;
 import com.project.spring.skillstack.service.CustomUserDetails;
+import com.project.spring.skillstack.service.PetService;
+
+import lombok.RequiredArgsConstructor;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -19,12 +24,15 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.File;
 import java.io.IOException;
 import java.time.LocalDate;
+import java.time.temporal.ChronoUnit;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 
 @RestController
 @RequestMapping("/pet")
+@RequiredArgsConstructor
 public class PetController {
 
     @Autowired
@@ -32,6 +40,9 @@ public class PetController {
 
     @Autowired
     private UserRepository userRepository;
+
+    @Autowired
+    private HealthCheckRecordRepository recordRepository;
 
     @Value("${spring.security.cors.site}")
     private String corsOrigin;
@@ -232,4 +243,53 @@ public class PetController {
             throw new RuntimeException("이미지 저장 실패", e);
         }
     }
+    private final PetService petService;
+
+    @GetMapping("/{petId}/age")
+    public ResponseEntity<Map<String, Object>> getPetAge(@PathVariable Long petId) {
+        PetDto pet = petService.getPetById(petId);
+        Map<String, Object> result = new HashMap<>();
+        result.put("age", pet.getPetAge());
+        return ResponseEntity.ok(result);
+    }
+
+    @GetMapping("/{petId}/health-dday")
+    public ResponseEntity<Map<String, Object>> getDdayByLastCheck(@PathVariable Long petId) {
+    PetDto pet = petService.getPetById(petId);
+
+    // 최신 검진 기록 가져오기
+    Optional<HealthCheckRecord> lastRecord = recordRepository.findTopByPetIdOrderByCheckedAtDesc(petId);
+    if (lastRecord.isEmpty()) {
+        return ResponseEntity.status(404).body(Map.of("message", "검진 기록이 없습니다."));
+    }
+
+    LocalDate checkedAt = lastRecord.get().getCheckedAt().toLocalDate();
+    int age = pet.getPetAge();
+
+    // 건강검진 날짜 계산
+    LocalDate nextCheckDate = petService.calculateNextHealthCheckDateByLastCheck(checkedAt, age);
+
+    // D-Day 메시지 생성 (dday 계산 없이 메시지만 응답)
+    String ddayMessage;
+    long dday = ChronoUnit.DAYS.between(LocalDate.now(), nextCheckDate);
+    if (dday > 0) {
+        ddayMessage = "D-" + dday;
+    } else if (dday == 0) {
+        ddayMessage = "D-Day";
+    } else {
+        ddayMessage = "D+" + Math.abs(dday);
+    }
+
+    // 응답 구성 (dday 제외)
+    Map<String, Object> result = new HashMap<>();
+    result.put("petName", pet.getPetName());
+    result.put("age", pet.getPetAge());
+    result.put("lastCheckDate", checkedAt);
+    result.put("nextCheckDate", nextCheckDate);
+    result.put("ddayMessage", ddayMessage);  // dday는 제거하고 ddayMessage만 보내기
+
+    return ResponseEntity.ok(result);
+}
+
+
 }
