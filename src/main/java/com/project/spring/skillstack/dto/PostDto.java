@@ -23,6 +23,7 @@ public class PostDto {
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
     private Integer viewCount;
+    private Integer commentCount;
     private String category;
     private Boolean isPublic;
     
@@ -44,6 +45,7 @@ public class PostDto {
                 .createdAt(entity.getCreatedAt())
                 .updatedAt(entity.getUpdatedAt())
                 .viewCount(entity.getViewCount())
+                .commentCount(entity.getCommentCount())
                 .category(entity.getCategory())
                 .isPublic(entity.getIsPublic())
                 .build();
