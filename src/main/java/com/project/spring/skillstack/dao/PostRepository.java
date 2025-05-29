@@ -14,6 +14,8 @@ import org.springframework.stereotype.Repository;
 import com.project.spring.skillstack.entity.PostEntity;
 import com.project.spring.skillstack.entity.UserEntity;
 
+import jakarta.transaction.Transactional;
+
 @Repository
 public interface PostRepository extends JpaRepository<PostEntity, Long> {
     
@@ -83,5 +85,8 @@ public interface PostRepository extends JpaRepository<PostEntity, Long> {
     @Query("SELECT DISTINCT p.category FROM PostEntity p WHERE p.category IS NOT NULL ORDER BY p.category")
     List<String> findDistinctCategories();
 
+    @Modifying
+    @Transactional
+    void deleteByUser_Id(Long userId);
     
 }

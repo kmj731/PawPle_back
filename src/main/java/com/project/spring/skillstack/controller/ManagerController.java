@@ -53,7 +53,7 @@ public class ManagerController {
     public ResponseEntity<List<UserDtoWithoutPass>> getAllUsers() {
         return ResponseEntity.ok(userService.getAllUsersWithoutPass());
     }
- 
+
     @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/user/{userId}/pets")
     public ResponseEntity<List<PetEntity>> getUserPets(@PathVariable Long userId) {
@@ -159,12 +159,12 @@ public class ManagerController {
         return ResponseEntity.ok(postService.getPostsByUser(username, page, size));
     }
 
-    // 게시글 삭제 기능
-    @DeleteMapping("/post/delete/{id}")
-    public ResponseEntity<Void> deletePost(@PathVariable Long id) {
-        postManagerService.deletePostById(id);
-    return ResponseEntity.noContent().build();
-}
+    // // 게시글 삭제 기능
+    // @DeleteMapping("/post/delete/{id}")
+    // public ResponseEntity<Void> deletePost(@PathVariable Long id) {
+    //     postManagerService.deletePostById(id);
+    // return ResponseEntity.noContent().build();
+
 
     // 게시글 수정 (관리자도 가능)
     @PutMapping("/post/{id}")
@@ -208,7 +208,7 @@ public class ManagerController {
 
      // 회원 삭제 API
     @PreAuthorize("hasRole('ADMIN')")
-    @DeleteMapping("/{id}")
+    @DeleteMapping("/user/delete/{id}")
     public ResponseEntity<Void> deleteUser(@PathVariable Long id) {
         boolean deleted = userService.deleteUserById(id);
         if (deleted) {
@@ -233,9 +233,15 @@ public class ManagerController {
     }
 
 
+    // 게시글 전체 삭제
+    @DeleteMapping("/post/delete/{postId}")
+    public ResponseEntity<?> deleteByPost(@PathVariable Long postId) {
+        postManagerService.deletePostWithComments(postId);
+        return ResponseEntity.ok().body("삭제 완료");
+    }
 
 
-
-    
 }
+    
+
     
