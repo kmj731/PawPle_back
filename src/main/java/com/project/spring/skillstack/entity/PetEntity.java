@@ -4,6 +4,9 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.hibernate.annotations.ValueGenerationType;
+
+
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -14,11 +17,18 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
+import jakarta.persistence.Version;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
+
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 @Entity
 @Table(name = "PetTable")
+@Getter
+@Setter
 @NoArgsConstructor
 public class PetEntity {
 
@@ -56,6 +66,9 @@ public class PetEntity {
     @OneToMany(mappedBy = "pet", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<HealthCheckRecord> healthRecords = new ArrayList<>();
 
+    
+
+
     public PetEntity(String petType, double weight, String petName, int petAge, String petGender, String petBreed, LocalDate registrationDate, UserEntity owner) {
         this.petType = petType;
         this.weight = weight;
@@ -65,6 +78,7 @@ public class PetEntity {
         this.petBreed = petBreed;
         this.registrationDate = registrationDate;
         this.owner = owner;
+        
     }
 
     public String getPetName() { return petName; }

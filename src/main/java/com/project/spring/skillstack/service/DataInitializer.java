@@ -111,6 +111,7 @@ public class DataInitializer implements CommandLineRunner {
                 "푸들",
                 LocalDate.now().minusYears(1 + i % 3),
                 user
+                
             );
 
             PetEntity pet2 = new PetEntity(
@@ -122,6 +123,7 @@ public class DataInitializer implements CommandLineRunner {
                 "러시안블루",
                 LocalDate.now().minusYears(2 + i % 2),
                 user
+                
             );
 
             user.getPets().add(pet1);
