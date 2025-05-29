@@ -12,9 +12,10 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.transaction.annotation.Transactional;
-
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
@@ -87,6 +88,12 @@ public class PermitPage {
         cookieUtil.GenerateJWTCookie(token, response);
 
         return ResponseEntity.ok(Map.of("message", "success"));
+    }
+
+    @GetMapping("/check-id")
+    public ResponseEntity<?> checkId(@RequestParam("username") String username) {
+        boolean exists = userRep.findByName(username).isPresent();
+        return ResponseEntity.ok(Map.of("exists", exists));
     }
 
     @PostMapping("/find-id")
