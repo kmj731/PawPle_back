@@ -141,6 +141,33 @@ public class PetController {
         return ResponseEntity.ok(new PetDto(pet));
     }
     
+    @PutMapping("/delete-image/{id}")
+    @Transactional
+    public ResponseEntity<?> deletePetImage(
+        @PathVariable Long id,
+        @AuthenticationPrincipal CustomUserDetails userDetails
+    ) {
+        if (userDetails == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("message", "로그인 정보 없음"));
+        }
+
+        Optional<PetEntity> optionalPet = petRepository.findById(id);
+        if (optionalPet.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("message", "반려동물 정보 없음"));
+        }
+
+        PetEntity pet = optionalPet.get();
+
+        if (!pet.getOwner().getName().equals(userDetails.getUsername())) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(Map.of("message", "수정 권한 없음"));
+        }
+
+        pet.setImageUrl(null);
+        pet.setThumbnailUrl(null);
+        petRepository.save(pet);
+
+        return ResponseEntity.ok(Map.of("message", "펫 이미지 삭제 완료"));
+    }
 
 
 

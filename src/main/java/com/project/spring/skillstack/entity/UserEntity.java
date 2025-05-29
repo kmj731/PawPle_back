@@ -58,6 +58,9 @@ public class UserEntity {
 
     private LocalDate birthDate;
 
+    private String imageUrl;
+    private String thumbnailUrl;
+
     private LocalDateTime created;
 
     @Transient
@@ -68,7 +71,7 @@ public class UserEntity {
     private List<PetEntity> pets = new ArrayList<>();
 
     public UserDto toDto() {
-        return new UserDto(id, name, pass, socialName, getRoles().stream().map(String::toString).collect(Collectors.toList()), email, phoneNumber, birthDate, created, attr, pets);
+        return new UserDto(id, name, pass, socialName, getRoles().stream().map(String::toString).collect(Collectors.toList()), email, phoneNumber, birthDate, imageUrl, thumbnailUrl, created, attr, pets);
     }
 
     public UserDtoWithoutPass toDtoWithoutPass(){

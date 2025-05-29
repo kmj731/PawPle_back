@@ -78,6 +78,8 @@ public class PermitPage {
                 dto.getEmail(),
                 dto.getPhoneNumber(),
                 dto.getBirthDate(),
+                null,
+                null,
                 LocalDateTime.now(),
                 null,
                 null);
