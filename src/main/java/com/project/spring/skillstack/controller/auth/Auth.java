@@ -38,5 +38,9 @@ public class Auth {
         return new Role(user.getAuthorities().toArray()[0].toString().replaceFirst("ROLE_", "").toLowerCase());
     }
 
-
+        // 현재 로그인한 사용자 정보 조회 API 추가
+    @GetMapping("/me")
+    public CustomUserDetails getCurrentUser(@AuthenticationPrincipal CustomUserDetails user) {
+        return user;
+    }
 }
