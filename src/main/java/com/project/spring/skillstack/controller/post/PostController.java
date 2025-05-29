@@ -66,6 +66,12 @@ public class PostController {
         return ResponseEntity.ok(categories);
     }
 
+    @GetMapping("/categories/sub")
+    public ResponseEntity<List<String>> getAvailableSubCategories() {
+        List<String> categories = postService.getAvailableSubCategories();
+        return ResponseEntity.ok(categories);
+    }
+
     // 게시글 상세 조회
     @GetMapping("/{id}")
     public ResponseEntity<PostDto> getPostById(@PathVariable Long id) {

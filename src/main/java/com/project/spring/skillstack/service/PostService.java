@@ -87,6 +87,25 @@ public class PostService {
         // return postRepository.findDistinctCategories();
     }
 
+    @Transactional(readOnly = true)
+    public Page<PostDto> getPostsByCategoryAndSubCategory(String category, String subCategory, int page, int size) {
+        Pageable pageable = PageRequest.of(page, size);
+        Page<PostEntity> postPage = postRepository.findByCategoryAndSubCategoryOrderByCreatedAtDesc(category, subCategory, pageable);
+        return postPage.map(PostDto::fromEntity);
+    }
+
+    @Transactional(readOnly = true)
+    public List<String> getAvailableSubCategories() {
+        return Arrays.asList(
+            "홈케어",
+            "식이관리",
+            "병원",
+            "영양제",
+            "행동",
+            "질병"
+        );
+    }
+    
     //특정 사용자의 카테고리별 게시글 조회
     @Transactional(readOnly = true)
     public Page<PostDto> getPostsByUserAndCategory(String username, String category, int page, int size) {

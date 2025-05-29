@@ -75,6 +75,9 @@ public class PostEntity {
     @Column(length = 50)
     private String category;
 
+    @Column(length = 50)
+    private String subCategory;
+
     // 게시글 수정 (비공개 처리)
     @Builder.Default
     @Column(nullable = false)
@@ -86,8 +89,6 @@ public class PostEntity {
     @PrePersist
     protected void onCreate() {
         this.createdAt = LocalDateTime.now();
-        this.viewCount = 0;
-        this.commentCount = 0;
     }
     
     @PreUpdate

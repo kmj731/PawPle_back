@@ -50,6 +50,16 @@ public interface PostRepository extends JpaRepository<PostEntity, Long> {
         String title, String content, String category, Pageable pageable
     );
 
+    // 세부 카테고리 
+    Page<PostEntity> findByCategoryAndSubCategoryOrderByCreatedAtDesc(String category, String subCategory, Pageable pageable);
+
+    Page<PostEntity> findByUserAndCategoryAndSubCategoryOrderByCreatedAtDesc(UserEntity user, String category, String subCategory, Pageable pageable);
+
+    Page<PostEntity> findByTitleContainingOrContentContainingAndCategoryAndSubCategoryOrderByCreatedAtDesc(
+        String title, String content, String category, String subCategory, Pageable pageable
+    );
+
+
     // 조회수 증가
     @Modifying
     @Query("UPDATE PostEntity p SET p.viewCount = p.viewCount + 1 WHERE p.id = :id")
