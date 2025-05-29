@@ -72,9 +72,6 @@ public class DataInitializer implements CommandLineRunner {
         record2.setPet(abcdPet2);
         abcdPet2.getHealthRecords().add(record2);
 
-        abcd.getPets().add(abcdPet);
-        abcd.getPets().add(abcdPet2);
-
         userRep.save(root);
         userRep.save(abcd);
         userRep.save(vet);
