@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RequestBody; 
 import org.springframework.web.bind.annotation.RestController;
@@ -25,6 +26,7 @@ import com.project.spring.skillstack.dao.UserRepository;
 import com.project.spring.skillstack.dto.UserDto;
 import com.project.spring.skillstack.entity.PetEntity;
 import com.project.spring.skillstack.entity.UserEntity;
+import com.project.spring.skillstack.service.UserService;
 import com.project.spring.skillstack.utility.CookieUtil;
 import com.project.spring.skillstack.utility.JwtUtil;
 
@@ -51,7 +53,7 @@ public class UserController {
     @Value("${spring.security.jwt.cookie.name}")
     String jwtCookieName;
 
-
+    
 
 
     // 회원정보 조회
@@ -151,6 +153,7 @@ public class UserController {
     }
 
 
+    
 
 
 

@@ -35,7 +35,7 @@ public class HealthCheckRecord {
 
     @JsonIgnore
     @ManyToOne
-    @JoinColumn(name = "pet_id", nullable = false)
+    @JoinColumn(name = "pet_id", referencedColumnName = "id", nullable = false)
     private PetEntity pet;
 
     @OneToMany(mappedBy = "record", cascade = CascadeType.ALL, orphanRemoval = true)
