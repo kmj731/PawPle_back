@@ -7,6 +7,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import org.hibernate.annotations.BatchSize;
+
 import com.project.spring.skillstack.dto.UserDto;
 import com.project.spring.skillstack.dto.UserDtoWithoutPass;
 
@@ -50,6 +52,7 @@ public class UserEntity {
 
     private String socialName;
 
+    @BatchSize(size = 10)
     @ElementCollection(fetch = FetchType.EAGER)
     private List<String> roles;
 
@@ -66,7 +69,8 @@ public class UserEntity {
     @Transient
     private Map<String, Object> attr;
 
-    
+
+    @BatchSize(size = 10)
     @OneToMany(mappedBy = "owner", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
     private List<PetEntity> pets = new ArrayList<>();
 

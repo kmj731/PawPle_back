@@ -147,16 +147,40 @@ public class UserService {
         userRepository.delete(user);
     }
 
-    // roles 변경
-    @Transactional
-    public void updateUserRoles(Long userId, List<String> newRoles) {
-        UserEntity user = userRepository.findById(userId)
-            .orElseThrow(() -> new RuntimeException("User not found"));
+    // // roles 변경
+    // @Transactional
+    // public void updateUserRoles(Long userId, List<String> newRoles) {
+    //     UserEntity user = userRepository.findById(userId)
+    //         .orElseThrow(() -> new RuntimeException("User not found"));
 
-        user.setRoles(newRoles); // ElementCollection은 내부적으로 DELETE 후 INSERT 처리됨
-        userRepository.save(user); // 생략해도 트랜잭션 종료 시 flush됨
+    //     user.setRoles(newRoles); // ElementCollection은 내부적으로 DELETE 후 INSERT 처리됨
+    //     userRepository.save(user); // 생략해도 트랜잭션 종료 시 flush됨
+    // }
+
+    // public UserEntity getUserByNameWithRoles(String name) {
+    //     return userRepository.findByNameWithRoles(name)
+    //         .orElseThrow(() -> new UsernameNotFoundException("User not found"));
+    // }
+
+
+    public Optional<UserEntity> findByNameWithRoles(String name) {
+        return userRepository.findByNameWithRoles(name);
     }
 
+    @Transactional
+    public UserEntity updateUserRoles(Long userId, List<String> roles) {
+    UserEntity user = userRepository.findById(userId)
+            .orElseThrow(() -> new RuntimeException("User not found"));
+    
+    // roles만 수정하도록 로직을 한정
+    user.setRoles(roles);
+    userRepository.save(user);  // 여기서는 UserEntity만 저장
+    
+    // PostEntity와 관련된 로직은 별도로 처리하거나, 영향을 미치지 않도록 해야 함
+    
+    return user;
+}
+    }
 
     
-}
+

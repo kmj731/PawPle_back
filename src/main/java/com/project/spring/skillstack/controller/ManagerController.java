@@ -7,6 +7,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import org.springframework.data.domain.Page;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -18,13 +19,16 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.project.spring.skillstack.dao.UserRepository;
 import com.project.spring.skillstack.dto.PetDto;
 import com.project.spring.skillstack.dto.PostDto;
 import com.project.spring.skillstack.dto.UpdateUserRoleRequest;
 import com.project.spring.skillstack.dto.UserDto;
 import com.project.spring.skillstack.dto.UserDtoWithoutPass;
+import com.project.spring.skillstack.dto.UserResponse;
 import com.project.spring.skillstack.entity.PetEntity;
 import com.project.spring.skillstack.entity.PostEntity;
+import com.project.spring.skillstack.entity.UserEntity;
 import com.project.spring.skillstack.service.PostManagerService;
 import com.project.spring.skillstack.service.PostService;
 import com.project.spring.skillstack.service.UserService;
@@ -44,10 +48,13 @@ public class ManagerController {
     private final PostService postService;
     private final PostManagerService postManagerService;
 
-    public ManagerController(UserService userService, PostService postService, PostManagerService postManagerService){
+    private final UserRepository userRepository;
+
+    public ManagerController(UserService userService, PostService postService, PostManagerService postManagerService,UserRepository userRepository){
         this.userService = userService;
         this.postService = postService;
         this.postManagerService = postManagerService;
+        this.userRepository = userRepository;
     }
 
     // 전체 회원 조회
@@ -243,11 +250,63 @@ public class ManagerController {
         return ResponseEntity.ok().body("삭제 완료");
     }
 
-    // roles 변경
-    @PutMapping("/user/roles")
-    public ResponseEntity<?> updateUserRoles(@RequestBody UpdateUserRoleRequest request) {
-        userService.updateUserRoles(request.getUserId(), request.getRoles());
-        return ResponseEntity.ok().build();
+
+    // // 권한 수정
+    // @PatchMapping("/admin/user/roles/{userId}")
+    // public ResponseEntity<UserResponse> updateUserRoles(
+    //     @PathVariable Long userId,
+    //     @RequestBody Map<String, List<String>> rolesMap) {
+    
+    //     List<String> newRoles = rolesMap.get("roles");
+    //     if (newRoles == null) {
+    //         return ResponseEntity.badRequest().body(null); // roles 필드가 없으면 400 처리
+    //     }
+    
+    //     userService.updateUserRoles(userId, newRoles);
+    
+    //     UserEntity updatedUser = userRepository.findById(userId)
+    //             .orElseThrow(() -> new RuntimeException("User not found"));
+    
+    //     UserResponse response = new UserResponse(updatedUser);
+    
+    //     return ResponseEntity.ok(response);
+    // }
+
+    // @GetMapping("/{name}")
+    // public ResponseEntity<UserDto> getUser(@PathVariable String name) {
+    //     UserEntity user = userService.getUserByNameWithRoles(name);
+    //     return ResponseEntity.ok(user.toDto());
+    // }
+
+
+    // 권한 수정 (PATCH /admin/user/roles/{userId})
+    @PreAuthorize("hasRole('ADMIN')")
+    @PatchMapping("/user/roles/{userId}")
+    public ResponseEntity<UserEntity> updateUserRoles(
+        @PathVariable Long userId,
+        @RequestBody UpdateUserRoleRequest request) {
+
+    List<String> roles = request.getRoles();
+    if (roles == null) {
+        return ResponseEntity.badRequest().build();
+    }
+    try {
+        UserEntity updatedUser = userService.updateUserRoles(userId, roles);
+        return ResponseEntity.ok(updatedUser);
+    } catch (RuntimeException e) {
+        return ResponseEntity.notFound().build();
+    }
+}
+
+    // 회원 삭제
+    @DeleteMapping("/{userId}")
+    public ResponseEntity<Void> deleteByUser(@PathVariable Long userId) {
+        try {
+            userService.deleteUserByID(userId);
+            return ResponseEntity.noContent().build();
+        } catch (RuntimeException e) {
+            return ResponseEntity.notFound().build();
+        }
     }
 
 

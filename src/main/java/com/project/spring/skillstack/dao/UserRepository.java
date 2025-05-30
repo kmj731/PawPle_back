@@ -3,13 +3,17 @@ package com.project.spring.skillstack.dao;
 import java.util.List;
 import java.util.Optional;
 
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import com.project.spring.skillstack.entity.UserEntity;
 
 @Repository
 public interface UserRepository extends JpaRepository<UserEntity, Long> {
+    @EntityGraph(attributePaths = {"roles"})
     public Optional<UserEntity> findByName(String name);
     public Optional<UserEntity> findByEmail(String email);
     public Optional<UserEntity> findByPhoneNumber(String phoneNumber);
@@ -23,6 +27,9 @@ public interface UserRepository extends JpaRepository<UserEntity, Long> {
     List<UserEntity> findByEmailContainingIgnoreCase(String email); // 이메일을 포함한 사용자 검색(대소문자 구분 X)
     List<UserEntity> findBySocialNameContainingIgnoreCase(String socialName);// 소셜이름을 포함한 사용자 검색 (대소문자 구분 x)
     Optional<UserEntity> findByNameAndEmailAndPhoneNumber(String name, String email, String phoneNumber);
+
+    @Query("SELECT u FROM UserEntity u LEFT JOIN FETCH u.roles WHERE u.name = :name")
+    Optional<UserEntity> findByNameWithRoles(@Param("name") String name);
 
     
     
