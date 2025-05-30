@@ -20,6 +20,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.project.spring.skillstack.dto.PetDto;
 import com.project.spring.skillstack.dto.PostDto;
+import com.project.spring.skillstack.dto.UpdateUserRoleRequest;
 import com.project.spring.skillstack.dto.UserDto;
 import com.project.spring.skillstack.dto.UserDtoWithoutPass;
 import com.project.spring.skillstack.entity.PetEntity;
@@ -29,11 +30,13 @@ import com.project.spring.skillstack.service.PostService;
 import com.project.spring.skillstack.service.UserService;
 
 import io.swagger.v3.oas.annotations.parameters.RequestBody;
+import lombok.RequiredArgsConstructor;
 
 
 // 관리자 Controller 
 @RestController
 @RequestMapping("/admin")
+
 // @RequestMapping("/api")
 public class ManagerController {
     
@@ -238,6 +241,12 @@ public class ManagerController {
     public ResponseEntity<?> deleteByPost(@PathVariable Long postId) {
         postManagerService.deletePostWithComments(postId);
         return ResponseEntity.ok().body("삭제 완료");
+    }
+
+    @PutMapping("/user/roles")
+    public ResponseEntity<?> updateUserRoles(@RequestBody UpdateUserRoleRequest request) {
+        userService.updateUserRoles(request.getUserId(), request.getRoles());
+        return ResponseEntity.ok().build();
     }
 
 

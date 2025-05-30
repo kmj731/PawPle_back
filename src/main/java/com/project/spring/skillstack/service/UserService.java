@@ -130,6 +130,7 @@ public class UserService {
     }
     
 
+    // 회원 삭제
     public void deleteUserByID(Long userId) {
         UserEntity user = userRepository.findById(userId)
             .orElseThrow(() -> new EntityNotFoundException("User not found"));
@@ -146,6 +147,15 @@ public class UserService {
         userRepository.delete(user);
     }
 
+    // roles 변경
+    @Transactional
+    public void updateUserRoles(Long userId, List<String> newRoles) {
+        UserEntity user = userRepository.findById(userId)
+            .orElseThrow(() -> new RuntimeException("User not found"));
+
+        user.setRoles(newRoles); // ElementCollection은 내부적으로 DELETE 후 INSERT 처리됨
+        userRepository.save(user); // 생략해도 트랜잭션 종료 시 flush됨
+    }
 
 
     
