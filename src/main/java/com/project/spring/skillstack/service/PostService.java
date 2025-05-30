@@ -4,6 +4,7 @@ package com.project.spring.skillstack.service;
 import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Random;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -30,6 +31,7 @@ public class PostService {
     @Autowired
     private UserRepository userRepository;
     
+    private final Random random = new Random();
     // 게시글 생성
     @Transactional
     public PostDto createPost(PostDto postDto, String username) {
@@ -230,4 +232,28 @@ public class PostService {
         Page<PostEntity> postPage = postRepository.findByCategoryOrderByCommentCountDescCreatedAtDesc(category, pageable);
         return postPage.map(PostDto::fromEntity);
     }
+
+    // 게시글 개수 조회
+    public long getPostCount(){
+        return postRepository.count();
+    }
+
+    // // 랜덤 포인트 적립 메서드
+    // public boolean awardRandomPoints(String username) {
+    //     // 30% 확률 체크
+    //     if (random.nextInt(100) < 30) {
+    //         int points = 5 + random.nextInt(11); // 5~15점 랜덤
+    //         // 유저 포인트 적립 로직 예: DB 업데이트
+    //         UserEntity user = userRepository.findByName(username)
+    //                 .orElseThrow(() -> new UsernameNotFoundException("유저를 찾을 수 없습니다."));
+
+    //         user.setPoint(user.getPoint() + points);
+    //         userRepository.save(user);
+
+    //         return true; // 적립 완료
+    //     }
+    //     return false; // 적립 안됨 (확률 미충족)
+    // } 
+
+    
 }

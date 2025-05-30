@@ -1,121 +1,137 @@
 package com.project.spring.skillstack.controller.health;
 
-
-
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.SessionAttribute;
-
+import com.project.spring.skillstack.dao.PetRepository;
+import com.project.spring.skillstack.dao.UserRepository;
 import com.project.spring.skillstack.dto.HealthCheckRequest;
 import com.project.spring.skillstack.dto.HealthCheckResultResponse;
-import com.project.spring.skillstack.service.HealthCheckService;
+import com.project.spring.skillstack.entity.HealthCheckRecord;
+import com.project.spring.skillstack.entity.PetEntity;
+import com.project.spring.skillstack.entity.UserEntity;
+import com.project.spring.skillstack.repository.HealthCheckRecordRepository;
+import com.project.spring.skillstack.service.CustomUserDetails;
 
-import jakarta.servlet.http.HttpSession;
-import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.bind.annotation.*;
 
-@Controller
+import java.time.LocalDateTime;
+import java.util.*;
+
+@RestController
 @RequestMapping("/health")
-@RequiredArgsConstructor
 public class HealthCheckController {
 
-    private final HealthCheckService service;
-    private final List<String> categories = List.of("심장", "위/장", "피부/귀", "신장/방광", "면역력/호흡기", "치아", "뼈/관절", "눈", "행동","체중 및 비만도");
+    @Autowired
+    private UserRepository userRepository;
 
-    @GetMapping("/check/{step}")
-    public String showStep(@PathVariable int step, Model model) {
-        if (step >= categories.size()) {
-            return "redirect:/health/result";
+    @Autowired
+    private PetRepository petRepository;
+
+    @Autowired
+    private HealthCheckRecordRepository recordRepository;
+
+    // 점수 기준 문항 정의
+    private static final Map<String, List<String>> QUESTION_SCORES = Map.of(
+        "심장", List.of("심장박동이 불규칙해요", "숨이 가빠요", "기절한 적이 있어요", "쉽게 지쳐요", "없어요"),
+        "위/장", List.of("구토를 자주 해요", "설사를 자주 해요", "밥을 잘 안 먹거나 식욕이 줄었어요", "변 상태가 자주 물처럼 묽어요", "없어요"),
+        "피부/귀", List.of("피부에서 냄새가 나요", "귀에서 분비물이 나와요", "피부가 빨개요", "가려워서 자주 긁어요", "없어요"),
+        "신장/방광", List.of("소변을 자주 봐요", "소변 냄새가 강해요", "소변을 볼 때 힘들어하거나 자주 실수해요", "소변 색이 평소보다 진하거나 붉어요", "없어요"),
+        "면역력/호흡기", List.of("기침을 자주 해요", "콧물이 나고 코를 자주 문질러요", "열이 있어요", "숨이 차서 헐떡거려요", "없어요"),
+        "치아", List.of("입에서 냄새가 나요", "딱딱한 사료를 잘 못 씹어요", "이가 흔들리거나 빠졌어요", "잇몸이 붓고 피가 나요", "없어요"),
+        "뼈/관절", List.of("다리를 절뚝거려요", "계단을 오르기 힘들어해요", "일어나기 힘들어해요", "산책을 싫어해요", "없어요"),
+        "눈", List.of("눈꼽이 많이 껴요", "눈이 빨개요", "빛에 민감하게 반응해요", "눈이 뿌옇게 보여요", "없어요"),
+        "행동", List.of("기운이 없어요", "짖는 횟수가 줄었어요", "숨는 일이 많아졌어요", "혼자 있으려고 해요", "없어요"),
+        "체중 및 비만도", List.of("최근 강아지의 체중이 눈에 띄게 늘었거나 줄었어요", "허리 라인이 잘 안 보이거나 만져지지 않아요", "배를 만졌을 때 갈비뼈가 잘 느껴지지 않아요", "예전보다 덜 움직이고, 활동량이 줄었거나 쉽게 지쳐해요", "없어요")
+    );
+
+    /**
+     * 건강검진 결과 저장
+     */
+    @PostMapping("/submit")
+    @Transactional
+    public ResponseEntity<?> submitCheck(
+            @RequestBody HealthCheckRequest request,
+            @AuthenticationPrincipal CustomUserDetails userDetails) {
+
+        if (userDetails == null) {
+            return ResponseEntity.status(401).body(Map.of("message", "로그인 필요"));
         }
 
-        model.addAttribute("category", categories.get(step));
-        model.addAttribute("step", step);
-        model.addAttribute("progress", (step + 1) * 100 / categories.size());
-        model.addAttribute("options", getOptionsFor(categories.get(step)));
-        return "health_step";
+        Optional<UserEntity> optionalUser = userRepository.findByName(userDetails.getUsername());
+        if (optionalUser.isEmpty()) {
+            return ResponseEntity.status(404).body(Map.of("message", "사용자 없음"));
+        }
+
+        Optional<PetEntity> optionalPet = petRepository.findById(request.getPetId());
+        if (optionalPet.isEmpty()) {
+            return ResponseEntity.status(404).body(Map.of("message", "해당 반려동물 없음"));
+        }
+
+        PetEntity pet = optionalPet.get();
+
+        // ❗ '없어요'와 다른 항목이 동시에 선택되었는지 검사
+        for (Map.Entry<String, List<String>> entry : request.getSelectedOptions().entrySet()) {
+            List<String> selected = entry.getValue();
+            if (selected.contains("없어요") && selected.size() > 1) {
+                return ResponseEntity.badRequest().body(Map.of(
+                    "message", String.format("'%s' 항목에서 '없어요'는 다른 보기와 함께 선택할 수 없습니다.", entry.getKey())
+                ));
+            }
+        }
+
+        // ✅ 감점 방식: 기본 100점 - (2점 * '없어요' 제외 선택 개수)
+        int deduction = request.getSelectedOptions().values().stream()
+            .flatMap(List::stream)
+            .filter(answer -> !"없어요".equals(answer))
+            .mapToInt(answer -> 2)
+            .sum();
+
+        int totalScore = 100 - deduction;
+
+        String status;
+        if (totalScore >= 70) status = "양호";
+        else if (totalScore >= 40) status = "경고";
+        else status = "위험";
+
+        // 기록 저장
+        HealthCheckRecord record = new HealthCheckRecord();
+        record.setUserId(optionalUser.get().getId());
+        record.setPet(pet);
+        record.setCheckedAt(LocalDateTime.now());
+        record.setTotalScore(totalScore);
+        record.setResultStatus(status);
+
+        recordRepository.save(record);
+
+        // 결과 응답
+        HealthCheckResultResponse response = new HealthCheckResultResponse();
+        response.setScore(totalScore);
+        response.setStatus(status);
+        response.setWarnings(getTopCategories(request));
+
+        return ResponseEntity.ok(response);
     }
 
-    @PostMapping("/next")
-    public String saveAndNext(@RequestParam String category,
-                           @RequestParam(required = false) List<String> answers,
-                           @SessionAttribute(value = "userId", required = false) Long userId,
-                           @RequestParam int step,
-                           HttpSession session) {
 
-    Map<String, List<String>> saved = (Map<String, List<String>>) session.getAttribute("healthData");
-    if (saved == null) saved = new HashMap<>();
-    saved.put(category, answers != null ? answers : List.of("없어요"));
-    session.setAttribute("healthData", saved);
-
-    if (step >= categories.size() - 1) {
-        return "redirect:/health/result";  // ✅ 정확한 주소
+    /**
+     * 특정 펫의 건강검진 이력 조회
+     */
+    @GetMapping("/pet/{petId}")
+    public ResponseEntity<?> getRecordsByPet(@PathVariable Long petId) {
+        List<HealthCheckRecord> records = recordRepository.findByPetId(petId);
+        return ResponseEntity.ok(records);
     }
 
-    return "redirect:/health/check/" + (step + 1);
-}
-
-
-
-@GetMapping("/result")
-public String showResult(HttpSession session, Model model) {
-    System.out.println("✅ /health/result 컨트롤러 진입 성공");
-
-    // 세션에 저장된 건강 체크 데이터 꺼내기
-    Map<String, List<String>> saved = (Map<String, List<String>>) session.getAttribute("healthData");
-
-    // 세션에 데이터가 없다면 처음으로 리다이렉트
-    if (saved == null || saved.isEmpty()) {
-        System.out.println("❌ 세션에 healthData 없음 → /health/check/0으로 리다이렉트");
-        return "redirect:/health/check/0";
-    }
-
-    try {
-        // 요청 객체 구성
-        HealthCheckRequest request = new HealthCheckRequest();
-        request.setUserId(1L); // 나중에 로그인 연동되면 세션에서 꺼내기
-        request.setSelectedOptions(saved);
-
-        // 서비스 처리
-        service.processCheck(request);
-        HealthCheckResultResponse result = service.getResult(1L);
-
-        // 결과 템플릿에 데이터 전달
-        model.addAttribute("result", result);
-        model.addAttribute("selected", saved);
-
-        System.out.println("✅ 결과 처리 성공! 점수: " + result.getScore());
-    } catch (Exception e) {
-        System.out.println("❌ 결과 처리 중 예외 발생: " + e.getMessage());
-        e.printStackTrace();
-        return "redirect:/health/check/0";
-    }
-
-    return "health_result";
-}
-
-
-
-    private List<String> getOptionsFor(String category) {
-        return switch (category) {
-            case "심장" -> List.of("심장박동이 불규칙해요","숨이 가빠요","기절한 적이 있어요","쉽게 지쳐요","없어요");
-            case "위/장" -> List.of("구토를 자주 해요", "설사를 자주 해요","밥을 잘 안 먹거나 식욕이 줄었어요", "변 상태가 자주 물처럼 묽어요", "없어요");
-            case "피부/귀" -> List.of("피부에서 냄새가 나요","귀에서 분비물이 나와요","피부가 빨개요","가려워서 자주 긁어요","없어요");
-            case "신장/방광" -> List.of("소변을 자주 봐요", "소변 냄새가 강해요", "소변을 볼 때 힘들어하거나 자주 실수해요", "소변 색이 평소보다 진하거나 붉어요", "없어요");
-            case "면역력/호흡기" -> List.of("기침을 자주 해요","콧물이 나고 코를 자주 문질러요","열이 있어요","숨이 차서 헐떡거려요","없어요");
-            case "치아" -> List.of("입에서 냄새가 나요", "딱딱한 사료를 잘 못 씹어요","이가 흔들리거나 빠졌어요", "잇몸이 붓고 피가 나요", "없어요");
-            case "뼈/관절" -> List.of("다리를 절뚝거려요","계단을 오르기 힘들어해요","일어나기 힘들어해요", "산책을 싫어해요","없어요");
-            case "눈" -> List.of("눈꼽이 많이 껴요","눈이 빨개요","빛에 민감하게 반응해요", "눈이 뿌옇게 보여요","없어요");
-            case "행동" -> List.of("기운이 없어요", "짖는 횟수가 줄었어요", "숨는 일이 많아졌어요", "혼자 있으려고 해요", "없어요");
-            case "체중 및 비만도" -> List.of("최근 강아지의 체중이 눈에 띄게 늘었거나 줄었어요","허리 라인이 잘 안 보이거나 만져지지 않아요", "배를 만졌을 때 갈비뼈가 잘 느껴지지 않아요", "예전보다 덜 움직이고, 활동량이 줄었거나 쉽게 지쳐해요","없어요");
-            default -> List.of("없어요");
-        };
+    /**
+     * 주의가 필요한 항목 top 3 리턴 (선택된 항목 수 기준 정렬)
+     */
+    private List<String> getTopCategories(HealthCheckRequest request) {
+        return request.getSelectedOptions().entrySet().stream()
+                .sorted((a, b) -> Integer.compare(b.getValue().size(), a.getValue().size()))
+                .limit(3)
+                .map(Map.Entry::getKey)
+                .toList();
     }
 }

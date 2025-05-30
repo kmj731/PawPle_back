@@ -1,7 +1,9 @@
 package com.project.spring.skillstack.dto;
 
 import java.time.LocalDate;
+import java.util.List;
 
+import com.project.spring.skillstack.entity.HealthCheckRecord;
 import com.project.spring.skillstack.entity.PetEntity;
 
 public class PetDto {
@@ -14,6 +16,8 @@ public class PetDto {
     private String petBreed;
     private Double weight;
     private LocalDate registrationDate;
+    private String imageUrl;
+    private List<HealthCheckRecord> healthRecords;
 
     public PetDto() {}
     
@@ -26,6 +30,9 @@ public class PetDto {
         this.petBreed = pet.getPetBreed();
         this.weight = pet.getWeight();
         this.registrationDate = pet.getRegistrationDate();
+        this.imageUrl = pet.getImageUrl();
+        this.healthRecords = pet.getHealthRecords();
+        
     }
 
     public Long getId() { return id; }
@@ -36,6 +43,8 @@ public class PetDto {
     public String getPetBreed() { return petBreed; }
     public Double getWeight() { return weight; }
     public LocalDate getRegistrationDate() { return registrationDate; }
+    public List<HealthCheckRecord> getHealthRecords() { return healthRecords; }
+    public String getImageUrl() { return imageUrl; }
 
     public void setPetType(String petType) { this.petType = petType; }
     public void setWeight(Double weight) { this.weight = weight; }
@@ -43,4 +52,5 @@ public class PetDto {
     public void setPetAge(Integer petAge) { this.petAge = petAge; }
     public void setPetGender(String petGender) { this.petGender = petGender; }
     public void setPetBreed(String petBreed) { this.petBreed = petBreed; }
+    public void setHealthRecords(List<HealthCheckRecord> healthRecords) { this.healthRecords = healthRecords; }
 }

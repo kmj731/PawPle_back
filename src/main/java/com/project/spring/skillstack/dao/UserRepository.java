@@ -15,6 +15,8 @@ public interface UserRepository extends JpaRepository<UserEntity, Long> {
     public Optional<UserEntity> findByPhoneNumber(String phoneNumber);
     public void deleteByName(String name);
 
+    boolean existsByName(String name);
+
     List<UserEntity> findAll();
     
     List<UserEntity> findByNameContainingIgnoreCase(String name); // 이름을 포함한 사용자 검색(대소문자 구분 x)
@@ -22,6 +24,7 @@ public interface UserRepository extends JpaRepository<UserEntity, Long> {
     List<UserEntity> findBySocialNameContainingIgnoreCase(String socialName);// 소셜이름을 포함한 사용자 검색 (대소문자 구분 x)
     Optional<UserEntity> findByNameAndEmailAndPhoneNumber(String name, String email, String phoneNumber);
 
+    
     
 }
 

@@ -14,6 +14,8 @@ import org.springframework.stereotype.Repository;
 import com.project.spring.skillstack.entity.PostEntity;
 import com.project.spring.skillstack.entity.UserEntity;
 
+import jakarta.transaction.Transactional;
+
 @Repository
 public interface PostRepository extends JpaRepository<PostEntity, Long> {
     

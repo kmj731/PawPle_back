@@ -1,7 +1,10 @@
 package com.project.spring.skillstack.controller;
 
-import java.time.LocalDateTime;
+
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
@@ -15,13 +18,13 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.project.spring.skillstack.dto.PetDto;
 import com.project.spring.skillstack.dto.PostDto;
-import com.project.spring.skillstack.dto.UpdatePostDto;
-import com.project.spring.skillstack.dto.UpdateUserDto;
+import com.project.spring.skillstack.dto.UserDto;
 import com.project.spring.skillstack.dto.UserDtoWithoutPass;
 import com.project.spring.skillstack.entity.PetEntity;
 import com.project.spring.skillstack.entity.PostEntity;
-
+import com.project.spring.skillstack.service.PostManagerService;
 import com.project.spring.skillstack.service.PostService;
 import com.project.spring.skillstack.service.UserService;
 
@@ -36,10 +39,12 @@ public class ManagerController {
     
     private final UserService userService;
     private final PostService postService;
+    private final PostManagerService postManagerService;
 
-    public ManagerController(UserService userService, PostService postService){
+    public ManagerController(UserService userService, PostService postService, PostManagerService postManagerService){
         this.userService = userService;
         this.postService = postService;
+        this.postManagerService = postManagerService;
     }
 
     // 전체 회원 조회
@@ -72,121 +77,28 @@ public class ManagerController {
 
     // ✅ 소셜 이름으로 회원 검색 (관리자만)
     // @PreAuthorize("hasRole('ADMIN')")
-    @GetMapping("/user/socail")
+    @GetMapping("/user/social")
     public ResponseEntity<List<UserDtoWithoutPass>> searchUsersBySocialName(@RequestParam String socialName) {
         return ResponseEntity.ok(userService.searchUsersBySocialName(socialName));
     }
 
-    // // 회원 정보 수정 (관리자만)
-    // // @PreAuthorize("hasRole('ADMIN')")
-    // @PutMapping("/users")
-    // public ResponseEntity<UserDtoWithoutPass> updateUser(
-    //     @PathVariable Long id,
-    //     @RequestBody UpdateUserDto dto
-    // ){
-    //     return ResponseEntity.ok(userService.updateUser(id,dto));
-    // }
 
-    // // 이름 수정
-    // @PatchMapping("/name")
-    // public ResponseEntity<?> updateName(@RequestBody NameUpdateRequest request) {
-    //     userService.updateName(request.getUserId(), request.getName());
-    //     return ResponseEntity.ok("Name updated successfully");
-    // }
-
-    // // 소셜 이름 수정
-    // @PatchMapping("/socialName")
-    // public ResponseEntity<?> updateSocialName(@RequestBody SocialNameUpdateRequest request) {
-    //     userService.updateSocialName(request.getUserId(), request.getSocialName());
-    //     return ResponseEntity.ok("Social Name updated successfully");
-    // }
-
-    // // 이메일 수정
-    // @PatchMapping("/email")
-    // public ResponseEntity<?> updateEmail(@RequestBody EmailUpdateRequest request) {
-    //     userService.updateEmail(request.getUserId(), request.getEmail());
-    //     return ResponseEntity.ok("Email updated successfully");
-    // }
-
-    // // 전화번호 수정
-    // @PatchMapping("/phoneNumber")
-    // public ResponseEntity<?> updatePhoneNumber(@RequestBody PhoneNumberUpdateRequest request) {
-    //     userService.updatePhoneNumber(request.getUserId(), request.getPhoneNumber());
-    //     return ResponseEntity.ok("Phone Number updated successfully");
-    // }
 
     
-    // 회원 삭제
-    // @PreAuthorize("hasRole('ADMIN')")
-    @DeleteMapping("/user/delete")
-    public ResponseEntity<Void> deleteUser(@PathVariable Long id){
-        userService.deleteUser(id);
-        return ResponseEntity.noContent().build();
+
+
+    
+
+    // 전체 게시글 조회
+    @PreAuthorize("hasRole('ADMIN')")
+    @GetMapping("/post")
+    public ResponseEntity<List<PostDto>> getAllPosts() {
+        List<PostDto> postDto = postManagerService.getAllPost().stream()
+                .map(PostDto::fromEntity)
+                .collect(Collectors.toList());
+        return ResponseEntity.ok(postDto);
     }
 
-    // // 전체 게시글 조회
-    // // @PreAuthorize("hasRole('ADMIN')")
-    // @GetMapping("/post")
-    // public ResponseEntity<List<PostEntity>> getAllPosts(){
-    //     List<PostEntity> posts = postService.getAllPost();
-    //     return ResponseEntity.ok(posts);
-    // }
-
-    // // 제목으로 게시글 조회
-    // // @PreAuthorize("hasRole('ADMIN')")
-    // @GetMapping("/post")
-    // public ResponseEntity<List<PostEntity>> searchPostsByTitle(@RequestParam String title){
-    //     List<PostEntity> posts = postService.searchPostByTitle(title);
-    //     return ResponseEntity.ok(posts);
-    // }
-
-    // // 내용으로 게시글 조회
-    // // @PreAuthorize("hasRole('ADMIN')")
-    // @GetMapping("/post")
-    // public ResponseEntity<List<PostEntity>> searchPostsByContent(@RequestParam String content) {
-    //     List<PostEntity> posts = postService.searchPostByContent(content);
-    //     return ResponseEntity.ok(posts);
-    // }
-
-    //  // 소셜 이름으로 게시글 조회
-    // @GetMapping("/post")
-    // public ResponseEntity<List<PostEntity>> searchPostsBySocialName(@RequestParam String socialName) {
-    //     List<PostEntity> posts = postService.searchPostBySocialName(socialName);
-    //     return ResponseEntity.ok(posts);
-    // }
-
-    // // 날짜 범위로 게시글 조회
-    // @GetMapping("/post")
-    // public ResponseEntity<List<PostEntity>> searchPostByLocalDateTime(@RequestParam String startDate, @RequestParam String endDate) {
-    //     // String -> LocalDateTime 변환 필요
-    //     LocalDateTime start = LocalDateTime.parse(startDate);
-    //     LocalDateTime end = LocalDateTime.parse(endDate);
-
-    //     List<PostEntity> posts = postService.searchPostByLocalDateTime(start, end);
-    //     return ResponseEntity.ok(posts);
-    // }
-    
-
-    // // 게시글 상세 조회
-    // @GetMapping("/post")
-    // public ResponseEntity<PostEntity> getPostById(@PathVariable Long id) {
-    //     PostEntity post = postService.getPostById(id);
-    //     return ResponseEntity.ok(post);
-    // }
-
-    // // 게시글 수정
-    // @PutMapping("/post")
-    // public ResponseEntity<PostEntity> updatePost(@PathVariable Long id, @RequestBody UpdatePostDto dto){
-    //     PostEntity updated = postService.updatePost(id, dto);
-    //     return ResponseEntity.ok(updated);
-    // }
-    
-    // // 게시글 삭제
-    // @DeleteMapping("/post")
-    // public ResponseEntity<Void> deletePost(@PathVariable Long id){
-    //     postService.deletePost(id);
-    //     return ResponseEntity.noContent().build();
-    // }
 
     // vet 접근 
     @PreAuthorize("hasRole('vet')")
@@ -197,16 +109,16 @@ public class ManagerController {
 
 
 
-    // 전체 게시글 조회 (페이징)
-    @GetMapping
-    public ResponseEntity<Page<PostDto>> getAllPosts(
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size) {
-        return ResponseEntity.ok(postService.getAllPosts(page, size));
-    }
+    // // 전체 게시글 조회 (페이징)
+    // @GetMapping("/post")
+    // public ResponseEntity<Page<PostDto>> getAllPosts(
+    //         @RequestParam(defaultValue = "0") int page,
+    //         @RequestParam(defaultValue = "10") int size) {
+    //     return ResponseEntity.ok(postService.getAllPosts(page, size));
+    // }
 
     // 게시글 상세 조회
-    @GetMapping("/{id}")
+    @GetMapping("/post/{id}")
     public ResponseEntity<PostDto> getPostById(@PathVariable Long id) {
         return ResponseEntity.ok(postService.getPostById(id));
     }
@@ -247,21 +159,89 @@ public class ManagerController {
         return ResponseEntity.ok(postService.getPostsByUser(username, page, size));
     }
 
-    // 게시글 삭제 (관리자도 가능)
-    @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deletePost(@PathVariable Long id, @RequestParam String username) {
-        postService.deletePost(id, username);
-        return ResponseEntity.noContent().build();
-    }
+    // // 게시글 삭제 기능
+    // @DeleteMapping("/post/delete/{id}")
+    // public ResponseEntity<Void> deletePost(@PathVariable Long id) {
+    //     postManagerService.deletePostById(id);
+    // return ResponseEntity.noContent().build();
+
 
     // 게시글 수정 (관리자도 가능)
-    @PutMapping("/{id}")
+    @PutMapping("/post/{id}")
     public ResponseEntity<PostDto> updatePost(
             @PathVariable Long id,
             @RequestBody PostDto dto,
             @RequestParam String username) {
         return ResponseEntity.ok(postService.updatePost(id, dto, username));
     }
+
+    // 게시글 제목 수정 (PATCH)
+    @PatchMapping("/post/update/{id}")
+    public ResponseEntity<PostDto> updatePostTitle(
+            @PathVariable Long id,
+            @RequestBody Map<String, String> updates) {
+        
+        String newTitle = updates.get("title");
+        if (newTitle == null || newTitle.trim().isEmpty()) {
+            return ResponseEntity.badRequest().build();
+        }
+
+        PostEntity updatedEntity = postManagerService.updatePostTitle(id, newTitle);
+        if (updatedEntity == null) {
+            return ResponseEntity.notFound().build();
+        }
+
+        PostDto updatedDto = PostDto.fromEntity(updatedEntity);
+        return ResponseEntity.ok(updatedDto);
+    }
+
+    // 게시글 공지로 이동
+    @PatchMapping("/post/{id}/move")
+    public ResponseEntity<PostDto> moveToNotice(@PathVariable Long id) {
+        PostEntity updatedPost = postManagerService.setPostAsNotice(id);
+        if (updatedPost == null) {
+            return ResponseEntity.notFound().build();
+        }
+        return ResponseEntity.ok(PostDto.fromEntity(updatedPost));
+    }
+
+
+     // 회원 삭제 API
+    @PreAuthorize("hasRole('ADMIN')")
+    @DeleteMapping("/user/delete/{id}")
+    public ResponseEntity<Void> deleteUser(@PathVariable Long id) {
+        boolean deleted = userService.deleteUserById(id);
+        if (deleted) {
+             return ResponseEntity.noContent().build(); // 204 No Content
+        } else {
+             return ResponseEntity.notFound().build(); // 404 Not Found
+        }
+    }
+
+
+    // 게시글, 회원 수 조회
+    @GetMapping("/stats")
+    public ResponseEntity<Map<String, Long>> getStats() {
+        long userCount = userService.getUserCount();
+        long postCount = postService.getPostCount();
+
+        Map<String, Long> result = new HashMap<>();
+        result.put("userCount", userCount);
+        result.put("postCount", postCount);
+
+        return ResponseEntity.ok(result);
+    }
+
+
+    // 게시글 전체 삭제
+    @DeleteMapping("/post/delete/{postId}")
+    public ResponseEntity<?> deleteByPost(@PathVariable Long postId) {
+        postManagerService.deletePostWithComments(postId);
+        return ResponseEntity.ok().body("삭제 완료");
+    }
+
+
 }
     
 
+    

@@ -21,6 +21,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.project.spring.skillstack.dto.PostDto;
+// import com.project.spring.skillstack.service.PointService;
 import com.project.spring.skillstack.service.PostService;
 
 @RestController
@@ -29,6 +30,12 @@ public class PostController {
 
     @Autowired
     private PostService postService;
+
+    // private final PointService pointService;
+
+    // public PostController(PointService pointService){
+    //     this.pointService = pointService;
+    // }
     
     // 게시글 생성
     @PostMapping
@@ -37,6 +44,18 @@ public class PostController {
         String username = auth.getName();
         
         PostDto createdPost = postService.createPost(postDto, username);
+
+        // 포인트 적립 시도 : 30% 확률로 5 ~ 15점 랜덤 적립
+        // try {
+        //     boolean awarded = pointService.awardRandomPoints(username, "게시글 작성 포인트 적립");
+        //     if (awarded) {
+        //         // 성공 시 로그 출력 또는 별도 알림 처리 가능
+        //         System.out.println("포인트가 적립되었습니다.");
+        //     }
+        // } catch (Exception e) {
+        //     // 포인트 적립 실패해도 게시글 작성은 성공적으로 처리됨
+        //     System.err.println("포인트 적립 중 오류 발생: " + e.getMessage());
+        // }
         return new ResponseEntity<>(createdPost, HttpStatus.CREATED);
     }
     

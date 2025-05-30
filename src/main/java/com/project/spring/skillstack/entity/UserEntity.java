@@ -33,15 +33,15 @@ import lombok.NoArgsConstructor;
 @SequenceGenerator(
     allocationSize = 1,
     initialValue = 1,
-    name = "UserSeq",
-    sequenceName = "UserSeq"
+    name = "User_Seq",
+    sequenceName = "User_Seq"
 )
 public class UserEntity {
 
     @Id
     @GeneratedValue(
         strategy = GenerationType.SEQUENCE,
-        generator = "UserSeq"
+        generator = "User_Seq"
     )
     private Long id;
 
@@ -63,6 +63,10 @@ public class UserEntity {
     @Transient
     private Map<String, Object> attr;
 
+    // private int point;
+    // public void addPoint(int amount){
+    //     this.point += amount;
+    // }
     
     @OneToMany(mappedBy = "owner", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
     private List<PetEntity> pets = new ArrayList<>();

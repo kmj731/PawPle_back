@@ -1,9 +1,11 @@
+
 package com.project.spring.skillstack.entity;
 
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
-import jakarta.persistence.Id; // ✅ JPA용 올바른 임포트
+import jakarta.persistence.Id;
 import jakarta.persistence.CollectionTable;
 import jakarta.persistence.Column;
 import jakarta.persistence.ElementCollection;
@@ -16,6 +18,7 @@ import jakarta.persistence.Table;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+// import net.minidev.json.annotate.JsonIgnore;
 
 @Entity
 @Table(name = "health_check_detail")
@@ -27,16 +30,18 @@ public class HealthCheckDetail {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private String category; // 예: "심장", "피부/귀", ...
-
+    private String category;
 
     @ElementCollection
     @CollectionTable(name = "health_check_answers", joinColumns = @JoinColumn(name = "detail_id"))
     @Column(name = "answer")
-    private List<String> selectedAnswers; // ["없어요", "자주 그래요", ...]
-    private int score; // 해당 항목 점수
-    
+    private List<String> selectedAnswers;
+
+    private int score;
+
+   
     @ManyToOne
     @JoinColumn(name = "record_id")
+    @JsonIgnore
     private HealthCheckRecord record;
 }

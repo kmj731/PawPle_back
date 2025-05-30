@@ -4,6 +4,9 @@ import java.io.IOException;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.autoconfigure.security.SecurityProperties;
+import org.springframework.boot.web.servlet.FilterRegistrationBean;
+import org.springframework.context.annotation.Bean;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -42,7 +45,7 @@ public class JwtAuthorizationFilter extends OncePerRequestFilter {
 
         String token = null;
 
-        // 쿠키에서 JWT 토큰 추출
+        // ✅ 1. 쿠키가 존재하면 JWT 토큰 추출
         if (request.getCookies() != null) {
             for (Cookie cookie : request.getCookies()) {
                 if (jwtAuthCookieName.equals(cookie.getName())) {
@@ -52,27 +55,35 @@ public class JwtAuthorizationFilter extends OncePerRequestFilter {
             }
         }
 
+        // ✅ 2. 토큰이 있고 아직 인증되지 않았다면
         if (StringUtils.hasText(token)) {
             try {
-                String username = jwtUtil.extractUsername(token);
+                String username = jwtUtil.extractUsername(token); // JWT에서 username 추출
 
-                if (StringUtils.hasText(username) && SecurityContextHolder.getContext().getAuthentication() == null) {
+                if (StringUtils.hasText(username) &&
+                    SecurityContextHolder.getContext().getAuthentication() == null) {
+
                     UserDetails userDetails = customUserDetailService.loadUserByUsername(username);
 
                     if (jwtUtil.validateToken(token, userDetails)) {
-                        UsernamePasswordAuthenticationToken authentication =
+                        UsernamePasswordAuthenticationToken authToken =
                                 new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
-                        SecurityContextHolder.getContext().setAuthentication(authentication);
+
+                        // ✅ 3. 인증 객체 설정
+                        SecurityContextHolder.getContext().setAuthentication(authToken);
                     } else {
-                        cookieUtil.RemoveJWTCookie(response); // 토큰이 유효하지 않으면 삭제
+                        // ❗ 토큰 유효하지 않으면 쿠키 삭제
+                        cookieUtil.RemoveJWTCookie(response);
                     }
                 }
             } catch (Exception e) {
-                // 예외 발생 시 무시하고 필터 체인 진행
+                System.out.println("[JWT 필터 오류] " + e.getClass().getSimpleName() + ": " + e.getMessage());
+                e.printStackTrace();
             }
         }
 
-        filterChain.doFilter(request, response);
+        filterChain.doFilter(request, response); // 다음 필터로 전달
     }
+
 
 }
