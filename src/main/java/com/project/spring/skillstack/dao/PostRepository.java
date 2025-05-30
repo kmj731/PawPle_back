@@ -88,4 +88,7 @@ public interface PostRepository extends JpaRepository<PostEntity, Long> {
     // 카테고리별 댓글 수 기준 인기글 조회
     Page<PostEntity> findByCategoryOrderByCommentCountDescCreatedAtDesc(String category, Pageable pageable);
 
+    // 회원 삭제
+    void deleteByUser_Id(Long userId);
+
 }

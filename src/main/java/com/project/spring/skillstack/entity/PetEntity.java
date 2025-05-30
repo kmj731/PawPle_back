@@ -57,7 +57,7 @@ public class PetEntity {
     @Column(nullable = false)
     private LocalDate registrationDate;
 
-    @Column
+    @Column(name = "img_url")
     private String imageUrl;
 
     @JsonIgnore

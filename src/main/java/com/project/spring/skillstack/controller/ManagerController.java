@@ -243,6 +243,7 @@ public class ManagerController {
         return ResponseEntity.ok().body("삭제 완료");
     }
 
+    // roles 변경
     @PutMapping("/user/roles")
     public ResponseEntity<?> updateUserRoles(@RequestBody UpdateUserRoleRequest request) {
         userService.updateUserRoles(request.getUserId(), request.getRoles());
