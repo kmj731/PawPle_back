@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.orm.ObjectOptimisticLockingFailureException;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
@@ -22,6 +23,14 @@ import java.util.Optional;
 @RestController
 @RequestMapping("/pet")
 public class PetController {
+
+
+    // 예외처리 코드
+    @ExceptionHandler(ObjectOptimisticLockingFailureException.class)
+    public ResponseEntity<String> handleOptimisticLockingException(ObjectOptimisticLockingFailureException ex) {
+        // 해당 컨트롤러에서만 예외 처리
+        return ResponseEntity.status(HttpStatus.CONFLICT).body("Data was updated or deleted by another transaction.");
+    }
 
     @Autowired
     private PetRepository petRepository;
@@ -66,6 +75,9 @@ public class PetController {
                 dto.getPetBreed(),
                 LocalDate.now(),
                 owner
+
+                
+
         );
 
         PetEntity savedPet = petRepository.save(pet);
