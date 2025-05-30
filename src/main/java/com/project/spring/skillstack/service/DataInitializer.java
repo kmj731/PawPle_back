@@ -33,13 +33,17 @@ public class DataInitializer implements CommandLineRunner {
         List<String> roles = new ArrayList<>();
         roles.add("USER");
 
-        UserEntity root = new UserEntity(null, "root", passwordEncoder.encode("1234"), "root", List.of("ADMIN"), null, null, null, LocalDateTime.now(), null, new ArrayList<>());
-        UserEntity abcd = new UserEntity(null, "abcd", passwordEncoder.encode("1234"), "abcd", roles, "abc123@pawple.com", "010-1234-5678", null, LocalDateTime.now(), null, new ArrayList<>());
-        UserEntity vet = new UserEntity(null, "vet", passwordEncoder.encode("1234"), "vet", roles, "vet123@pawple.com", "010-4321-8765", null, LocalDateTime.now(), null, new ArrayList<>());
+        UserEntity root = new UserEntity(null, "root", passwordEncoder.encode("1234"), "root", List.of("ADMIN"), null, null, null, null, null, LocalDateTime.now(), null, new ArrayList<>());
+        UserEntity abcd = new UserEntity(null, "abcd", passwordEncoder.encode("1234"), "abcd", roles, "abc123@pawple.com", "010-1234-5678", null, null, null, LocalDateTime.now(), null, new ArrayList<>());
+        UserEntity vet = new UserEntity(null, "vet", passwordEncoder.encode("1234"), "vet", roles, "vet123@pawple.com", "010-4321-8765", null, null, null, LocalDateTime.now(), null, new ArrayList<>());
 
-        PetEntity abcdPet = new PetEntity("고양이", 4.0, "나비", 2, "수컷", "코숏", LocalDate.now(), abcd);
+        abcd.setImageUrl("/test/iu.jpg");
+
+        PetEntity abcdPet = new PetEntity("고양이", 4.0, "나비", 2025, "수컷", "코숏", LocalDate.now(), abcd);
+        abcdPet.setImageUrl("/test/cat.jpg");
         abcd.getPets().add(abcdPet);
-        PetEntity abcdPet2 = new PetEntity("강아지", 4.0, "바둑이", 3, "암컷", "진돗개", LocalDate.now(), abcd);
+        PetEntity abcdPet2 = new PetEntity("강아지", 4.0, "바둑이", 2024, "암컷", "진돗개", LocalDate.now(), abcd);
+        abcdPet2.setImageUrl("/test/dog.jpg");
         abcd.getPets().add(abcdPet2);
 
         PostEntity abcdPost1 = PostEntity.builder()
@@ -94,6 +98,8 @@ public class DataInitializer implements CommandLineRunner {
                 "user" + suffix + "@pawple.com",
                 "010-1234-" + String.format("%04d", i),
                 null,
+                null, 
+                null, 
                 LocalDateTime.now(),
                 null,
                 new ArrayList<>()
@@ -108,7 +114,6 @@ public class DataInitializer implements CommandLineRunner {
                 "푸들",
                 LocalDate.now().minusYears(1 + i % 3),
                 user
-                
             );
 
             PetEntity pet2 = new PetEntity(
@@ -120,7 +125,6 @@ public class DataInitializer implements CommandLineRunner {
                 "러시안블루",
                 LocalDate.now().minusYears(2 + i % 2),
                 user
-                
             );
 
             user.getPets().add(pet1);
