@@ -4,6 +4,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ThreadLocalRandom;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
@@ -47,17 +48,19 @@ public class DataInitializer implements CommandLineRunner {
         abcd.getPets().add(abcdPet2);
 
         PostEntity abcdPost1 = PostEntity.builder()
-            .title("abcd의 첫 번째 게시글")
+            .title("첫 글을 올립니다!")
             .content("안녕하세요. abcd입니다. 첫 글을 올립니다!")
             .category("건강토픽")
             .user(abcd)
+            .viewCount(150)
             .build();
 
         PostEntity abcdPost2 = PostEntity.builder()
-            .title("abcd의 두 번째 게시글")
+            .title("반려동물 건강 관련해서 궁금한 점이 있습니다.")
             .content("반려동물 건강 관련해서 궁금한 점이 있습니다.")
             .category("Q&A")
             .user(abcd)
+            .viewCount(181)
             .build();
             
         HealthCheckRecord record1 = new HealthCheckRecord();
@@ -140,18 +143,23 @@ public class DataInitializer implements CommandLineRunner {
             UserEntity user = userList.get(i);
             String suffix = String.format("%02d", i + 1);
 
+            int randomViewCount1 = ThreadLocalRandom.current().nextInt(1, 101); // 1 ~ 100
+            int randomViewCount2 = ThreadLocalRandom.current().nextInt(1, 101);
+
             PostEntity post1 = PostEntity.builder()
-                .title("제목 예시 A - user" + suffix)
+                .title("게시글 테스트 진행중 user" + suffix + "의 첫 번째 게시글입니다.")
                 .content("user" + suffix + "의 첫 번째 게시글입니다.")
                 .category("건강토픽")
                 .user(user)
+                .viewCount(randomViewCount1)
                 .build();
 
             PostEntity post2 = PostEntity.builder()
-                .title("제목 예시 B - user" + suffix)
+                .title("게시글 테스트 진행중 user" + suffix + "의 두 번째 게시글입니다.")
                 .content("user" + suffix + "의 두 번째 게시글입니다.")
                 .category("일상")
                 .user(user)
+                .viewCount(randomViewCount2)
                 .build();
 
             postList.add(post1);
