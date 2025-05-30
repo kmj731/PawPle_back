@@ -41,6 +41,9 @@ public class CommentService {
         
         comment = commentRepository.save(comment);
         
+        // 게시글의 댓글 수 증가
+        postRepository.increaseCommentCount(commentDto.getPostId());
+
         return mapToDto(comment);
     }
     
@@ -92,7 +95,11 @@ public class CommentService {
             throw new RuntimeException("You are not authorized to delete this comment");
         }
         
+        Long postId = comment.getPost().getId();
         commentRepository.delete(comment);
+        
+        // 게시글의 댓글 수 감소
+        postRepository.decreaseCommentCount(postId);
     }
     
     private CommentDto mapToDto(CommentEntity comment) {

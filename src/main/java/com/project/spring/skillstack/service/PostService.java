@@ -89,6 +89,25 @@ public class PostService {
         // return postRepository.findDistinctCategories();
     }
 
+    @Transactional(readOnly = true)
+    public Page<PostDto> getPostsByCategoryAndSubCategory(String category, String subCategory, int page, int size) {
+        Pageable pageable = PageRequest.of(page, size);
+        Page<PostEntity> postPage = postRepository.findByCategoryAndSubCategoryOrderByCreatedAtDesc(category, subCategory, pageable);
+        return postPage.map(PostDto::fromEntity);
+    }
+
+    @Transactional(readOnly = true)
+    public List<String> getAvailableSubCategories() {
+        return Arrays.asList(
+            "홈케어",
+            "식이관리",
+            "병원",
+            "영양제",
+            "행동",
+            "질병"
+        );
+    }
+    
     //특정 사용자의 카테고리별 게시글 조회
     @Transactional(readOnly = true)
     public Page<PostDto> getPostsByUserAndCategory(String username, String category, int page, int size) {
@@ -182,9 +201,7 @@ public class PostService {
         return postPage.map(PostDto::fromEntity);
     }
 
-    /**
-     * 인기글 조회 (조회수 기준)
-     */
+    // 인기글 조회 (조회수 기준)
     @Transactional(readOnly = true)
     public Page<PostDto> getPopularPostsByViews(int page, int size) {
         Pageable pageable = PageRequest.of(page, size);
@@ -192,9 +209,7 @@ public class PostService {
         return postPage.map(PostDto::fromEntity);
     }
 
-    /**
-     * 카테고리별 인기글 조회 (조회수 기준)
-     */
+    // 카테고리별 인기글 조회 (조회수 기준)
     @Transactional(readOnly = true)
     public Page<PostDto> getPopularPostsByViewsInCategory(String category, int page, int size) {
         Pageable pageable = PageRequest.of(page, size);
@@ -202,23 +217,19 @@ public class PostService {
         return postPage.map(PostDto::fromEntity);
     }
 
-    /**
-     * 인기글 조회 (댓글수 기준) - 댓글 테이블이 있다면
-     */
+    // 댓글 수 기준 인기글 조회
     @Transactional(readOnly = true)
     public Page<PostDto> getPopularPostsByComments(int page, int size) {
         Pageable pageable = PageRequest.of(page, size);
-        Page<PostEntity> postPage = postRepository.findAllOrderByCommentCountDesc(pageable);
+        Page<PostEntity> postPage = postRepository.findAllByOrderByCommentCountDescCreatedAtDesc(pageable);
         return postPage.map(PostDto::fromEntity);
     }
-
-    /**
-     * 카테고리별 인기글 조회 (댓글수 기준) - 댓글 테이블이 있다면
-     */
+    
+    // 카테고리별 댓글 수 기준 인기글 조회
     @Transactional(readOnly = true)
     public Page<PostDto> getPopularPostsByCommentsInCategory(String category, int page, int size) {
         Pageable pageable = PageRequest.of(page, size);
-        Page<PostEntity> postPage = postRepository.findByCategoryOrderByCommentCountDesc(category, pageable);
+        Page<PostEntity> postPage = postRepository.findByCategoryOrderByCommentCountDescCreatedAtDesc(category, pageable);
         return postPage.map(PostDto::fromEntity);
     }
 
