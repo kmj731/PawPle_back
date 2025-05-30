@@ -147,16 +147,25 @@ public class UserService {
         userRepository.delete(user);
     }
 
+    // // roles 변경
+    // @Transactional
+    // public void updateUserRoles(Long userId, List<String> newRoles) {
+    //     UserEntity user = userRepository.findById(userId)
+    //         .orElseThrow(() -> new RuntimeException("User not found"));
+
+    //     user.setRoles(newRoles); // ElementCollection은 내부적으로 DELETE 후 INSERT 처리됨
+    //     userRepository.save(user); // 생략해도 트랜잭션 종료 시 flush됨
+    // }
+
     // roles 변경
     @Transactional
-    public void updateUserRoles(Long userId, List<String> newRoles) {
-        UserEntity user = userRepository.findById(userId)
-            .orElseThrow(() -> new RuntimeException("User not found"));
+    public UserDtoWithoutPass updateUserRoles(Long id, List<String> roles) {
+    UserEntity user = userRepository.findById(id)
+        .orElseThrow(() -> new EntityNotFoundException("User not found"));
 
-        user.setRoles(newRoles); // ElementCollection은 내부적으로 DELETE 후 INSERT 처리됨
-        userRepository.save(user); // 생략해도 트랜잭션 종료 시 flush됨
-    }
-
+    user.setRoles(roles);
+    return user.toDtoWithoutPass();
+}
 
     
 }

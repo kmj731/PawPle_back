@@ -243,11 +243,14 @@ public class ManagerController {
         return ResponseEntity.ok().body("삭제 완료");
     }
 
-    // roles 변경
-    @PutMapping("/user/roles")
-    public ResponseEntity<?> updateUserRoles(@RequestBody UpdateUserRoleRequest request) {
-        userService.updateUserRoles(request.getUserId(), request.getRoles());
-        return ResponseEntity.ok().build();
+    @PatchMapping("/admin/user/{id}/roles")
+    public ResponseEntity<UserDtoWithoutPass> updateUserRoles(
+        @PathVariable Long id,
+        @RequestBody Map<String, List<String>> body) {
+
+        List<String> roles = body.get("roles");
+        UserDtoWithoutPass updated = userService.updateUserRoles(id, roles);
+        return ResponseEntity.ok(updated);
     }
 
 
