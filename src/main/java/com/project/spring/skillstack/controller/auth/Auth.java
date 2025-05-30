@@ -14,12 +14,10 @@ import com.project.spring.skillstack.service.CustomUserDetails;
 import com.project.spring.skillstack.utility.CookieUtil;
 import com.project.spring.skillstack.utility.JwtUtil;
 
-
 @RestController
 @RequestMapping("/auth")
 public class Auth {
-    
-    
+
     @Autowired
     UserRepository userRep;
     @Autowired
@@ -31,12 +29,13 @@ public class Auth {
     @Autowired
     JwtUtil jwtUtil;
 
-
-
     @GetMapping("/role")
     public Role role(@AuthenticationPrincipal CustomUserDetails user) {
         return new Role(user.getAuthorities().toArray()[0].toString().replaceFirst("ROLE_", "").toLowerCase());
     }
 
-
+    @GetMapping("/me")
+    public CustomUserDetails getCurrentUser(@AuthenticationPrincipal CustomUserDetails user) {
+        return user;
+    }
 }
