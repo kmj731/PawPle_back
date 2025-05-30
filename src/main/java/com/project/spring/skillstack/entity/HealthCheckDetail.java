@@ -18,7 +18,7 @@ import jakarta.persistence.Table;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import net.minidev.json.annotate.JsonIgnore;
+// import net.minidev.json.annotate.JsonIgnore;
 
 @Entity
 @Table(name = "health_check_detail")
@@ -39,7 +39,7 @@ public class HealthCheckDetail {
 
     private int score;
 
-    @JsonIgnore
+   
     @ManyToOne
     @JoinColumn(name = "record_id")
     @JsonIgnore
