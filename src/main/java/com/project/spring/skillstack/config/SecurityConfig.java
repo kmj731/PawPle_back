@@ -89,7 +89,7 @@ public class SecurityConfig {
                         .successHandler((request, response, authentication) -> {
                             String token = jwtUtil.generateToken((UserDetails) authentication.getPrincipal());
                             cookieUtil.GenerateJWTCookie(token, response);
-                            response.sendRedirect(corsOrigin + "/home");
+                            response.sendRedirect(corsOrigin + "/");
                         })
                         .permitAll())
                 .logout(logout -> logout
