@@ -12,8 +12,7 @@ import com.project.spring.skillstack.dao.CommentRepository;
 import com.project.spring.skillstack.dao.PetRepository;
 import com.project.spring.skillstack.dao.PostRepository;
 import com.project.spring.skillstack.dao.UserRepository;
-
-
+import com.project.spring.skillstack.dto.UserDto;
 import com.project.spring.skillstack.dto.UserDtoWithoutPass;
 import com.project.spring.skillstack.entity.HealthCheckRecord;
 import com.project.spring.skillstack.entity.PetEntity;
@@ -150,12 +149,14 @@ public class UserService {
 
     // roles 변경
     @Transactional
-    public void updateUserRoles(Long userId, List<String> newRoles) {
+    public UserDto updateRoles(Long userId, List<String> newRoles) {
         UserEntity user = userRepository.findById(userId)
             .orElseThrow(() -> new RuntimeException("User not found"));
 
-        user.setRoles(newRoles); // ElementCollection은 내부적으로 DELETE 후 INSERT 처리됨
-        userRepository.save(user); // 생략해도 트랜잭션 종료 시 flush됨
+        user.setRoles(newRoles); // roles만 수정됨
+
+        // 변경 감지(dirty checking)로 자동 update
+        return user.toDto(); // ✅ UserDto 반환
     }
 
 

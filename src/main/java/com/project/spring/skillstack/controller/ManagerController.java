@@ -20,6 +20,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.project.spring.skillstack.dto.PetDto;
 import com.project.spring.skillstack.dto.PostDto;
+import com.project.spring.skillstack.dto.RoleUpdateRequest;
 import com.project.spring.skillstack.dto.UpdateUserRoleRequest;
 import com.project.spring.skillstack.dto.UserDto;
 import com.project.spring.skillstack.dto.UserDtoWithoutPass;
@@ -249,11 +250,20 @@ public class ManagerController {
         return ResponseEntity.ok().body("삭제 완료");
     }
 
-    // roles 변경
-    @PutMapping("/user/roles")
-    public ResponseEntity<?> updateUserRoles(@RequestBody UpdateUserRoleRequest request) {
-        userService.updateUserRoles(request.getUserId(), request.getRoles());
-        return ResponseEntity.ok().build();
+    @PreAuthorize("hasRole('ADMIN')")
+    @PatchMapping("/user/{id}")
+    public ResponseEntity<UserDto> updateUserRoles(
+        @PathVariable Long id,
+        @RequestBody RoleUpdateRequest updateData
+    ) {
+        List<String> roles = updateData.getRoles();
+    
+        if (roles == null || roles.isEmpty()) {
+            return ResponseEntity.badRequest().build();
+        }
+    
+        UserDto updatedUser = userService.updateRoles(id, roles);
+        return ResponseEntity.ok(updatedUser);
     }
 
 
