@@ -130,22 +130,23 @@ public class UserService {
     }
     
 
-    // 회원 삭제
-    public void deleteUserByID(Long userId) {
+
+    // 회원 삭제 
+    public void deleteUser(Long userId) {
         UserEntity user = userRepository.findById(userId)
-            .orElseThrow(() -> new EntityNotFoundException("User not found"));
+            .orElseThrow(() -> new RuntimeException("사용자를 찾을 수 없습니다."));
 
-        // 1. PetEntity의 healthRecords 자식 삭제
-        for (PetEntity pet : user.getPets()) {
-            pet.getHealthRecords().clear(); // HealthCheckRecord 삭제 (orphanRemoval)
+        
+        // 자식 Pet의 healthRecord도 비워야 Pet이 삭제 가능
+        for(PetEntity pet : user.getPets()) {
+            pet.getHealthRecords().clear();
         }
-
-        // 2. User의 pets 컬렉션에서 PetEntity 제거 (orphanRemoval에 의해 pet 삭제)
+        
         user.getPets().clear();
-
-        // 3. User 삭제
+        // PetEntity는 cascade + orphanRemoval로 인해 자동 삭제됨
         userRepository.delete(user);
     }
+
 
     // roles 변경
     @Transactional
