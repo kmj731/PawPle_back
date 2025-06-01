@@ -250,6 +250,7 @@ public class ManagerController {
         return ResponseEntity.ok().body("삭제 완료");
     }
 
+    // 권한 수정
     @PreAuthorize("hasRole('ADMIN')")
     @PatchMapping("/user/{id}")
     public ResponseEntity<UserDto> updateUserRoles(
@@ -265,6 +266,23 @@ public class ManagerController {
         UserDto updatedUser = userService.updateRoles(id, roles);
         return ResponseEntity.ok(updatedUser);
     }
+
+    // 권한 수정
+    //     @PreAuthorize("hasRole('ADMIN')")
+    // @PatchMapping("/user/{id}")
+    // public ResponseEntity<UserDto> updateUserRoles(
+    //     @PathVariable Long id,
+    //     @RequestBody RoleUpdateRequest updateData
+    // ) {
+    //     List<String> roles = updateData.getRoles();
+
+    //     if (roles == null || roles.isEmpty()) {
+    //         return ResponseEntity.badRequest().body(null);
+    //     }
+
+    //     UserDto updatedUser = userService.updateRoles(id, roles);
+    //     return ResponseEntity.ok(updatedUser);
+    // }
 
 
 }

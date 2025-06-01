@@ -160,5 +160,28 @@ public class UserService {
     }
 
 
+    // roles 변경
+//     @Transactional
+//     public UserDto updateRoles(Long userId, List<String> newRoles) {
+//     UserEntity user = userRepository.findById(userId)
+//         .orElseThrow(() -> new RuntimeException("User not found"));
+
+//     // 필요한 경우 역할 유효성 검사 추가 가능
+//     validateRoles(newRoles);
+
+//     user.setRoles(newRoles);
+
+//     // JPA 변경 감지로 업데이트 처리됨
+//     return user.toDto();
+// }
+
+//     private void validateRoles(List<String> roles) {
+//         List<String> validRoles = List.of("ADMIN", "USER", "VET");
+//         for (String role : roles) {
+//             if (!validRoles.contains(role)) {
+//             throw new IllegalArgumentException("Invalid role: " + role);
+//         }
+//     }
+// }
     
 }
