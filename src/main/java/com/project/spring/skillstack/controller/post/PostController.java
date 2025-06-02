@@ -21,6 +21,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.project.spring.skillstack.dto.PostDto;
+import com.project.spring.skillstack.service.LikeService;
 // import com.project.spring.skillstack.service.PointService;
 import com.project.spring.skillstack.service.PostService;
 
@@ -30,6 +31,9 @@ public class PostController {
 
     @Autowired
     private PostService postService;
+
+    @Autowired
+    private LikeService likeService;
 
     // private final PointService pointService;
 
@@ -212,6 +216,66 @@ public class PostController {
         } else {
             posts = postService.getPopularPostsByComments(page, size);
         }
+        return ResponseEntity.ok(posts);
+    }
+
+    // 좋아요 토글
+    @PostMapping("/{id}/like")
+    public ResponseEntity<Map<String, Object>> toggleLike(@PathVariable Long id) {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        String username = auth.getName();
+        
+        boolean isLiked = likeService.toggleLike(id, username);
+        long likeCount = likeService.getLikeCount(id);
+        
+        Map<String, Object> response = new HashMap<>();
+        response.put("isLiked", isLiked);
+        response.put("likeCount", likeCount);
+        response.put("message", isLiked ? "좋아요를 눌렀습니다." : "좋아요를 취소했습니다.");
+        
+        return ResponseEntity.ok(response);
+    }
+
+    // 좋아요 상태 확인
+    @GetMapping("/{id}/like/status")
+    public ResponseEntity<Map<String, Object>> getLikeStatus(@PathVariable Long id) {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        String username = auth.getName();
+        
+        boolean isLiked = likeService.isLikedByUser(id, username);
+        long likeCount = likeService.getLikeCount(id);
+        
+        Map<String, Object> response = new HashMap<>();
+        response.put("isLiked", isLiked);
+        response.put("likeCount", likeCount);
+        
+        return ResponseEntity.ok(response);
+    }
+
+    // 좋아요 수 기준 인기글 조회
+    @GetMapping("/popular/likes")
+    public ResponseEntity<Page<PostDto>> getPopularPostsByLikes(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(required = false) String category) {
+        Page<PostDto> posts;
+        if (category != null && !category.isEmpty()) {
+            posts = postService.getPopularPostsByLikesInCategory(category, page, size);
+        } else {
+            posts = postService.getPopularPostsByLikes(page, size);
+        }
+        return ResponseEntity.ok(posts);
+    }
+
+    // 내가 좋아요한 게시글 조회
+    @GetMapping("/liked")
+    public ResponseEntity<Page<PostDto>> getLikedPosts(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size) {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        String username = auth.getName();
+        
+        Page<PostDto> posts = likeService.getLikedPostsByUser(username, page, size);
         return ResponseEntity.ok(posts);
     }
 }
