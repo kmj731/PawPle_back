@@ -11,21 +11,21 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 
-import com.project.spring.skillstack.dao.LikeRepository;
+import com.project.spring.skillstack.dao.PostLikeRepository;
 import com.project.spring.skillstack.dao.PostRepository;
 import com.project.spring.skillstack.dao.UserRepository;
 import com.project.spring.skillstack.dto.PostDto;
-import com.project.spring.skillstack.entity.LikeEntity;
+import com.project.spring.skillstack.entity.PostLikeEntity;
 import com.project.spring.skillstack.entity.PostEntity;
 import com.project.spring.skillstack.entity.UserEntity;
 
 import jakarta.persistence.EntityNotFoundException;
 
 @Service
-public class LikeService {
+public class PostLikeService {
     
     @Autowired
-    private LikeRepository likeRepository;
+    private PostLikeRepository likeRepository;
     
     @Autowired
     private PostRepository postRepository;
@@ -42,7 +42,7 @@ public class LikeService {
         PostEntity post = postRepository.findById(postId)
                 .orElseThrow(() -> new EntityNotFoundException("게시글을 찾을 수 없습니다: " + postId));
         
-        Optional<LikeEntity> existingLike = likeRepository.findByUserAndPost(user, post);
+        Optional<PostLikeEntity> existingLike = likeRepository.findByUserAndPost(user, post);
         
         if (existingLike.isPresent()) {
             // 이미 좋아요가 있으면 삭제 (좋아요 취소)
@@ -51,7 +51,7 @@ public class LikeService {
             return false; // 좋아요 취소됨
         } else {
             // 좋아요가 없으면 추가
-            LikeEntity like = LikeEntity.builder()
+            PostLikeEntity like = PostLikeEntity.builder()
                     .user(user)
                     .post(post)
                     .build();
@@ -89,7 +89,7 @@ public class LikeService {
                 .orElseThrow(() -> new UsernameNotFoundException("사용자를 찾을 수 없습니다: " + username));
         
         Pageable pageable = PageRequest.of(page, size);
-        Page<LikeEntity> likePage = likeRepository.findByUserOrderByCreatedAtDesc(user, pageable);
+        Page<PostLikeEntity> likePage = likeRepository.findByUserOrderByCreatedAtDesc(user, pageable);
         
         return likePage.map(like -> PostDto.fromEntity(like.getPost()));
     }

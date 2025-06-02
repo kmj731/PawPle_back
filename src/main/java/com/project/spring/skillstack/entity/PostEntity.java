@@ -92,7 +92,7 @@ public class PostEntity {
     private Integer likeCount = 0;
 
     @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<LikeEntity> likes = new ArrayList<>();
+    private List<PostLikeEntity> likes = new ArrayList<>();
 
     @PrePersist
     protected void onCreate() {

@@ -21,7 +21,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.project.spring.skillstack.dto.PostDto;
-import com.project.spring.skillstack.service.LikeService;
+import com.project.spring.skillstack.service.PostLikeService;
 // import com.project.spring.skillstack.service.PointService;
 import com.project.spring.skillstack.service.PostService;
 
@@ -33,7 +33,7 @@ public class PostController {
     private PostService postService;
 
     @Autowired
-    private LikeService likeService;
+    private PostLikeService likeService;
 
     // private final PointService pointService;
 

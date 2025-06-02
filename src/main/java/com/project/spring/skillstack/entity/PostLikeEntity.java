@@ -32,7 +32,7 @@ import lombok.NoArgsConstructor;
     name = "LikeSeq",
     sequenceName = "LikeSeq"
 )
-public class LikeEntity {
+public class PostLikeEntity {
     
     @Id
     @GeneratedValue(
