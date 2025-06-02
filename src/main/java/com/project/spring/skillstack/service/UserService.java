@@ -7,7 +7,7 @@ import java.util.stream.Collectors;
 
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
-
+    
 import com.project.spring.skillstack.controller.ManagerController;
 import com.project.spring.skillstack.dao.UserRepository;
 
