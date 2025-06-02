@@ -260,7 +260,7 @@ public class ManagerController {
 
     // 권한 수정
     @PreAuthorize("hasRole('ADMIN')")
-    @PatchMapping("/user/{id}")
+    @PatchMapping("/user/roles/{id}")
     public ResponseEntity<UserDto> updateUserRoles(
         @PathVariable Long id,
         @RequestBody RoleUpdateRequest updateData
