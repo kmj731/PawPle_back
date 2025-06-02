@@ -8,6 +8,9 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import jakarta.persistence.Id;
 import jakarta.persistence.CascadeType;
+import jakarta.persistence.CollectionTable;
+import jakarta.persistence.Column;
+import jakarta.persistence.ElementCollection;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -32,6 +35,11 @@ public class HealthCheckRecord {
     private int totalScore;
     private String resultStatus;
     private LocalDateTime checkedAt;
+
+    @ElementCollection
+    @CollectionTable(name = "health_check_warnings", joinColumns = @JoinColumn(name = "record_id"))
+    @Column(name = "warning")
+    private List<String> warnings = new ArrayList<>();
 
     @JsonIgnore
     @ManyToOne
