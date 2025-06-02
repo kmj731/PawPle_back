@@ -21,6 +21,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.project.spring.skillstack.dto.PostDto;
+// import com.project.spring.skillstack.service.PointService;
 import com.project.spring.skillstack.service.PostService;
 
 @RestController
@@ -29,6 +30,12 @@ public class PostController {
 
     @Autowired
     private PostService postService;
+
+    // private final PointService pointService;
+
+    // public PostController(PointService pointService){
+    //     this.pointService = pointService;
+    // }
     
     // 게시글 생성
     @PostMapping
@@ -37,6 +44,18 @@ public class PostController {
         String username = auth.getName();
         
         PostDto createdPost = postService.createPost(postDto, username);
+
+        // 포인트 적립 시도 : 30% 확률로 5 ~ 15점 랜덤 적립
+        // try {
+        //     boolean awarded = pointService.awardRandomPoints(username, "게시글 작성 포인트 적립");
+        //     if (awarded) {
+        //         // 성공 시 로그 출력 또는 별도 알림 처리 가능
+        //         System.out.println("포인트가 적립되었습니다.");
+        //     }
+        // } catch (Exception e) {
+        //     // 포인트 적립 실패해도 게시글 작성은 성공적으로 처리됨
+        //     System.err.println("포인트 적립 중 오류 발생: " + e.getMessage());
+        // }
         return new ResponseEntity<>(createdPost, HttpStatus.CREATED);
     }
     
@@ -46,36 +65,6 @@ public class PostController {
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size) {
         Page<PostDto> posts = postService.getAllPosts(page, size);
-        return ResponseEntity.ok(posts);
-    }
-    
-    // 인기글 조회 (조회수 기준)
-    @GetMapping("/popular/views")
-    public ResponseEntity<Page<PostDto>> getPopularPostsByViews(
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size,
-            @RequestParam(required = false) String category) {
-        Page<PostDto> posts;
-        if (category != null && !category.isEmpty()) {
-            posts = postService.getPopularPostsByViewsInCategory(category, page, size);
-        } else {
-            posts = postService.getPopularPostsByViews(page, size);
-        }
-        return ResponseEntity.ok(posts);
-    }
-    
-    // 인기글 조회 (댓글수 기준) - 댓글 기능이 있다면
-    @GetMapping("/popular/comments")
-    public ResponseEntity<Page<PostDto>> getPopularPostsByComments(
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size,
-            @RequestParam(required = false) String category) {
-        Page<PostDto> posts;
-        if (category != null && !category.isEmpty()) {
-            posts = postService.getPopularPostsByCommentsInCategory(category, page, size);
-        } else {
-            posts = postService.getPopularPostsByComments(page, size);
-        }
         return ResponseEntity.ok(posts);
     }
 
@@ -93,6 +82,12 @@ public class PostController {
     @GetMapping("/categories")
     public ResponseEntity<List<String>> getAvailableCategories() {
         List<String> categories = postService.getAvailableCategories();
+        return ResponseEntity.ok(categories);
+    }
+
+    @GetMapping("/categories/sub")
+    public ResponseEntity<List<String>> getAvailableSubCategories() {
+        List<String> categories = postService.getAvailableSubCategories();
         return ResponseEntity.ok(categories);
     }
 
@@ -186,6 +181,36 @@ public class PostController {
             posts = postService.getPostsByUserAndCategory(username, category, page, size);
         } else {
             posts = postService.getPostsByUser(username, page, size);
+        }
+        return ResponseEntity.ok(posts);
+    }
+
+    // 인기글 조회 (조회수 기준)
+    @GetMapping("/popular/views")
+    public ResponseEntity<Page<PostDto>> getPopularPostsByViews(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(required = false) String category) {
+        Page<PostDto> posts;
+        if (category != null && !category.isEmpty()) {
+            posts = postService.getPopularPostsByViewsInCategory(category, page, size);
+        } else {
+            posts = postService.getPopularPostsByViews(page, size);
+        }
+        return ResponseEntity.ok(posts);
+    }
+
+    // 댓글 수 기준 인기글 조회
+    @GetMapping("/popular/comments")
+    public ResponseEntity<Page<PostDto>> getPopularPostsByComments(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(required = false) String category) {
+        Page<PostDto> posts;
+        if (category != null && !category.isEmpty()) {
+            posts = postService.getPopularPostsByCommentsInCategory(category, page, size);
+        } else {
+            posts = postService.getPopularPostsByComments(page, size);
         }
         return ResponseEntity.ok(posts);
     }

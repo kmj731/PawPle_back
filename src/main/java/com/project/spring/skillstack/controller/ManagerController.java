@@ -18,8 +18,10 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.project.spring.skillstack.dto.PetDto;
 import com.project.spring.skillstack.dto.PostDto;
-
+import com.project.spring.skillstack.dto.UpdateUserRoleRequest;
+import com.project.spring.skillstack.dto.UserDto;
 import com.project.spring.skillstack.dto.UserDtoWithoutPass;
 import com.project.spring.skillstack.entity.PetEntity;
 import com.project.spring.skillstack.entity.PostEntity;
@@ -28,11 +30,13 @@ import com.project.spring.skillstack.service.PostService;
 import com.project.spring.skillstack.service.UserService;
 
 import io.swagger.v3.oas.annotations.parameters.RequestBody;
+import lombok.RequiredArgsConstructor;
 
 
 // 관리자 Controller 
 @RestController
 @RequestMapping("/admin")
+
 // @RequestMapping("/api")
 public class ManagerController {
     
@@ -158,12 +162,12 @@ public class ManagerController {
         return ResponseEntity.ok(postService.getPostsByUser(username, page, size));
     }
 
-    // 게시글 삭제 기능
-    @DeleteMapping("/post/delete/{id}")
-    public ResponseEntity<Void> deletePost(@PathVariable Long id) {
-        postManagerService.deletePostById(id);
-    return ResponseEntity.noContent().build();
-}
+    // // 게시글 삭제 기능
+    // @DeleteMapping("/post/delete/{id}")
+    // public ResponseEntity<Void> deletePost(@PathVariable Long id) {
+    //     postManagerService.deletePostById(id);
+    // return ResponseEntity.noContent().build();
+
 
     // 게시글 수정 (관리자도 가능)
     @PutMapping("/post/{id}")
@@ -206,16 +210,16 @@ public class ManagerController {
 
 
      // 회원 삭제 API
-     @PreAuthorize("hasRole('ADMIN')")
-     @DeleteMapping("/{id}")
-     public ResponseEntity<Void> deleteUser(@PathVariable Long id) {
-         boolean deleted = userService.deleteUserById(id);
-         if (deleted) {
+    @PreAuthorize("hasRole('ADMIN')")
+    @DeleteMapping("/user/delete/{id}")
+    public ResponseEntity<Void> deleteUser(@PathVariable Long id) {
+        boolean deleted = userService.deleteUserById(id);
+        if (deleted) {
              return ResponseEntity.noContent().build(); // 204 No Content
-         } else {
+        } else {
              return ResponseEntity.notFound().build(); // 404 Not Found
-         }
-     }
+        }
+    }
 
 
     // 게시글, 회원 수 조회
@@ -230,6 +234,24 @@ public class ManagerController {
 
         return ResponseEntity.ok(result);
     }
+
+
+    // 게시글 전체 삭제
+    @DeleteMapping("/post/delete/{postId}")
+    public ResponseEntity<?> deleteByPost(@PathVariable Long postId) {
+        postManagerService.deletePostWithComments(postId);
+        return ResponseEntity.ok().body("삭제 완료");
+    }
+
+    // roles 변경
+    @PutMapping("/user/roles")
+    public ResponseEntity<?> updateUserRoles(@RequestBody UpdateUserRoleRequest request) {
+        userService.updateUserRoles(request.getUserId(), request.getRoles());
+        return ResponseEntity.ok().build();
+    }
+
+
 }
     
 
+    

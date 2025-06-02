@@ -23,7 +23,9 @@ public class PostDto {
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
     private Integer viewCount;
+    private Integer commentCount;
     private String category;
+    private String subCategory;
     private Boolean isPublic;
     
     // 요청 데이터용 생성자
@@ -44,7 +46,9 @@ public class PostDto {
                 .createdAt(entity.getCreatedAt())
                 .updatedAt(entity.getUpdatedAt())
                 .viewCount(entity.getViewCount())
+                .commentCount(entity.getCommentCount())
                 .category(entity.getCategory())
+                .subCategory(entity.getSubCategory())
                 .isPublic(entity.getIsPublic())
                 .build();
     }
@@ -55,6 +59,7 @@ public class PostDto {
                 .title(this.title)
                 .content(this.content)
                 .category(this.category)
+                .subCategory(this.subCategory)
                 .isPublic(this.isPublic != null ? this.isPublic : true)
                 .build();
     }

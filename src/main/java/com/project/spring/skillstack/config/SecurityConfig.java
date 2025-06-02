@@ -51,7 +51,7 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration config = new CorsConfiguration();
-        config.addAllowedOrigin(corsOrigin);
+        config.addAllowedOriginPattern(corsOrigin);
         config.addAllowedMethod("*");
         config.addAllowedHeader("*");
         config.setAllowCredentials(true);
@@ -64,9 +64,11 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
+                .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .csrf(csrf -> csrf
                         .disable())
                 .authorizeHttpRequests(auth -> auth
+                        .requestMatchers(HttpMethod.GET, "/comments/**").permitAll() 
                         .requestMatchers(HttpMethod.GET, "/api/posts/**").permitAll() // GET 요청은 인증없이 허용
                         .requestMatchers("/api/**").authenticated() // 나머지 API는 인증 필요
                         .requestMatchers("/posts/**", "/public/**", "/permit/**", "/docs", "/swagger-ui/**", "/v3/**",
@@ -87,7 +89,7 @@ public class SecurityConfig {
                         .successHandler((request, response, authentication) -> {
                             String token = jwtUtil.generateToken((UserDetails) authentication.getPrincipal());
                             cookieUtil.GenerateJWTCookie(token, response);
-                            response.sendRedirect(corsOrigin + "/home");
+                            response.sendRedirect(corsOrigin + "/");
                         })
                         .permitAll())
                 .logout(logout -> logout

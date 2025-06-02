@@ -30,6 +30,9 @@ private Long id;
 
     private LocalDate birthDate;
     
+    private String imageUrl;
+    private String thumbnailUrl;
+
     private LocalDateTime created;
 
     private Map<String, Object> attr;

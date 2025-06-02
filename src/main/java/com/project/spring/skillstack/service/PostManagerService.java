@@ -118,6 +118,15 @@ public class PostManagerService {
         return postRepository.save(post);
     }
 
+    // 게시글 삭제
+    @Transactional
+    public void deletePostWithComments(Long postId) {
+        PostEntity post = postRepository.findById(postId)
+                .orElseThrow(() -> new RuntimeException("게시글이 존재하지 않습니다."));
+        
+        postRepository.delete(post); // 댓글도 자동 삭제됨 (Cascade 설정에 의해)
+    }
+
     
 }
 
