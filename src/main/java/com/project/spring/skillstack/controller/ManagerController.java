@@ -275,8 +275,9 @@ public class ManagerController {
         return ResponseEntity.ok(updatedUser);
     }
 
-   
+
     // 게시글 공개/비공개 수정
+    @PreAuthorize("hasRole('ADMIN')")
     @PatchMapping("/post/visibility/{id}")
 public ResponseEntity<PostDto> updateVisibility(
         @PathVariable Long id,
