@@ -102,6 +102,7 @@ public class HealthCheckController {
         record.setCheckedAt(LocalDateTime.now());
         record.setTotalScore(totalScore);
         record.setResultStatus(status);
+        record.setWarnings(getTopCategories(request));
 
         recordRepository.save(record);
 
@@ -129,9 +130,9 @@ public class HealthCheckController {
      */
     private List<String> getTopCategories(HealthCheckRequest request) {
         return request.getSelectedOptions().entrySet().stream()
-                .sorted((a, b) -> Integer.compare(b.getValue().size(), a.getValue().size()))
-                .limit(3)
-                .map(Map.Entry::getKey)
-                .toList();
+            .sorted((a, b) -> Integer.compare(b.getValue().size(), a.getValue().size()))
+            .limit(3)
+            .map(entry -> entry.getKey().replaceAll("^\\d+\\.\\s*", ""))  // ← 숫자 제거
+            .toList();
     }
 }
