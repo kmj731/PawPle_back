@@ -68,9 +68,10 @@ public class SecurityConfig {
                 .csrf(csrf -> csrf
                         .disable())
                 .authorizeHttpRequests(auth -> auth
+                        .requestMatchers(HttpMethod.GET, "/comments/**").permitAll() 
                         .requestMatchers(HttpMethod.GET, "/api/posts/**").permitAll() // GET 요청은 인증없이 허용
                         .requestMatchers("/api/**").authenticated() // 나머지 API는 인증 필요
-                        .requestMatchers("/comments/**", "/posts/**", "/public/**", "/permit/**", "/docs", "/swagger-ui/**", "/v3/**",
+                        .requestMatchers("/posts/**", "/public/**", "/permit/**", "/docs", "/swagger-ui/**", "/v3/**",
                                 "/favicon.ico")
                         .permitAll()
                         .requestMatchers("/oauth2/**", "/logout").permitAll()
@@ -88,7 +89,7 @@ public class SecurityConfig {
                         .successHandler((request, response, authentication) -> {
                             String token = jwtUtil.generateToken((UserDetails) authentication.getPrincipal());
                             cookieUtil.GenerateJWTCookie(token, response);
-                            response.sendRedirect(corsOrigin + "/home");
+                            response.sendRedirect(corsOrigin + "/");
                         })
                         .permitAll())
                 .logout(logout -> logout

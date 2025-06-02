@@ -4,6 +4,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ThreadLocalRandom;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
@@ -33,29 +34,51 @@ public class DataInitializer implements CommandLineRunner {
         List<String> roles = new ArrayList<>();
         roles.add("USER");
 
-        UserEntity root = new UserEntity(null, "root", passwordEncoder.encode("1234"), "root", List.of("ADMIN"), null, null, null, LocalDateTime.now(), null, new ArrayList<>());
-        UserEntity abcd = new UserEntity(null, "abcd", passwordEncoder.encode("1234"), "abcd", roles, "abc123@pawple.com", "010-1234-5678", null, LocalDateTime.now(), null, new ArrayList<>());
-        UserEntity vet = new UserEntity(null, "vet", passwordEncoder.encode("1234"), "vet", roles, "vet123@pawple.com", "010-4321-8765", null, LocalDateTime.now(), null, new ArrayList<>());
+        UserEntity root = new UserEntity(null, "root", passwordEncoder.encode("1234"), "root", List.of("ADMIN"), null, null, null, null, null, LocalDateTime.now(), null, new ArrayList<>());
+        UserEntity abcd = new UserEntity(null, "abcd", passwordEncoder.encode("1234"), "abcd", roles, "abc123@pawple.com", "010-1234-5678", null, null, null, LocalDateTime.now(), null, new ArrayList<>());
+        UserEntity vet = new UserEntity(null, "vet", passwordEncoder.encode("1234"), "vet", roles, "vet123@pawple.com", "010-4321-8765", null, null, null, LocalDateTime.now(), null, new ArrayList<>());
 
-        PetEntity abcdPet = new PetEntity("고양이", 4.0, "나비", 2, "수컷", "코숏", LocalDate.now(), abcd);
+        abcd.setImageUrl("/iu.jpg");
+
+        PetEntity abcdPet = new PetEntity("고양이", 4.0, "나비", 2025, "수컷", "코숏", LocalDate.now(), abcd);
+        abcdPet.setImageUrl("/cat.jpg");
         abcd.getPets().add(abcdPet);
-        PetEntity abcdPet2 = new PetEntity("강아지", 4.0, "바둑이", 3, "암컷", "진돗개", LocalDate.now(), abcd);
+        PetEntity abcdPet2 = new PetEntity("강아지", 4.0, "바둑이", 2024, "암컷", "진돗개", LocalDate.now(), abcd);
+        abcdPet2.setImageUrl("/dog.jpg");
         abcd.getPets().add(abcdPet2);
 
         PostEntity abcdPost1 = PostEntity.builder()
-            .title("abcd의 첫 번째 게시글")
+            .title("첫 글을 올립니다!")
             .content("안녕하세요. abcd입니다. 첫 글을 올립니다!")
-            .category("건강토픽")
+            .category("일상")
             .user(abcd)
+            .viewCount(150)
             .build();
 
         PostEntity abcdPost2 = PostEntity.builder()
-            .title("abcd의 두 번째 게시글")
+            .title("반려동물 건강 관련해서 궁금한 점이 있습니다.")
             .content("반려동물 건강 관련해서 궁금한 점이 있습니다.")
             .category("Q&A")
             .user(abcd)
+            .viewCount(181)
+            .build();
+
+        PostEntity abcdPost3 = PostEntity.builder()
+            .title("강아지 눈곱이 자주 생기는데 정상인가요?")
+            .content("강아지가 아침마다 눈곱이 많이 끼는데 걱정돼서 질문드립니다.")
+            .category("Q&A")
+            .user(abcd)
+            .viewCount(220)
             .build();
             
+        PostEntity abcdPost4 = PostEntity.builder()
+            .title("고양이 스트레스 해소법 공유해요")
+            .content("고양이가 요즘 예민해서 스트레스 해소 방법을 찾다가 성공한 경험을 공유합니다")
+            .category("토픽")
+            .user(abcd)
+            .viewCount(251)
+            .build();
+
         HealthCheckRecord record1 = new HealthCheckRecord();
         record1.setUserId(abcd.getId()); 
         record1.setTotalScore(80);
@@ -77,6 +100,8 @@ public class DataInitializer implements CommandLineRunner {
         userRep.save(vet);
         postRep.save(abcdPost1);
         postRep.save(abcdPost2);
+        postRep.save(abcdPost3);
+        postRep.save(abcdPost4);
         
 
         // 유저 초기화 데이터
@@ -94,6 +119,8 @@ public class DataInitializer implements CommandLineRunner {
                 "user" + suffix + "@pawple.com",
                 "010-1234-" + String.format("%04d", i),
                 null,
+                null, 
+                null, 
                 LocalDateTime.now(),
                 null,
                 new ArrayList<>()
@@ -108,7 +135,6 @@ public class DataInitializer implements CommandLineRunner {
                 "푸들",
                 LocalDate.now().minusYears(1 + i % 3),
                 user
-                
             );
 
             PetEntity pet2 = new PetEntity(
@@ -120,7 +146,6 @@ public class DataInitializer implements CommandLineRunner {
                 "러시안블루",
                 LocalDate.now().minusYears(2 + i % 2),
                 user
-                
             );
 
             user.getPets().add(pet1);
@@ -136,18 +161,33 @@ public class DataInitializer implements CommandLineRunner {
             UserEntity user = userList.get(i);
             String suffix = String.format("%02d", i + 1);
 
+            int randomViewCount1 = ThreadLocalRandom.current().nextInt(1, 101);
+            int randomViewCount2 = ThreadLocalRandom.current().nextInt(1, 101);
+
+            LocalDateTime createdAt1 = LocalDate.of(2025, 5, 1)
+                .plusDays(ThreadLocalRandom.current().nextInt(31))
+                .atTime(ThreadLocalRandom.current().nextInt(24), ThreadLocalRandom.current().nextInt(60));
+
+            LocalDateTime createdAt2 = LocalDate.of(2025, 5, 1)
+                .plusDays(ThreadLocalRandom.current().nextInt(31))
+                .atTime(ThreadLocalRandom.current().nextInt(24), ThreadLocalRandom.current().nextInt(60));
+
             PostEntity post1 = PostEntity.builder()
-                .title("제목 예시 A - user" + suffix)
+                .title("user" + suffix + "의 첫 번째 게시글입니다. 게시글 테스트 진행중입니다.")
                 .content("user" + suffix + "의 첫 번째 게시글입니다.")
-                .category("건강토픽")
+                .category("토픽")
                 .user(user)
+                .viewCount(randomViewCount1)
+                .createdAt(createdAt1)
                 .build();
 
             PostEntity post2 = PostEntity.builder()
-                .title("제목 예시 B - user" + suffix)
+                .title("user" + suffix + "의 두 번째 게시글입니다. 게시글 테스트 진행중입니다.")
                 .content("user" + suffix + "의 두 번째 게시글입니다.")
                 .category("일상")
                 .user(user)
+                .viewCount(randomViewCount2)
+                .createdAt(createdAt2)
                 .build();
 
             postList.add(post1);

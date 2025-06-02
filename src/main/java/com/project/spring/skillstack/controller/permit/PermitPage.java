@@ -23,7 +23,6 @@ import org.springframework.web.bind.annotation.RestController;
 import com.project.spring.skillstack.dao.UserRepository;
 import com.project.spring.skillstack.dto.UserDto;
 import com.project.spring.skillstack.entity.UserEntity;
-import com.project.spring.skillstack.service.UserService;
 import com.project.spring.skillstack.utility.CookieUtil;
 import com.project.spring.skillstack.utility.JwtUtil;
 
@@ -33,7 +32,6 @@ import jakarta.servlet.http.HttpServletResponse;
 @RequestMapping("/permit/auth")
 public class PermitPage {
 
-    
     @Autowired
     UserRepository userRep;
     @Autowired
@@ -80,6 +78,8 @@ public class PermitPage {
                 dto.getEmail(),
                 dto.getPhoneNumber(),
                 dto.getBirthDate(),
+                null,
+                null,
                 LocalDateTime.now(),
                 null,
                 null);
@@ -117,7 +117,6 @@ public class PermitPage {
         }
     }
 
-    // 비밀번호 찾기
     @PostMapping("/reset-password")
     @ResponseBody
     @Transactional
@@ -140,8 +139,6 @@ public class PermitPage {
 
         return ResponseEntity.ok(Map.of("message", "password_reset_success"));
     }
-
-    
 
 
 }
