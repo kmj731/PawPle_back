@@ -298,6 +298,8 @@ public ResponseEntity<PostDto> updateVisibility(
     return ResponseEntity.ok(dto);
 }
 
+
+    // 게시글 공개 수정
     @GetMapping
     public ResponseEntity<List<VisibilityUpdateRequest>> getAllPosts(Authentication authentication) {
     boolean isAdmin = authentication != null && authentication.getAuthorities()
