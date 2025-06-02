@@ -1,12 +1,13 @@
 package com.project.spring.skillstack.service;
 
 import java.util.List;
-import java.util.Optional;
+
 import java.util.stream.Collectors;
 
 
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.project.spring.skillstack.dao.CommentRepository;
 import com.project.spring.skillstack.dao.PetRepository;
@@ -15,12 +16,12 @@ import com.project.spring.skillstack.dao.UserRepository;
 
 
 import com.project.spring.skillstack.dto.UserDtoWithoutPass;
-import com.project.spring.skillstack.entity.HealthCheckRecord;
+
 import com.project.spring.skillstack.entity.PetEntity;
 import com.project.spring.skillstack.entity.UserEntity;
 
 import jakarta.persistence.EntityNotFoundException;
-import jakarta.transaction.Transactional;
+
 
 
 
@@ -156,6 +157,8 @@ public class UserService {
         user.setRoles(newRoles); // ElementCollection은 내부적으로 DELETE 후 INSERT 처리됨
         userRepository.save(user); // 생략해도 트랜잭션 종료 시 flush됨
     }
+
+    // 게시글 삭제
 
 
     
