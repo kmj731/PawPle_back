@@ -15,6 +15,7 @@ import com.project.spring.skillstack.dao.PostRepository;
 import com.project.spring.skillstack.dao.UserRepository;
 import com.project.spring.skillstack.dto.UserDto;
 import com.project.spring.skillstack.dto.UserDtoWithoutPass;
+import com.project.spring.skillstack.dto.UserSimpleInfoDto;
 import com.project.spring.skillstack.entity.HealthCheckRecord;
 import com.project.spring.skillstack.entity.PetEntity;
 import com.project.spring.skillstack.entity.UserEntity;
@@ -184,5 +185,15 @@ public class UserService {
 //         }
 //     }
 // }
+
+
+
+    // 회원 상세 정보 조회
+    public UserSimpleInfoDto getUserSimpleInfoDto(Long UserId){
+        UserEntity user = userRepository.findById(UserId)
+            .orElseThrow(() -> new IllegalArgumentException("해당 사용자가 존재하지 않습니다."));
+        
+        return new UserSimpleInfoDto(user.getPhoneNumber(), user.getBirthDate(), user.getAttr());
+    }
     
 }

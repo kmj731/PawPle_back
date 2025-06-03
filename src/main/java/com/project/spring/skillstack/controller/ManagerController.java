@@ -29,6 +29,7 @@ import com.project.spring.skillstack.dto.RoleUpdateRequest;
 import com.project.spring.skillstack.dto.UpdateUserRoleRequest;
 import com.project.spring.skillstack.dto.UserDto;
 import com.project.spring.skillstack.dto.UserDtoWithoutPass;
+import com.project.spring.skillstack.dto.UserSimpleInfoDto;
 import com.project.spring.skillstack.dto.VisibilityUpdateRequest;
 import com.project.spring.skillstack.entity.PetEntity;
 import com.project.spring.skillstack.entity.PostEntity;
@@ -323,6 +324,12 @@ public ResponseEntity<PostDto> updateVisibility(
 
     return ResponseEntity.ok(result);
 }
+
+    // 상세 정보 조회
+    @GetMapping("/user/{id}")
+    public UserSimpleInfoDto getUserSimpleInfoDto(@PathVariable Long id){
+        return userService.getUserSimpleInfoDto(id);
+    }
 
 
 }
