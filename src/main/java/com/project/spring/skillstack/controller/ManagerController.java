@@ -74,7 +74,7 @@ public class ManagerController {
     }
 
     // ✅ 이름으로 회원 검색 (관리자만)
-    // @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/user/name")
     public ResponseEntity<List<UserDtoWithoutPass>> searchUserByName(@RequestParam String name){
         
@@ -82,14 +82,14 @@ public class ManagerController {
     }
 
     // ✅ 이메일로 회원 검색 (관리자만)
-    // @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/user/email")
     public ResponseEntity<List<UserDtoWithoutPass>> searchUsersByEmail(@RequestParam String email) {
         return ResponseEntity.ok(userService.searchUsersByEmail(email));
     }
 
     // ✅ 소셜 이름으로 회원 검색 (관리자만)
-    // @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/user/social")
     public ResponseEntity<List<UserDtoWithoutPass>> searchUsersBySocialName(@RequestParam String socialName) {
         return ResponseEntity.ok(userService.searchUsersBySocialName(socialName));
@@ -131,12 +131,14 @@ public class ManagerController {
     // }
 
     // 게시글 상세 조회
+    @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/post/{id}")
     public ResponseEntity<PostDto> getPostById(@PathVariable Long id) {
         return ResponseEntity.ok(postService.getPostById(id));
     }
 
     // 제목으로 조회
+    @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/post/search/title")
     public List<PostDto> searchByTitle(@RequestParam String title) {
         List<PostEntity> posts = postManagerService.searchByTitle(title);
@@ -144,6 +146,7 @@ public class ManagerController {
     }
 
     // UserName으로 조회
+    @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/post/search/user")
     public List<PostDto> searchByUser(@RequestParam String user) {
         List<PostEntity> posts = postManagerService.searchByUser(user);
@@ -151,6 +154,7 @@ public class ManagerController {
     }
 
     // 내용으로 검색
+    @PreAuthorize("hasRole('ADMIN')")
     @GetMapping(params = "content")
     public ResponseEntity<Page<PostDto>> searchByContent(
             @RequestParam String content,
@@ -160,6 +164,7 @@ public class ManagerController {
     }
 
     // 제목 또는 내용으로 검색
+    @PreAuthorize("hasRole('ADMIN')")
     @GetMapping(params = "keyword")
     public ResponseEntity<Page<PostDto>> searchByKeyword(
             @RequestParam String keyword,
@@ -169,6 +174,7 @@ public class ManagerController {
     }
 
     // 사용자 이름으로 게시글 검색
+    @PreAuthorize("hasRole('ADMIN')")
     @GetMapping(params = "username")
     public ResponseEntity<Page<PostDto>> getPostsByUser(
             @RequestParam String username,
@@ -185,6 +191,7 @@ public class ManagerController {
 
 
     // 게시글 수정 (관리자도 가능)
+    @PreAuthorize("hasRole('ADMIN')")
     @PutMapping("/post/{id}")
     public ResponseEntity<PostDto> updatePost(
             @PathVariable Long id,
@@ -194,6 +201,7 @@ public class ManagerController {
     }
 
     // 게시글 제목 수정 (PATCH)
+    @PreAuthorize("hasRole('ADMIN')")
     @PatchMapping("/post/update/{id}")
     public ResponseEntity<PostDto> updatePostTitle(
             @PathVariable Long id,
@@ -214,6 +222,7 @@ public class ManagerController {
     }
 
     // 게시글 공지로 이동
+    @PreAuthorize("hasRole('ADMIN')")
     @PatchMapping("/post/{id}/move")
     public ResponseEntity<PostDto> moveToNotice(@PathVariable Long id) {
         PostEntity updatedPost = postManagerService.setPostAsNotice(id);
@@ -237,6 +246,7 @@ public class ManagerController {
     // }
 
     @DeleteMapping("/user/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<String> deleteUser(@PathVariable Long id) {
         userService.deleteUser(id);
         return ResponseEntity.ok("사용자 삭제 완료");
@@ -252,6 +262,7 @@ public class ManagerController {
 
 
     // 게시글, 회원 수 조회
+    @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/stats")
     public ResponseEntity<Map<String, Long>> getStats() {
         long userCount = userService.getUserCount();
@@ -266,6 +277,7 @@ public class ManagerController {
 
 
     // 게시글 전체 삭제
+    @PreAuthorize("hasRole('ADMIN')")
     @DeleteMapping("/post/delete/{postId}")
     public ResponseEntity<?> deleteByPost(@PathVariable Long postId) {
         postManagerService.deletePostWithComments(postId);
@@ -293,7 +305,7 @@ public class ManagerController {
     // 게시글 공개/비공개 수정
     @PreAuthorize("hasRole('ADMIN')")
     @PatchMapping("/post/visibility/{id}")
-public ResponseEntity<PostDto> updateVisibility(
+    public ResponseEntity<PostDto> updateVisibility(
         @PathVariable Long id,
         @RequestBody VisibilityUpdateRequest request) {
 
@@ -315,6 +327,7 @@ public ResponseEntity<PostDto> updateVisibility(
 
 
     // 게시글 공개 수정
+    @PreAuthorize("hasRole('ADMIN')")
     @GetMapping
     public ResponseEntity<List<VisibilityUpdateRequest>> getAllPosts(Authentication authentication) {
     boolean isAdmin = authentication != null && authentication.getAuthorities()
@@ -339,6 +352,7 @@ public ResponseEntity<PostDto> updateVisibility(
 }
 
     // 상세 정보 조회
+    @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/user/{id}")
     public UserSimpleInfoDto getUserSimpleInfoDto(@PathVariable Long id){
         return userService.getUserSimpleInfoDto(id);
