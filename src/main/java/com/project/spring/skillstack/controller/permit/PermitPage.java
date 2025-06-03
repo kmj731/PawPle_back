@@ -77,7 +77,7 @@ public class PermitPage {
                 roles,
                 dto.getEmail(),
                 dto.getPhoneNumber(),
-                dto.getBirthDate(),
+                null,
                 null,
                 null,
                 LocalDateTime.now(),
