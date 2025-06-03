@@ -91,4 +91,7 @@ public interface PostRepository extends JpaRepository<PostEntity, Long> {
     // 회원 삭제
     void deleteByUser_Id(Long userId);
 
+    // 게시글 수정
+    List<PostEntity> findByIsPublicTrue();
+
 }

@@ -7,8 +7,10 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import org.springframework.data.domain.Page;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -18,18 +20,22 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.server.ResponseStatusException;
 
+import com.project.spring.skillstack.dao.PostRepository;
 import com.project.spring.skillstack.dto.PetDto;
 import com.project.spring.skillstack.dto.PostDto;
+import com.project.spring.skillstack.dto.RoleUpdateRequest;
 import com.project.spring.skillstack.dto.UpdateUserRoleRequest;
 import com.project.spring.skillstack.dto.UserDto;
 import com.project.spring.skillstack.dto.UserDtoWithoutPass;
+import com.project.spring.skillstack.dto.UserSimpleInfoDto;
+import com.project.spring.skillstack.dto.VisibilityUpdateRequest;
 import com.project.spring.skillstack.entity.PetEntity;
 import com.project.spring.skillstack.entity.PostEntity;
 import com.project.spring.skillstack.service.PostManagerService;
 import com.project.spring.skillstack.service.PostService;
 import com.project.spring.skillstack.service.UserService;
-
 
 import lombok.RequiredArgsConstructor;
 
@@ -45,10 +51,13 @@ public class ManagerController {
     private final PostService postService;
     private final PostManagerService postManagerService;
 
-    public ManagerController(UserService userService, PostService postService, PostManagerService postManagerService){
+    private final PostRepository postRepository;
+
+    public ManagerController(UserService userService, PostService postService, PostManagerService postManagerService, PostRepository postRepository){
         this.userService = userService;
         this.postService = postService;
         this.postManagerService = postManagerService;
+        this.postRepository = postRepository;
     }
 
     // 전체 회원 조회
@@ -210,16 +219,22 @@ public class ManagerController {
     }
 
 
-     // 회원 삭제 API
-    @PreAuthorize("hasRole('ADMIN')")
+    //  // 회원 삭제 API
+    // @PreAuthorize("hasRole('ADMIN')")
+    // @DeleteMapping("/user/{id}")
+    // public ResponseEntity<Void> deleteUser(@PathVariable Long id) {
+    //     boolean deleted = userService.deleteUserById(id);
+    //     if (deleted) {
+    //          return ResponseEntity.noContent().build(); // 204 No Content
+    //     } else {
+    //          return ResponseEntity.notFound().build(); // 404 Not Found
+    //     }
+    // }
+
     @DeleteMapping("/user/{id}")
-    public ResponseEntity<Void> deleteUser(@PathVariable Long id) {
-        boolean deleted = userService.deleteUserById(id);
-        if (deleted) {
-             return ResponseEntity.noContent().build(); // 204 No Content
-        } else {
-             return ResponseEntity.notFound().build(); // 404 Not Found
-        }
+    public ResponseEntity<String> deleteUser(@PathVariable Long id) {
+        userService.deleteUser(id);
+        return ResponseEntity.ok("사용자 삭제 완료");
     }
 
 
@@ -252,11 +267,76 @@ public class ManagerController {
         return ResponseEntity.ok().body("삭제 완료");
     }
 
-    // roles 변경
-    @PutMapping("/user/roles")
-    public ResponseEntity<?> updateUserRoles(@RequestBody UpdateUserRoleRequest request) {
-        userService.updateUserRoles(request.getUserId(), request.getRoles());
-        return ResponseEntity.ok().build();
+    // 권한 수정
+    @PreAuthorize("hasRole('ADMIN')")
+    @PatchMapping("/user/roles/{id}")
+    public ResponseEntity<UserDto> updateUserRoles(
+        @PathVariable Long id,
+        @RequestBody RoleUpdateRequest updateData
+    ) {
+        List<String> roles = updateData.getRoles();
+    
+        if (roles == null || roles.isEmpty()) {
+            return ResponseEntity.badRequest().build();
+        }
+    
+        UserDto updatedUser = userService.updateRoles(id, roles);
+        return ResponseEntity.ok(updatedUser);
+    }
+
+
+    // 게시글 공개/비공개 수정
+    @PreAuthorize("hasRole('ADMIN')")
+    @PatchMapping("/post/visibility/{id}")
+public ResponseEntity<PostDto> updateVisibility(
+        @PathVariable Long id,
+        @RequestBody VisibilityUpdateRequest request) {
+
+    PostEntity post = postRepository.findById(id)
+            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Post not found"));
+
+    post.setIsPublic(request.getIsPublic());
+    PostEntity updatedPost = postRepository.save(post);
+
+    PostDto dto = new PostDto();
+    dto.setId(updatedPost.getId());
+    dto.setTitle(updatedPost.getTitle());
+    dto.setContent(updatedPost.getContent());
+    dto.setIsPublic(updatedPost.getIsPublic());
+    // 필요하다면 더 필드 추가
+
+    return ResponseEntity.ok(dto);
+}
+
+
+    // 게시글 공개 수정
+    @GetMapping
+    public ResponseEntity<List<VisibilityUpdateRequest>> getAllPosts(Authentication authentication) {
+    boolean isAdmin = authentication != null && authentication.getAuthorities()
+            .stream().anyMatch(auth -> auth.getAuthority().equals("ROLE_ADMIN"));
+
+    List<PostEntity> posts = isAdmin ?
+            postRepository.findAll() :
+            postRepository.findByIsPublicTrue();
+
+    List<VisibilityUpdateRequest> result = posts.stream()
+            .map(p -> {
+                VisibilityUpdateRequest dto = new VisibilityUpdateRequest();
+                dto.setId(p.getId());
+                dto.setTitle(p.getTitle());
+                dto.setContent(p.getContent());
+                dto.setIsPublic(p.getIsPublic());
+                return dto;
+            })
+            .toList();
+
+    return ResponseEntity.ok(result);
+}
+
+    // 상세 정보 조회
+    @GetMapping("/user/{id}")
+    public UserSimpleInfoDto getUserSimpleInfoDto(@PathVariable Long id){
+        return userService.getUserSimpleInfoDto(id);
     }
 
 
