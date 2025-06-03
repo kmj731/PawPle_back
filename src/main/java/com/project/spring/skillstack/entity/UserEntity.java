@@ -29,7 +29,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
-@Table(name = "UserTable")
+@Table(name = "User_Table")
 @SequenceGenerator(
     allocationSize = 1,
     initialValue = 1,
