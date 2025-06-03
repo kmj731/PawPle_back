@@ -55,6 +55,7 @@ public class DataInitializer implements CommandLineRunner {
             .category("일상")
             .user(abcd)
             .viewCount(150)
+            .commentCount(1)
             .build();
 
         PostEntity abcdPost2 = PostEntity.builder()
@@ -63,6 +64,7 @@ public class DataInitializer implements CommandLineRunner {
             .category("Q&A")
             .user(abcd)
             .viewCount(181)
+            .commentCount(1)
             .build();
 
         PostEntity abcdPost3 = PostEntity.builder()
@@ -71,6 +73,7 @@ public class DataInitializer implements CommandLineRunner {
             .category("Q&A")
             .user(abcd)
             .viewCount(220)
+            .commentCount(1)
             .build();
             
         PostEntity abcdPost4 = PostEntity.builder()
@@ -79,6 +82,7 @@ public class DataInitializer implements CommandLineRunner {
             .category("토픽")
             .user(abcd)
             .viewCount(251)
+            .commentCount(1)
             .build();
 
         HealthCheckRecord record1 = new HealthCheckRecord();
