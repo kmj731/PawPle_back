@@ -129,7 +129,7 @@ public class PostManagerService {
 
 
 
-    public List<PostEntity> searchByTitle(String title){
+    public List<PostEntity> searchByTitle(String title) {
         return postRepository.findByTitleContainingIgnoreCase(title);
     }
 

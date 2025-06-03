@@ -95,8 +95,7 @@ public interface PostRepository extends JpaRepository<PostEntity, Long> {
     List<PostEntity> findByIsPublicTrue();
 
 
-    // 제목으로 조회
-    List<PostEntity> findByTitleContainingIgnoreCase(String title);
+    
 
 
     List<PostEntity> findByUser_NameContainingIgnoreCase(String username);
