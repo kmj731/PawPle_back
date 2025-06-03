@@ -52,7 +52,7 @@ public class PermitPage {
     public ResponseEntity<?> signup(@RequestBody UserDto dto, HttpServletResponse response) {
 
         if (dto.getName() == null || dto.getPass() == null || dto.getEmail() == null ||
-            dto.getPhoneNumber() == null || dto.getBirthDate() == null) {
+            dto.getPhoneNumber() == null) {
             return ResponseEntity.badRequest().body(Map.of("message", "empty_input"));
         }
 
