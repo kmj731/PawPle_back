@@ -136,13 +136,18 @@ public class ManagerController {
         return ResponseEntity.ok(postService.getPostById(id));
     }
 
-    // 제목으로 검색
-    @GetMapping(params = "title")
-    public ResponseEntity<Page<PostDto>> searchByTitle(
-            @RequestParam String title,
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size) {
-        return ResponseEntity.ok(postService.searchPostsByTitle(title, page, size));
+    // 제목으로 조회
+    @GetMapping("/post/search/title")
+    public List<PostDto> searchByTitle(@RequestParam String title) {
+        List<PostEntity> posts = postManagerService.searchByTitle(title);
+        return posts.stream().map(PostDto::fromEntity).collect(Collectors.toList());
+    }
+
+    // UserName으로 조회
+    @GetMapping("/post/search/user")
+    public List<PostDto> searchByUser(@RequestParam String user) {
+        List<PostEntity> posts = postManagerService.searchByUser(user);
+        return posts.stream().map(PostDto::fromEntity).collect(Collectors.toList());
     }
 
     // 내용으로 검색

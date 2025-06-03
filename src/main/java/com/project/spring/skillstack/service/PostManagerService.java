@@ -127,6 +127,16 @@ public class PostManagerService {
         postRepository.delete(post); // 댓글도 자동 삭제됨 (Cascade 설정에 의해)
     }
 
+
+
+    public List<PostEntity> searchByTitle(String title){
+        return postRepository.findByTitleContainingIgnoreCase(title);
+    }
+
+    public List<PostEntity> searchByUser(String username) {
+        return postRepository.findByUser_NameContainingIgnoreCase(username);
+    }
+
     
 }
 
