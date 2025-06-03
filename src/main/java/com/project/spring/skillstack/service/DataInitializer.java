@@ -11,8 +11,10 @@ import org.springframework.boot.CommandLineRunner;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
+import com.project.spring.skillstack.dao.CommentRepository;
 import com.project.spring.skillstack.dao.PostRepository;
 import com.project.spring.skillstack.dao.UserRepository;
+import com.project.spring.skillstack.entity.CommentEntity;
 import com.project.spring.skillstack.entity.HealthCheckRecord;
 import com.project.spring.skillstack.entity.PetEntity;
 import com.project.spring.skillstack.entity.PostEntity;
@@ -27,6 +29,8 @@ public class DataInitializer implements CommandLineRunner {
     PasswordEncoder passwordEncoder;
     @Autowired
     PostRepository postRep;
+    @Autowired
+    CommentRepository commentRep;
 
     @Override
     public void run(String... args) throws Exception {
@@ -191,6 +195,35 @@ public class DataInitializer implements CommandLineRunner {
         }
 
         postRep.saveAll(postList);
+
+        UserEntity user01 = userList.get(0); // index 0 → user01
+        UserEntity user02 = userList.get(1); // index 1 → user02
+
+        CommentEntity comment1 = CommentEntity.builder()
+            .content("첫 글 축하드립니다!")
+            .user(user01)
+            .post(abcdPost1)
+            .build();
+
+        CommentEntity comment2 = CommentEntity.builder()
+            .content("답변 기다리고 있어요")
+            .user(user02)
+            .post(abcdPost2)
+            .build();
+
+        CommentEntity comment3 = CommentEntity.builder()
+            .content("저도 걱정돼요")
+            .user(user01)
+            .post(abcdPost3)
+            .build();
+
+        CommentEntity comment4 = CommentEntity.builder()
+            .content("정말 좋은 정보네요")
+            .user(user02)
+            .post(abcdPost4)
+            .build();
+
+        commentRep.saveAll(List.of(comment1, comment2, comment3, comment4));
 
         // userRep.save(new UserEntity(null, "root", passwordEncoder.encode("1234"), "root", List.of("ADMIN"), null, null, null, LocalDateTime.now(), null, null));
         // userRep.save(new UserEntity(null, "abcd", passwordEncoder.encode("1234"), "abcd", List.of("USER"), null, null, null, LocalDateTime.now(), null, null));
