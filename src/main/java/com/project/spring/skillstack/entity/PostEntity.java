@@ -86,6 +86,14 @@ public class PostEntity {
     // @Column(unique = true, nullable = false, updatable = false)
     // private String postKey = UUID.randomUUID().toString();
     
+    // 좋아요 필드
+    @Builder.Default
+    @Column(name = "LIKE_COUNT")
+    private Integer likeCount = 0;
+
+    @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<PostLikeEntity> likes = new ArrayList<>();
+
     @PrePersist
     protected void onCreate() {
         this.createdAt = LocalDateTime.now();

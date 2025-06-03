@@ -238,6 +238,22 @@ public class PostService {
         return postRepository.count();
     }
 
+    // 좋아요 수 기준 인기글 조회
+    @Transactional(readOnly = true)
+    public Page<PostDto> getPopularPostsByLikes(int page, int size) {
+        Pageable pageable = PageRequest.of(page, size);
+        Page<PostEntity> postPage = postRepository.findAllByOrderByLikeCountDescCreatedAtDesc(pageable);
+        return postPage.map(PostDto::fromEntity);
+    }
+
+    // 카테고리별 좋아요 수 기준 인기글 조회
+    @Transactional(readOnly = true)
+    public Page<PostDto> getPopularPostsByLikesInCategory(String category, int page, int size) {
+        Pageable pageable = PageRequest.of(page, size);
+        Page<PostEntity> postPage = postRepository.findByCategoryOrderByLikeCountDescCreatedAtDesc(category, pageable);
+        return postPage.map(PostDto::fromEntity);
+    }
+    
     // // 랜덤 포인트 적립 메서드
     // public boolean awardRandomPoints(String username) {
     //     // 30% 확률 체크

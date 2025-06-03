@@ -1,16 +1,18 @@
 package com.project.spring.skillstack.service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
+import com.project.spring.skillstack.dao.CommentLikeRepository;
 import com.project.spring.skillstack.dao.CommentRepository;
 import com.project.spring.skillstack.dao.PostRepository;
 import com.project.spring.skillstack.dao.UserRepository;
 import com.project.spring.skillstack.dto.CommentDto;
 import com.project.spring.skillstack.entity.CommentEntity;
+import com.project.spring.skillstack.entity.CommentLikeEntity;
 import com.project.spring.skillstack.entity.PostEntity;
 import com.project.spring.skillstack.entity.UserEntity;
 
@@ -20,7 +22,9 @@ import lombok.RequiredArgsConstructor;
 @Service
 @RequiredArgsConstructor
 public class CommentService {
-    
+
+    // private final CommentLikeRepository commentLikeRepository;
+    private final CommentLikeService commentLikeService;
     private final CommentRepository commentRepository;
     private final PostRepository postRepository;
     private final UserRepository userRepository;
@@ -33,10 +37,17 @@ public class CommentService {
         PostEntity post = postRepository.findById(commentDto.getPostId())
                 .orElseThrow(() -> new RuntimeException("Post not found"));
         
+        CommentEntity parent = null;
+        if (commentDto.getParentId() != null) {
+            parent = commentRepository.findById(commentDto.getParentId())
+                    .orElseThrow(() -> new RuntimeException("Parent comment not found"));
+        }
+
         CommentEntity comment = CommentEntity.builder()
                 .content(commentDto.getContent())
                 .user(user)
                 .post(post)
+                .parent(parent)
                 .build();
         
         comment = commentRepository.save(comment);
@@ -101,8 +112,17 @@ public class CommentService {
         // 게시글의 댓글 수 감소
         postRepository.decreaseCommentCount(postId);
     }
-    
-    private CommentDto mapToDto(CommentEntity comment) {
+
+
+    public CommentDto mapToDto(CommentEntity comment) {
+        List<CommentDto> childDtos = comment.getChildren() != null ?
+                comment.getChildren().stream()
+                        .map(this::mapToDto)
+                        .collect(Collectors.toList())
+                : new ArrayList<>();
+
+        long likeCount = commentLikeService.getLikeCount(comment.getId());
+
         return CommentDto.builder()
                 .id(comment.getId())
                 .content(comment.getContent())
@@ -111,6 +131,9 @@ public class CommentService {
                 .userId(comment.getUser().getId())
                 .userName(comment.getUser().getName())
                 .postId(comment.getPost().getId())
+                .parentId(comment.getParent() != null ? comment.getParent().getId() : null)
+                .children(childDtos)
+                .likeCount(likeCount)
                 .build();
     }
 }
