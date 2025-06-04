@@ -80,6 +80,7 @@ public class DataInitializer implements CommandLineRunner {
             .title("고양이 스트레스 해소법 공유해요")
             .content("고양이가 요즘 예민해서 스트레스 해소 방법을 찾다가 성공한 경험을 공유합니다")
             .category("토픽")
+            .subCategory("행동")
             .user(abcd)
             .viewCount(251)
             .commentCount(1)
@@ -163,29 +164,44 @@ public class DataInitializer implements CommandLineRunner {
 
         // 게시글 초기화
         List<PostEntity> postList = new ArrayList<>();
+        List<String> subCategories = List.of("홈케어", "식이관리", "병원", "영양제", "행동", "질병");
+
+        int postCountPerCategory = 5;
+        int userIndex = 0;
+
+        for (String subCategory : subCategories) {
+            for (int i = 1; i <= postCountPerCategory; i++) {
+                UserEntity user = userList.get(userIndex % userList.size());
+                userIndex++;
+
+                int randomViewCount = ThreadLocalRandom.current().nextInt(1, 101);
+                LocalDateTime createdAt = LocalDate.of(2025, 5, 1)
+                    .plusDays(ThreadLocalRandom.current().nextInt(31))
+                    .atTime(ThreadLocalRandom.current().nextInt(24), ThreadLocalRandom.current().nextInt(60));
+
+                PostEntity post = PostEntity.builder()
+                    .title(user.getName() + "의 [" + subCategory + "] 관련 게시글입니다.")
+                    .content("이 글은 " + subCategory + " 주제로 테스트용으로 생성되었습니다.")
+                    .category("토픽")
+                    .subCategory(subCategory)
+                    .user(user)
+                    .viewCount(randomViewCount)
+                    .createdAt(createdAt)
+                    .build();
+
+                postList.add(post);
+            }
+        }
+
         for (int i = 0; i < userList.size(); i++) {
             UserEntity user = userList.get(i);
             String suffix = String.format("%02d", i + 1);
 
-            int randomViewCount1 = ThreadLocalRandom.current().nextInt(1, 101);
             int randomViewCount2 = ThreadLocalRandom.current().nextInt(1, 101);
-
-            LocalDateTime createdAt1 = LocalDate.of(2025, 5, 1)
-                .plusDays(ThreadLocalRandom.current().nextInt(31))
-                .atTime(ThreadLocalRandom.current().nextInt(24), ThreadLocalRandom.current().nextInt(60));
 
             LocalDateTime createdAt2 = LocalDate.of(2025, 5, 1)
                 .plusDays(ThreadLocalRandom.current().nextInt(31))
                 .atTime(ThreadLocalRandom.current().nextInt(24), ThreadLocalRandom.current().nextInt(60));
-
-            PostEntity post1 = PostEntity.builder()
-                .title("user" + suffix + "의 첫 번째 게시글입니다. 게시글 테스트 진행중입니다.")
-                .content("user" + suffix + "의 첫 번째 게시글입니다.")
-                .category("토픽")
-                .user(user)
-                .viewCount(randomViewCount1)
-                .createdAt(createdAt1)
-                .build();
 
             PostEntity post2 = PostEntity.builder()
                 .title("user" + suffix + "의 두 번째 게시글입니다. 게시글 테스트 진행중입니다.")
@@ -196,7 +212,6 @@ public class DataInitializer implements CommandLineRunner {
                 .createdAt(createdAt2)
                 .build();
 
-            postList.add(post1);
             postList.add(post2);
         }
 
