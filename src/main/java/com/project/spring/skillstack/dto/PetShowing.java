@@ -10,7 +10,7 @@ import lombok.Setter;
 public class PetShowing {
     private Long id;
     private String petName;
-    private String petType;
+    private String petBreed;
     private Integer petAge;
     private String imageUrl;
     private String thumbnailUrl;
@@ -18,7 +18,7 @@ public class PetShowing {
     public PetShowing(PetEntity pet){
         this.id = pet.getId();
         this.petName = pet.getPetName();
-        this.petType = pet.getPetType();
+        this.petBreed = pet.getPetBreed();
         this.petAge = pet.getPetAge();
         this.imageUrl = pet.getImageUrl();
         this.thumbnailUrl = pet.getThumbnailUrl();
