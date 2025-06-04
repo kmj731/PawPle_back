@@ -17,6 +17,9 @@ import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.JoinTable;
+import jakarta.persistence.ManyToMany;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
@@ -61,6 +64,22 @@ public class UserEntity {
     private String imageUrl;
     private String thumbnailUrl;
 
+    @ManyToMany
+    @JoinTable(
+        name = "user_following",
+        joinColumns = @JoinColumn(name = "follower_id"),
+        inverseJoinColumns = @JoinColumn(name = "following_id")
+    )
+    private List<UserEntity> following = new ArrayList<>();
+
+    @ManyToMany
+    @JoinTable(
+        name = "user_blocked",
+        joinColumns = @JoinColumn(name = "blocker_id"),
+        inverseJoinColumns = @JoinColumn(name = "blocked_id")
+    )
+    private List<UserEntity> blockedUsers = new ArrayList<>();
+
     private LocalDateTime created;
 
     @Transient
@@ -71,8 +90,24 @@ public class UserEntity {
     private List<PetEntity> pets = new ArrayList<>();
 
     public UserDto toDto() {
-        return new UserDto(id, name, pass, socialName, getRoles().stream().map(String::toString).collect(Collectors.toList()), email, phoneNumber, birthDate, imageUrl, thumbnailUrl, created, attr, pets);
+        return new UserDto(
+            id,
+            name,
+            pass,
+            socialName,
+            roles.stream().map(String::toString).collect(Collectors.toList()),
+            email,
+            phoneNumber,
+            imageUrl,
+            thumbnailUrl,
+            following.stream().map(UserEntity::getId).collect(Collectors.toList()),
+            blockedUsers.stream().map(UserEntity::getId).collect(Collectors.toList()),
+            created,
+            attr,
+            pets
+        );
     }
+
 
     public UserDtoWithoutPass toDtoWithoutPass(){
         return new UserDtoWithoutPass(

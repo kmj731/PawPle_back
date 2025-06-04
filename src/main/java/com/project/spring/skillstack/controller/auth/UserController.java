@@ -14,6 +14,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -222,7 +223,127 @@ public class UserController {
         return ResponseEntity.ok(Map.of("message", "이미지 삭제 완료"));
     }
 
+    // 팔로우
+    @PostMapping("/follow/{targetId}")
+    @Transactional
+    public ResponseEntity<?> followUser(@AuthenticationPrincipal UserDetails userDetails,
+                                        @PathVariable Long targetId) {
+        if (userDetails == null || userDetails.getUsername() == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("message", "로그인 정보 없음"));
+        }
 
+        Optional<UserEntity> optionalUser = userRep.findByName(userDetails.getUsername());
+        Optional<UserEntity> targetOpt = userRep.findById(targetId);
+
+        if (optionalUser.isEmpty() || targetOpt.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("message", "유저 정보 없음"));
+        }
+
+        UserEntity currentUser = optionalUser.get();
+        UserEntity targetUser = targetOpt.get();
+
+        if (currentUser.getId().equals(targetUser.getId())) {
+            return ResponseEntity.badRequest().body(Map.of("message", "자기 자신은 팔로우할 수 없습니다."));
+        }
+
+        // 차단 상태면 해제
+        currentUser.getBlockedUsers().remove(targetUser);
+
+        // 팔로우하지 않은 경우에만 추가
+        if (!currentUser.getFollowing().contains(targetUser)) {
+            currentUser.getFollowing().add(targetUser);
+        }
+
+        userRep.save(currentUser);
+        return ResponseEntity.ok(Map.of("message", "팔로우 완료"));
+    }
+
+
+    // 언팔로우
+    @DeleteMapping("/unfollow/{targetId}")
+    @Transactional
+    public ResponseEntity<?> unfollowUser(@AuthenticationPrincipal UserDetails userDetails,
+                                        @PathVariable Long targetId) {
+        if (userDetails == null || userDetails.getUsername() == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("message", "로그인 정보 없음"));
+        }
+
+        Optional<UserEntity> optionalUser = userRep.findByName(userDetails.getUsername());
+        Optional<UserEntity> targetOpt = userRep.findById(targetId);
+
+        if (optionalUser.isEmpty() || targetOpt.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("message", "유저 정보 없음"));
+        }
+
+        UserEntity currentUser = optionalUser.get();
+        UserEntity targetUser = targetOpt.get();
+
+        currentUser.getFollowing().remove(targetUser);
+        userRep.save(currentUser);
+
+        return ResponseEntity.ok(Map.of("message", "언팔로우 완료"));
+    }
+
+    // 차단
+    @PostMapping("/block/{targetId}")
+    @Transactional
+    public ResponseEntity<?> blockUser(@AuthenticationPrincipal UserDetails userDetails,
+                                    @PathVariable Long targetId) {
+        if (userDetails == null || userDetails.getUsername() == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("message", "로그인 정보 없음"));
+        }
+
+        Optional<UserEntity> optionalUser = userRep.findByName(userDetails.getUsername());
+        Optional<UserEntity> targetOpt = userRep.findById(targetId);
+
+        if (optionalUser.isEmpty() || targetOpt.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("message", "유저 정보 없음"));
+        }
+
+        UserEntity currentUser = optionalUser.get();
+        UserEntity targetUser = targetOpt.get();
+
+        if (currentUser.getId().equals(targetUser.getId())) {
+            return ResponseEntity.badRequest().body(Map.of("message", "자기 자신은 차단할 수 없습니다."));
+        }
+
+        // 팔로우 상태면 제거
+        currentUser.getFollowing().remove(targetUser);
+
+        // 차단하지 않은 경우에만 추가
+        if (!currentUser.getBlockedUsers().contains(targetUser)) {
+            currentUser.getBlockedUsers().add(targetUser);
+        }
+
+        userRep.save(currentUser);
+        return ResponseEntity.ok(Map.of("message", "차단 완료"));
+    }
+
+
+    // 차단 해제
+    @DeleteMapping("/unblock/{targetId}")
+    @Transactional
+    public ResponseEntity<?> unblockUser(@AuthenticationPrincipal UserDetails userDetails,
+                                        @PathVariable Long targetId) {
+        if (userDetails == null || userDetails.getUsername() == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("message", "로그인 정보 없음"));
+        }
+
+        Optional<UserEntity> optionalUser = userRep.findByName(userDetails.getUsername());
+        Optional<UserEntity> targetOpt = userRep.findById(targetId);
+
+        if (optionalUser.isEmpty() || targetOpt.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("message", "유저 정보 없음"));
+        }
+
+        UserEntity currentUser = optionalUser.get();
+        UserEntity targetUser = targetOpt.get();
+
+        currentUser.getBlockedUsers().remove(targetUser);
+        userRep.save(currentUser);
+
+        return ResponseEntity.ok(Map.of("message", "차단 해제 완료"));
+    }
 
 
 }

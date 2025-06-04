@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -48,6 +49,17 @@ public class Permit {
                 .collect(Collectors.toList());
     }
 
+    // 특정 유저 엔티티 조회
+    @GetMapping("/test/user/{id}")
+    public ResponseEntity<?> getUserById(@PathVariable Long id) {
+        Optional<UserEntity> optionalUser = userRep.findById(id);
+        if (optionalUser.isEmpty()) {
+            return ResponseEntity.status(404).body(Map.of("message", "해당 ID의 사용자를 찾을 수 없습니다"));
+        }
+
+        return ResponseEntity.ok(optionalUser.get());
+    }
+    
     // 모든 펫 이름 목록
     @GetMapping("/test/pets")
     public List<String> getAllPets() {

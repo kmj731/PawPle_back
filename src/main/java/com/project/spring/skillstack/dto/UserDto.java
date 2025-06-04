@@ -27,11 +27,12 @@ private Long id;
 
     private String email;
     private String phoneNumber;
-
-    private LocalDate birthDate;
     
     private String imageUrl;
     private String thumbnailUrl;
+
+    private List<Long> followingIds;
+    private List<Long> blockedIds;
 
     private LocalDateTime created;
 
