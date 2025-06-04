@@ -230,16 +230,16 @@ public class ManagerController {
         return ResponseEntity.ok(updatedDto);
     }
 
-    // 게시글 공지로 이동
-    @PreAuthorize("hasRole('ADMIN')")
-    @PatchMapping("/post/{id}/move")
-    public ResponseEntity<PostDto> moveToNotice(@PathVariable Long id) {
-        PostEntity updatedPost = postManagerService.setPostAsNotice(id);
-        if (updatedPost == null) {
-            return ResponseEntity.notFound().build();
-        }
-        return ResponseEntity.ok(PostDto.fromEntity(updatedPost));
-    }
+    // // 게시글 공지로 이동
+    // @PreAuthorize("hasRole('ADMIN')")
+    // @PatchMapping("/post/move/{id}")
+    // public ResponseEntity<PostDto> moveToNotice(@PathVariable Long id) {
+    //     PostEntity updatedPost = postManagerService.setPostAsNotice(id);
+    //     if (updatedPost == null) {
+    //         return ResponseEntity.notFound().build();
+    //     }
+    //     return ResponseEntity.ok(PostDto.fromEntity(updatedPost));
+    // }
 
 
     //  // 회원 삭제 API
@@ -368,7 +368,21 @@ public class ManagerController {
     }
 
 
-}
+    // 게시글 카테고리 이동
+    @PreAuthorize("hasRole('ADMIN')")
+    @PatchMapping("/post/move/{id}")
+    public ResponseEntity<PostDto> movePostCategory(
+        @PathVariable Long id,
+        @RequestParam String category,
+        @RequestParam(required = false) String subCategory) {
+
+    PostEntity updatedPost = postManagerService.movePostCategory(id, category, subCategory);
+    if (updatedPost == null) {
+        return ResponseEntity.notFound().build();
+    }
+    return ResponseEntity.ok(PostDto.fromEntity(updatedPost));
+    }
+    }
     
 
     

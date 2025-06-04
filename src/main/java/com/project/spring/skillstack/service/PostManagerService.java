@@ -137,6 +137,20 @@ public class PostManagerService {
         return postRepository.findByUser_NameContainingIgnoreCase(username);
     }
 
+
+      // 게시글 이동
+    public PostEntity movePostCategory(Long postId, String category, String subCategory) {
+        Optional<PostEntity> optionalPost = postRepository.findById(postId);
+        if (optionalPost.isEmpty()) {
+            return null;
+        }
+    
+        PostEntity post = optionalPost.get();
+        post.setCategory(category);
+        post.setSubCategory(subCategory); // null이면 null로 설정
+        return postRepository.save(post);
+    }
+
     
 }
 
