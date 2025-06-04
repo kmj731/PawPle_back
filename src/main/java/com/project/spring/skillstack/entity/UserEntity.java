@@ -7,6 +7,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import com.project.spring.skillstack.dto.PetShowing;
+import com.project.spring.skillstack.dto.PetUserDto;
 import com.project.spring.skillstack.dto.UserDto;
 import com.project.spring.skillstack.dto.UserDtoWithoutPass;
 
@@ -95,6 +97,20 @@ public class UserEntity {
         );
 
     }
+
+    public PetUserDto toDTO() {
+    List<PetShowing> petShowings = pets.stream()
+        .map(PetShowing::new) // PetShowing(PetEntity pet) 생성자 필요
+        .collect(Collectors.toList());
+
+    return new PetUserDto(
+        id, name, pass, socialName,
+        roles, email, phoneNumber,
+        birthDate, imageUrl, thumbnailUrl,
+        created, attr, petShowings, point
+    );
+}
+
 
 
 }

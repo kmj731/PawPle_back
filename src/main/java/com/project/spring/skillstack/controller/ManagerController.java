@@ -24,6 +24,8 @@ import org.springframework.web.server.ResponseStatusException;
 
 import com.project.spring.skillstack.dao.PostRepository;
 import com.project.spring.skillstack.dto.PetDto;
+import com.project.spring.skillstack.dto.PetShowing;
+import com.project.spring.skillstack.dto.PetUserDto;
 import com.project.spring.skillstack.dto.PostDto;
 import com.project.spring.skillstack.dto.RoleUpdateRequest;
 import com.project.spring.skillstack.dto.UpdateUserRoleRequest;
@@ -33,6 +35,7 @@ import com.project.spring.skillstack.dto.UserSimpleInfoDto;
 import com.project.spring.skillstack.dto.VisibilityUpdateRequest;
 import com.project.spring.skillstack.entity.PetEntity;
 import com.project.spring.skillstack.entity.PostEntity;
+import com.project.spring.skillstack.entity.UserEntity;
 import com.project.spring.skillstack.service.PostManagerService;
 import com.project.spring.skillstack.service.PostService;
 import com.project.spring.skillstack.service.UserService;
@@ -67,11 +70,17 @@ public class ManagerController {
         return ResponseEntity.ok(userService.getAllUsersWithoutPass());
     }
 
+
+    // 펫 조회
     @PreAuthorize("hasRole('ADMIN')")
-    @GetMapping("/user/{userId}/pets")
-    public ResponseEntity<List<PetEntity>> getUserPets(@PathVariable Long userId) {
-        return ResponseEntity.ok(userService.getPetsByUserId(userId));
-    }
+    @GetMapping("/user/{id}/pets")
+    public ResponseEntity<List<PetShowing>> getUserPets(@PathVariable Long id) {
+        UserEntity user = userService.getUserById(id); // orElseThrow()
+        List<PetShowing> pets = user.getPets().stream()
+                               .map(PetShowing::new)  // PetEntity -> PetShowing DTO 변환
+                                .collect(Collectors.toList());
+        return ResponseEntity.ok(pets);
+        }
 
     // ✅ 이름으로 회원 검색 (관리자만)
     @PreAuthorize("hasRole('ADMIN')")
