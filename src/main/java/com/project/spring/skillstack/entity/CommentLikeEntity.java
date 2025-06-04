@@ -13,7 +13,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 @Entity
-@Table(name = "CommentLikeTable")
+@Table(name = "COMMENT_LIKE_TABLE")
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor

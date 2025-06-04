@@ -20,7 +20,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Entity
-@Table(name = "LikeTable", 
+@Table(name = "LIKE_TABLE", 
         uniqueConstraints = @UniqueConstraint(columnNames = {"user_id", "post_id"}))
 @Data
 @Builder
