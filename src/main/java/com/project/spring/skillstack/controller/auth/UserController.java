@@ -222,6 +222,30 @@ public class UserController {
         return ResponseEntity.ok(Map.of("message", "이미지 삭제 완료"));
     }
 
+    // 회원 탈퇴
+    @DeleteMapping("/withdraw")
+    @Transactional
+    public ResponseEntity<?> withdrawUser(@AuthenticationPrincipal UserDetails userDetails) {
+        if (userDetails == null || userDetails.getUsername() == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(Map.of("message", "로그인 정보 없음"));
+        }
+
+        Optional<UserEntity> optionalUser = userRep.findByName(userDetails.getUsername());
+        if (optionalUser.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(Map.of("message", "사용자 없음"));
+        }
+
+        UserEntity user = optionalUser.get();
+
+        // 연관된 PetEntity들도 함께 제거됨 (orphanRemoval = true 설정 덕분에)
+        userRep.delete(user);
+
+        // 쿠키 제거 (선택: 로그아웃 처리 유도)
+        // 실제 환경에 맞춰 response에서 쿠키 삭제하거나 리다이렉트 처리 가능
+        return ResponseEntity.ok(Map.of("message", "회원 탈퇴가 완료되었습니다."));
+    }
 
 
 
