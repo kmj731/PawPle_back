@@ -82,6 +82,17 @@ public class PostController {
         return ResponseEntity.ok(posts);
     }
 
+    // 카테고리-서브카테고리별 게시글 목록 조회
+    @GetMapping("/category/{category}/sub/{subCategory}")
+    public ResponseEntity<Page<PostDto>> getPostsByCategoryAndSubCategory(
+            @PathVariable String category,
+            @PathVariable String subCategory,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size) {
+        Page<PostDto> posts = postService.getPostsByCategoryAndSubCategory(category, subCategory, page, size);
+        return ResponseEntity.ok(posts);
+    }
+
     // 사용 가능한 카테고리 목록 조회
     @GetMapping("/categories")
     public ResponseEntity<List<String>> getAvailableCategories() {
