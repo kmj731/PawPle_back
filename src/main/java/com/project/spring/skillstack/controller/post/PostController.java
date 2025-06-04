@@ -101,6 +101,18 @@ public class PostController {
         PostDto post = postService.getPostById(id);
         return ResponseEntity.ok(post);
     }
+
+        // 서브 카테고리별 게시글 출력 
+    @GetMapping("/category/{category}/sub/{subCategory}")
+    public ResponseEntity<Page<PostDto>> getPostsByCategoryAndSubCategory(
+            @PathVariable String category,
+            @PathVariable String subCategory,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size) {
+        Page<PostDto> posts = postService.getPostsByCategoryAndSubCategory(category, subCategory, page, size);
+        return ResponseEntity.ok(posts);
+    }
+
     
     // 게시글 수정
     @PutMapping("/{id}")
