@@ -16,7 +16,9 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.project.spring.skillstack.dao.PostRepository;
 import com.project.spring.skillstack.dao.UserRepository;
+import com.project.spring.skillstack.dao.PetRepository;
 import com.project.spring.skillstack.dto.PostDto;
+import com.project.spring.skillstack.entity.PetEntity;
 import com.project.spring.skillstack.entity.PostEntity;
 import com.project.spring.skillstack.entity.UserEntity;
 
@@ -31,19 +33,35 @@ public class PostService {
     @Autowired
     private UserRepository userRepository;
     
+    @Autowired
+    private PetRepository petRepository;
+
     private final Random random = new Random();
     // 게시글 생성
     @Transactional
-    public PostDto createPost(PostDto postDto, String username) {
-        UserEntity user = userRepository.findByName(username)
-                .orElseThrow(() -> new UsernameNotFoundException("사용자를 찾을 수 없습니다: " + username));
-        
-        PostEntity post = postDto.toEntity();
-        post.setUser(user);
-        
-        PostEntity savedPost = postRepository.save(post);
-        return PostDto.fromEntity(savedPost);
+    public PostEntity createPost(PostDto postDto, String username) {
+    UserEntity user = userRepository.findByName(username)
+                            .orElseThrow(() -> new RuntimeException("User not found"));
+
+    PostEntity post = new PostEntity();
+    post.setTitle(postDto.getTitle());
+    post.setContent(postDto.getContent());
+    post.setUser(user);
+    post.setCreatedAt(LocalDateTime.now());
+
+    if (postDto.getPetId() != null) {
+        PetEntity pet = petRepository.findById(postDto.getPetId())
+                            .orElseThrow(() -> new RuntimeException("Pet not found"));
+        post.setPet(pet);
+    } else {
+        List<PetEntity> pets = petRepository.findByOwner(user); // user → owner
+        if (!pets.isEmpty()) {
+            post.setPet(pets.get(0));
+        }
     }
+
+    return postRepository.save(post);
+}
     
     // 모든 게시글 페이징 조회
     @Transactional(readOnly = true)

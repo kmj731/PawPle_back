@@ -9,7 +9,9 @@ import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -21,6 +23,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.project.spring.skillstack.dto.PostDto;
+import com.project.spring.skillstack.entity.PostEntity;
 import com.project.spring.skillstack.service.PostLikeService;
 // import com.project.spring.skillstack.service.PointService;
 import com.project.spring.skillstack.service.PostService;
@@ -43,11 +46,10 @@ public class PostController {
     
     // 게시글 생성
     @PostMapping
-    public ResponseEntity<PostDto> createPost(@RequestBody PostDto postDto) {
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        String username = auth.getName();
-        
-        PostDto createdPost = postService.createPost(postDto, username);
+    public ResponseEntity<?> createPost(@RequestBody PostDto postDto,
+                                    @AuthenticationPrincipal UserDetails userDetails) {
+        String username = userDetails.getUsername();
+        PostEntity savedPost = postService.createPost(postDto, username);
 
         // 포인트 적립 시도 : 30% 확률로 5 ~ 15점 랜덤 적립
         // try {
@@ -60,7 +62,7 @@ public class PostController {
         //     // 포인트 적립 실패해도 게시글 작성은 성공적으로 처리됨
         //     System.err.println("포인트 적립 중 오류 발생: " + e.getMessage());
         // }
-        return new ResponseEntity<>(createdPost, HttpStatus.CREATED);
+        return ResponseEntity.ok(savedPost);
     }
     
     // 게시글 목록 조회 (페이징)

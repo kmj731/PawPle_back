@@ -94,6 +94,10 @@ public class PostEntity {
     @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<PostLikeEntity> likes = new ArrayList<>();
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "pet_id")
+    private PetEntity pet;
+
     @PrePersist
     protected void onCreate() {
         this.createdAt = LocalDateTime.now();
