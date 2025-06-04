@@ -11,8 +11,10 @@ import org.springframework.boot.CommandLineRunner;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
+import com.project.spring.skillstack.dao.CommentRepository;
 import com.project.spring.skillstack.dao.PostRepository;
 import com.project.spring.skillstack.dao.UserRepository;
+import com.project.spring.skillstack.entity.CommentEntity;
 import com.project.spring.skillstack.entity.HealthCheckRecord;
 import com.project.spring.skillstack.entity.PetEntity;
 import com.project.spring.skillstack.entity.PostEntity;
@@ -27,24 +29,24 @@ public class DataInitializer implements CommandLineRunner {
     PasswordEncoder passwordEncoder;
     @Autowired
     PostRepository postRep;
+    @Autowired
+    CommentRepository commentRep;
 
     @Override
     public void run(String... args) throws Exception {
 
         List<String> roles = new ArrayList<>();
         roles.add("USER");
+        List<String> roles2 = new ArrayList<>();
+        roles2.add("VET");
 
-        UserEntity root = new UserEntity(null, "root", passwordEncoder.encode("1234"), "root", List.of("ADMIN"), null, null, null, null, null, LocalDateTime.now(), null, new ArrayList<>());
+        UserEntity root = new UserEntity(null, "root", passwordEncoder.encode("1234"), "root", List.of("ADMIN"), null, "010-0000-0000", LocalDate.of(1999,9,9), null, null, LocalDateTime.now(), null, new ArrayList<>());
         UserEntity abcd = new UserEntity(null, "abcd", passwordEncoder.encode("1234"), "abcd", roles, "abc123@pawple.com", "010-1234-5678", null, null, null, LocalDateTime.now(), null, new ArrayList<>());
-        UserEntity vet = new UserEntity(null, "vet", passwordEncoder.encode("1234"), "vet", roles, "vet123@pawple.com", "010-4321-8765", null, null, null, LocalDateTime.now(), null, new ArrayList<>());
-
-        abcd.setImageUrl("/test/iu.jpg");
+        UserEntity vet = new UserEntity(null, "vet", passwordEncoder.encode("1234"), "vet", roles2, "vet123@pawple.com", "010-4321-8765", null, null, null, LocalDateTime.now(), null, new ArrayList<>());
 
         PetEntity abcdPet = new PetEntity("고양이", 4.0, "나비", 2025, "수컷", "코숏", LocalDate.now(), abcd);
-        abcdPet.setImageUrl("/test/cat.jpg");
         abcd.getPets().add(abcdPet);
         PetEntity abcdPet2 = new PetEntity("강아지", 4.0, "바둑이", 2024, "암컷", "진돗개", LocalDate.now(), abcd);
-        abcdPet2.setImageUrl("/test/dog.jpg");
         abcd.getPets().add(abcdPet2);
 
         PostEntity abcdPost1 = PostEntity.builder()
@@ -53,6 +55,7 @@ public class DataInitializer implements CommandLineRunner {
             .category("일상")
             .user(abcd)
             .viewCount(150)
+            .commentCount(1)
             .build();
 
         PostEntity abcdPost2 = PostEntity.builder()
@@ -61,6 +64,7 @@ public class DataInitializer implements CommandLineRunner {
             .category("Q&A")
             .user(abcd)
             .viewCount(181)
+            .commentCount(1)
             .build();
 
         PostEntity abcdPost3 = PostEntity.builder()
@@ -69,6 +73,7 @@ public class DataInitializer implements CommandLineRunner {
             .category("Q&A")
             .user(abcd)
             .viewCount(220)
+            .commentCount(1)
             .build();
             
         PostEntity abcdPost4 = PostEntity.builder()
@@ -77,6 +82,7 @@ public class DataInitializer implements CommandLineRunner {
             .category("토픽")
             .user(abcd)
             .viewCount(251)
+            .commentCount(1)
             .build();
 
         HealthCheckRecord record1 = new HealthCheckRecord();
@@ -195,6 +201,35 @@ public class DataInitializer implements CommandLineRunner {
         }
 
         postRep.saveAll(postList);
+
+        UserEntity user01 = userList.get(0); // index 0 → user01
+        UserEntity user02 = userList.get(1); // index 1 → user02
+
+        CommentEntity comment1 = CommentEntity.builder()
+            .content("첫 글 축하드립니다!")
+            .user(user01)
+            .post(abcdPost1)
+            .build();
+
+        CommentEntity comment2 = CommentEntity.builder()
+            .content("답변 기다리고 있어요")
+            .user(user02)
+            .post(abcdPost2)
+            .build();
+
+        CommentEntity comment3 = CommentEntity.builder()
+            .content("저도 걱정돼요")
+            .user(user01)
+            .post(abcdPost3)
+            .build();
+
+        CommentEntity comment4 = CommentEntity.builder()
+            .content("정말 좋은 정보네요")
+            .user(user02)
+            .post(abcdPost4)
+            .build();
+
+        commentRep.saveAll(List.of(comment1, comment2, comment3, comment4));
 
         // userRep.save(new UserEntity(null, "root", passwordEncoder.encode("1234"), "root", List.of("ADMIN"), null, null, null, LocalDateTime.now(), null, null));
         // userRep.save(new UserEntity(null, "abcd", passwordEncoder.encode("1234"), "abcd", List.of("USER"), null, null, null, LocalDateTime.now(), null, null));

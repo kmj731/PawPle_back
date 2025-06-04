@@ -8,7 +8,11 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import jakarta.persistence.Id;
 import jakarta.persistence.CascadeType;
+import jakarta.persistence.CollectionTable;
+import jakarta.persistence.Column;
+import jakarta.persistence.ElementCollection;
 import jakarta.persistence.Entity;
+import jakarta.persistence.ForeignKey;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.JoinColumn;
@@ -33,9 +37,14 @@ public class HealthCheckRecord {
     private String resultStatus;
     private LocalDateTime checkedAt;
 
+    @ElementCollection
+    @CollectionTable(name = "health_check_warnings", joinColumns = @JoinColumn(name = "record_id"))
+    @Column(name = "warning")
+    private List<String> warnings = new ArrayList<>();
+
     @JsonIgnore
     @ManyToOne
-    @JoinColumn(name = "pet_id", referencedColumnName = "id", nullable = false)
+    @JoinColumn(name = "pet_id", foreignKey = @ForeignKey(name = " FK_health_pet") ,referencedColumnName = "id", nullable = false)
     private PetEntity pet;
 
     @OneToMany(mappedBy = "record", cascade = CascadeType.ALL, orphanRemoval = true)

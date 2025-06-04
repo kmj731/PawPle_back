@@ -24,6 +24,8 @@ public class PostDto {
     private LocalDateTime updatedAt;
     private Integer viewCount;
     private Integer commentCount;
+    private Integer likeCount;
+    private Boolean isLiked; // 현재 사용자 좋아요 상태
     private String category;
     private String subCategory;
     private Boolean isPublic;
@@ -47,6 +49,7 @@ public class PostDto {
                 .updatedAt(entity.getUpdatedAt())
                 .viewCount(entity.getViewCount())
                 .commentCount(entity.getCommentCount())
+                .likeCount(entity.getLikeCount())
                 .category(entity.getCategory())
                 .subCategory(entity.getSubCategory())
                 .isPublic(entity.getIsPublic())

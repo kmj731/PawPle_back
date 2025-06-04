@@ -91,4 +91,22 @@ public interface PostRepository extends JpaRepository<PostEntity, Long> {
     // 회원 삭제
     void deleteByUser_Id(Long userId);
 
+    // 게시글 수정
+    List<PostEntity> findByIsPublicTrue();
+
+    // 좋아요 수 증가
+    @Modifying
+    @Query("UPDATE PostEntity p SET p.likeCount = p.likeCount + 1 WHERE p.id = :id")
+    void increaseLikeCount(@Param("id") Long id);
+
+    // 좋아요 수 감소
+    @Modifying
+    @Query("UPDATE PostEntity p SET p.likeCount = p.likeCount - 1 WHERE p.id = :id AND p.likeCount > 0")
+    void decreaseLikeCount(@Param("id") Long id);
+
+    // 좋아요 수 기준 인기글 조회
+    Page<PostEntity> findAllByOrderByLikeCountDescCreatedAtDesc(Pageable pageable);
+
+    // 카테고리별 좋아요 수 기준 인기글 조회
+    Page<PostEntity> findByCategoryOrderByLikeCountDescCreatedAtDesc(String category, Pageable pageable);
 }
