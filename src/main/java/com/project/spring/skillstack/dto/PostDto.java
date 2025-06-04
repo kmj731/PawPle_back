@@ -29,6 +29,9 @@ public class PostDto {
     private String category;
     private String subCategory;
     private Boolean isPublic;
+    private Long petId; // 클라이언트에서 보낼 반려동물 ID
+    private PetDto pet;
+
     
     // 요청 데이터용 생성자
     public PostDto(String title, String content, String category) {
@@ -53,6 +56,8 @@ public class PostDto {
                 .category(entity.getCategory())
                 .subCategory(entity.getSubCategory())
                 .isPublic(entity.getIsPublic())
+                .pet(entity.getPet() != null ? PetDto.fromEntity(entity.getPet()) : null)
+                .petId(entity.getPet() != null ? entity.getPet().getId() : null)
                 .build();
     }
     

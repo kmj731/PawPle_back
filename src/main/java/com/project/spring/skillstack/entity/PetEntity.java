@@ -63,6 +63,9 @@ public class PetEntity {
     @OneToMany(mappedBy = "pet", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<HealthCheckRecord> healthRecords = new ArrayList<>();
 
+    @OneToMany(mappedBy = "pet")
+    private List<PostEntity> posts;
+
     public PetEntity(String petType, double weight, String petName, int petAge, String petGender, String petBreed, LocalDate registrationDate, UserEntity owner) {
         this.petType = petType;
         this.weight = weight;
