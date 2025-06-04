@@ -111,6 +111,20 @@ public class DataInitializer implements CommandLineRunner {
         postRep.save(abcdPost4);
         
 
+        UserEntity qwer = new UserEntity(null, "qwer", passwordEncoder.encode("1234"), "qwer", roles, "qwer123@pawple.com", "010-5678-1234", null, null, null, LocalDateTime.now(), null, new ArrayList<>());
+
+        PetEntity qwerPet1 = new PetEntity("강아지", 5.5, "초코", 2023, "수컷", "푸들", LocalDate.now(), qwer);
+        qwer.getPets().add(qwerPet1);
+        PetEntity qwerPet2 = new PetEntity("고양이", 3.2, "하양이", 2024, "암컷", "페르시안", LocalDate.now(), qwer);
+        qwer.getPets().add(qwerPet2);
+        
+        UserEntity asdf = new UserEntity(null, "asdf", passwordEncoder.encode("1234"), "asdf", roles, "asdf123@pawple.com", "010-8888-9999", null, null, null, LocalDateTime.now(), null, new ArrayList<>());
+
+        PetEntity asdfPet1 = new PetEntity("고양이", 2.8, "미미", 2022, "암컷", "러시안블루", LocalDate.now(), asdf);
+        asdf.getPets().add(asdfPet1);
+        PetEntity asdfPet2 = new PetEntity("강아지", 6.0, "콩이", 2023, "수컷", "말티즈", LocalDate.now(), asdf);
+        asdf.getPets().add(asdfPet2);
+
         // 유저 초기화 데이터
         
         List<UserEntity> userList = new ArrayList<>();
@@ -175,8 +189,7 @@ public class DataInitializer implements CommandLineRunner {
                 userIndex++;
 
                 int randomViewCount = ThreadLocalRandom.current().nextInt(1, 101);
-                LocalDateTime createdAt = LocalDate.of(2025, 5, 1)
-                    .plusDays(ThreadLocalRandom.current().nextInt(31))
+                LocalDateTime createdAt = LocalDate.of(2025, 6, 1)
                     .atTime(ThreadLocalRandom.current().nextInt(24), ThreadLocalRandom.current().nextInt(60));
 
                 PostEntity post = PostEntity.builder()
@@ -199,8 +212,7 @@ public class DataInitializer implements CommandLineRunner {
 
             int randomViewCount2 = ThreadLocalRandom.current().nextInt(1, 101);
 
-            LocalDateTime createdAt2 = LocalDate.of(2025, 5, 1)
-                .plusDays(ThreadLocalRandom.current().nextInt(31))
+            LocalDateTime createdAt2 = LocalDate.of(2025, 6, 1)
                 .atTime(ThreadLocalRandom.current().nextInt(24), ThreadLocalRandom.current().nextInt(60));
 
             PostEntity post2 = PostEntity.builder()
@@ -216,6 +228,96 @@ public class DataInitializer implements CommandLineRunner {
         }
 
         postRep.saveAll(postList);
+
+
+        PostEntity qwerPost1 = PostEntity.builder()
+            .title("강아지 산책 시간이 부족한가요?")
+            .content("초코가 요즘 자꾸 짖어서 산책 시간이 부족한지 고민입니다.")
+            .category("Q&A")
+            .user(qwer)
+            .viewCount(102)
+            .commentCount(0)
+            .build();
+
+        PostEntity qwerPost2 = PostEntity.builder()
+            .title("고양이 발톱 관리 팁 공유")
+            .content("하양이 발톱을 자를 때 유용한 팁을 공유해요!")
+            .category("토픽")
+            .subCategory("홈케어")
+            .user(qwer)
+            .viewCount(165)
+            .commentCount(1)
+            .build();
+
+
+        PostEntity qwerPost3 = PostEntity.builder()
+            .title("초코가 밥을 안 먹어요 ㅠㅠ")
+            .content("요 며칠 초코가 사료를 안 먹는데 병원을 가야 할까요?")
+            .category("Q&A")
+            .user(qwer)
+            .viewCount(110)
+            .commentCount(2)
+            .build();
+
+        PostEntity qwerPost4 = PostEntity.builder()
+            .title("하양이 장난감 추천해요!")
+            .content("요즘 하양이가 너무 심심해해요. 잘 놀았던 장난감 공유합니다 :)")
+            .category("토픽")
+            .subCategory("행동")
+            .user(qwer)
+            .viewCount(195)
+            .commentCount(3)
+            .build();
+
+        PostEntity asdfPost1 = PostEntity.builder()
+            .title("러시안블루 털 빠짐 심한가요?")
+            .content("미미가 털을 많이 뿜어서 관리가 어렵네요. 다들 어떻게 하세요?")
+            .category("Q&A")
+            .user(asdf)
+            .viewCount(89)
+            .commentCount(0)
+            .build();
+
+        PostEntity asdfPost2 = PostEntity.builder()
+            .title("말티즈 목욕 시기 어떻게 정하세요?")
+            .content("콩이가 목욕을 싫어해서 고민입니다. 목욕 주기를 어떻게 정하면 좋을까요?")
+            .category("토픽")
+            .subCategory("홈케어")
+            .user(asdf)
+            .viewCount(134)
+            .commentCount(1)
+            .build();
+
+        PostEntity asdfPost3 = PostEntity.builder()
+            .title("미미가 자꾸 숨는데 왜 그럴까요?")
+            .content("러시안블루 미미가 사람을 피하고 숨어요. 원인을 모르겠어요.")
+            .category("Q&A")
+            .user(asdf)
+            .viewCount(77)
+            .commentCount(1)
+            .build();
+
+        PostEntity asdfPost4 = PostEntity.builder()
+            .title("콩이랑 여행 다녀왔어요! 후기 공유")
+            .content("말티즈 콩이와 함께 1박 2일 펫캉스 다녀왔습니다. 팁 공유해요~")
+            .category("토픽")
+            .subCategory("일상")
+            .user(asdf)
+            .viewCount(210)
+            .commentCount(2)
+            .build();
+
+        userRep.save(qwer);
+        userRep.save(asdf);
+
+        postRep.save(qwerPost1);
+        postRep.save(qwerPost2);
+        postRep.save(qwerPost3);
+        postRep.save(qwerPost4);
+        postRep.save(asdfPost1);
+        postRep.save(asdfPost2);
+        postRep.save(asdfPost3);
+        postRep.save(asdfPost4);
 
         UserEntity user01 = userList.get(0); // index 0 → user01
         UserEntity user02 = userList.get(1); // index 1 → user02
