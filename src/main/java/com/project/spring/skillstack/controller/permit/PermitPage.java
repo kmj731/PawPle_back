@@ -82,8 +82,8 @@ public class PermitPage {
                 null,
                 LocalDateTime.now(),
                 null,
-                0,
-                null);
+                null,
+                0);
 
         userRep.save(user);
 

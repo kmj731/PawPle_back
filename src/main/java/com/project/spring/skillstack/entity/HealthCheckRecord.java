@@ -24,7 +24,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Entity
-@Table(name = "health_check_record")
+@Table(name = "Health_Check_Record")
 @Getter @Setter
 @NoArgsConstructor
 public class HealthCheckRecord {

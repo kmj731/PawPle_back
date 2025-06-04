@@ -21,7 +21,7 @@ import lombok.Setter;
 // import net.minidev.json.annotate.JsonIgnore;
 
 @Entity
-@Table(name = "health_check_detail")
+@Table(name = "Health_Check_Detail")
 @Getter @Setter
 @NoArgsConstructor
 public class HealthCheckDetail {

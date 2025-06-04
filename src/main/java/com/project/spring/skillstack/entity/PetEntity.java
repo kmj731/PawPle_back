@@ -19,7 +19,7 @@ import lombok.NoArgsConstructor;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 @Entity
-@Table(name = "PetTable")
+@Table(name = "Pet_Table")
 @NoArgsConstructor
 public class PetEntity {
 

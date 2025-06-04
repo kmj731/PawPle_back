@@ -31,7 +31,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
-@Table(name = "User_Table")
+@Table(name = "USER_TABLE")
 @SequenceGenerator(
     allocationSize = 1,
     initialValue = 1,
@@ -68,16 +68,17 @@ public class UserEntity {
     @Transient
     private Map<String, Object> attr;
 
-    @Column(nullable = false)
-    private int point;
-
-    public void addPoint(int point){
-        this.point += point;
-    }
-
     
     @OneToMany(mappedBy = "owner", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
     private List<PetEntity> pets = new ArrayList<>();
+
+    @Column(name= "\"POINT\"")
+    private Integer point;
+
+    public void addPoint(Integer point){
+        this.point += point;
+    }
+
 
     public UserDto toDto() {
         return new UserDto(id, name, pass, socialName, getRoles().stream().map(String::toString).collect(Collectors.toList()), email, phoneNumber, birthDate, imageUrl, thumbnailUrl, created, attr, pets,point);
