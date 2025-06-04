@@ -14,5 +14,6 @@ public class UserSimpleInfoDto {
     
     private String phoneNumber;
     private LocalDate birthDate;
+    private int point;
     private Map<String, Object> attr;
 }

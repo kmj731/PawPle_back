@@ -71,4 +71,15 @@ public class PostDto {
                 .isPublic(this.isPublic != null ? this.isPublic : true)
                 .build();
     }
+
+    // 블라인드 처리용 팩토리
+    public static PostDto blinded(Long postId) {
+        return PostDto.builder()
+                .id(postId)
+                .title("블라인드 처리된 게시글입니다.")
+                .content("관리자에 의해 비공개 처리된 게시글입니다.")
+                .authorName("비공개")
+                .isPublic(false)
+                .build();
+    }
 }
