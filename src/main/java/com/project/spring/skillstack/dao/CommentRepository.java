@@ -9,7 +9,6 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import com.project.spring.skillstack.entity.CommentEntity;
-import com.project.spring.skillstack.entity.PostEntity;
 
 import jakarta.transaction.Transactional;
 
