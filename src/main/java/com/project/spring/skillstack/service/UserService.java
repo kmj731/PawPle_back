@@ -195,7 +195,7 @@ public class UserService {
         UserEntity user = userRepository.findById(UserId)
             .orElseThrow(() -> new IllegalArgumentException("해당 사용자가 존재하지 않습니다."));
         
-        return new UserSimpleInfoDto(user.getPhoneNumber(), user.getBirthDate(), user.getAttr());
+        return new UserSimpleInfoDto(user.getPhoneNumber(), user.getBirthDate(), user.getPoint(),user.getAttr());
     }
     
 }

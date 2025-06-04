@@ -38,4 +38,6 @@ private Long id;
     private Map<String, Object> attr;
 
     private List<PetEntity> pets;
+    private Integer point;
+    
 }

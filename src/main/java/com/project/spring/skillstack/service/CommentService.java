@@ -38,6 +38,10 @@ public class CommentService {
                 .user(user)
                 .post(post)
                 .build();
+
+        // 포인트 적립
+        user.addPoint(1);
+        userRepository.save(user);
         
         comment = commentRepository.save(comment);
         
