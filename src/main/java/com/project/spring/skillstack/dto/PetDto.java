@@ -37,7 +37,7 @@ public class PetDto {
         
     }
 
-    // 정적 변환 메서드 (추천 방식)
+    // 정적 변환 메서드
     public static PetDto fromEntity(PetEntity pet) {
         if (pet == null) return null;
         PetDto dto = new PetDto();
