@@ -246,5 +246,10 @@ public class PostService {
         return postRepository.count();
     }
 
+    // 게시글 블라인드처리
+    public PostEntity findById(Long id) {
+        return postRepository.findById(id).orElse(null);
+    }
+
     
 }

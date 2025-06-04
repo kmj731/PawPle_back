@@ -115,11 +115,18 @@ public class ManagerController {
     @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/post")
     public ResponseEntity<List<PostDto>> getAllPosts() {
-        List<PostDto> postDto = postManagerService.getAllPost().stream()
-                .map(PostDto::fromEntity)
-                .collect(Collectors.toList());
-        return ResponseEntity.ok(postDto);
-    }
+        List<PostDto> postDtoList = postManagerService.getAllPost().stream()
+            .map(post -> {
+                if (Boolean.FALSE.equals(post.getIsPublic())) {
+                    return PostDto.blinded(post.getId());
+                } else {
+                    return PostDto.fromEntity(post);
+                }
+            })
+            .collect(Collectors.toList());
+
+        return ResponseEntity.ok(postDtoList);
+}
 
 
     // vet 접근 
