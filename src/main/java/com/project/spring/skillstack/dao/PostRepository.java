@@ -38,7 +38,7 @@ public interface PostRepository extends JpaRepository<PostEntity, Long> {
 
     Optional<PostEntity> findByTitleAndUser(String postKey, UserEntity user);
 
-    Optional<PostEntity> findByTitle(String title);
+    // Optional<PostEntity> findByTitle(String title);
 
     // 카테고리별 게시글 조회 (최신순)
     Page<PostEntity> findByCategoryOrderByCreatedAtDesc(String category, Pageable pageable);
@@ -108,4 +108,10 @@ public interface PostRepository extends JpaRepository<PostEntity, Long> {
 
     // 카테고리별 좋아요 수 기준 인기글 조회
     Page<PostEntity> findByCategoryOrderByLikeCountDescCreatedAtDesc(String category, Pageable pageable);
+
+    // 제목으로 조회
+    List<PostEntity> findByTitleContainingIgnoreCase(String title);
+
+
+    List<PostEntity> findByUser_NameContainingIgnoreCase(String username);
 }

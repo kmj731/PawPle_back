@@ -49,6 +49,10 @@ public class CommentService {
                 .post(post)
                 .parent(parent)
                 .build();
+
+        // 포인트 적립
+        user.addPoint(1);
+        userRepository.save(user);
         
         comment = commentRepository.save(comment);
         

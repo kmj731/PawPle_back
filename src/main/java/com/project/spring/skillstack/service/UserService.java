@@ -18,6 +18,7 @@ import com.project.spring.skillstack.dto.UserDtoWithoutPass;
 import com.project.spring.skillstack.dto.UserSimpleInfoDto;
 import com.project.spring.skillstack.entity.HealthCheckRecord;
 import com.project.spring.skillstack.entity.PetEntity;
+import com.project.spring.skillstack.entity.PostEntity;
 import com.project.spring.skillstack.entity.UserEntity;
 
 import jakarta.persistence.EntityNotFoundException;
@@ -195,7 +196,17 @@ public class UserService {
         UserEntity user = userRepository.findById(UserId)
             .orElseThrow(() -> new IllegalArgumentException("해당 사용자가 존재하지 않습니다."));
         
-        return new UserSimpleInfoDto(user.getPhoneNumber(), user.getBirthDate(), user.getAttr());
+        return new UserSimpleInfoDto(user.getPhoneNumber(), user.getBirthDate(), user.getPoint(),user.getAttr());
     }
+
+
+
+    public UserEntity getUserById(Long id) {
+        return userRepository.findById(id)
+            .orElseThrow(() -> new EntityNotFoundException("사용자를 찾을 수 없습니다: " + id));
+    }
+
+
+
     
 }

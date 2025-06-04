@@ -290,5 +290,18 @@ public class PostController {
         
         Page<PostDto> posts = likeService.getLikedPostsByUser(username, page, size);
         return ResponseEntity.ok(posts);
+            }
+    
+        // 게시글 블라인드
+    @GetMapping("/post/{id}")
+    public ResponseEntity<PostDto> getPostDetail(@PathVariable Long id) {
+        PostEntity post = postService.findById(id);
+        if (post == null) {
+        return ResponseEntity.notFound().build();
+        }
+        if (!post.getIsPublic()) {
+            return ResponseEntity.ok(PostDto.blinded(post.getId()));
+        }
+        return ResponseEntity.ok(PostDto.fromEntity(post));
     }
 }

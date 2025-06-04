@@ -127,6 +127,30 @@ public class PostManagerService {
         postRepository.delete(post); // 댓글도 자동 삭제됨 (Cascade 설정에 의해)
     }
 
+
+
+    public List<PostEntity> searchByTitle(String title) {
+        return postRepository.findByTitleContainingIgnoreCase(title);
+    }
+
+    public List<PostEntity> searchByUser(String username) {
+        return postRepository.findByUser_NameContainingIgnoreCase(username);
+    }
+
+
+      // 게시글 이동
+    public PostEntity movePostCategory(Long postId, String category, String subCategory) {
+        Optional<PostEntity> optionalPost = postRepository.findById(postId);
+        if (optionalPost.isEmpty()) {
+            return null;
+        }
+    
+        PostEntity post = optionalPost.get();
+        post.setCategory(category);
+        post.setSubCategory(subCategory); // null이면 null로 설정
+        return postRepository.save(post);
+    }
+
     
 }
 

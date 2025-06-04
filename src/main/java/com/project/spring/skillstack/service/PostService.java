@@ -6,6 +6,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
 
+import org.attoparser.dom.Comment;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -14,6 +15,7 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.project.spring.skillstack.config.PointPolicy;
 import com.project.spring.skillstack.dao.PostRepository;
 import com.project.spring.skillstack.dao.UserRepository;
 import com.project.spring.skillstack.dao.PetRepository;
@@ -48,6 +50,10 @@ public class PostService {
     post.setContent(postDto.getContent());
     post.setUser(user);
     post.setCreatedAt(LocalDateTime.now());
+
+    // 포인트 적립
+    user.addPoint(10);
+    userRepository.save(user);
 
     if (postDto.getPetId() != null) {
         PetEntity pet = petRepository.findById(postDto.getPetId())
@@ -288,6 +294,10 @@ public class PostService {
     //     }
     //     return false; // 적립 안됨 (확률 미충족)
     // } 
+    // 게시글 블라인드처리
+    public PostEntity findById(Long id) {
+        return postRepository.findById(id).orElse(null);
+    }
 
     
 }
