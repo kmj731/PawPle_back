@@ -35,6 +35,11 @@ public class DataInitializer implements CommandLineRunner {
     @Override
     public void run(String... args) throws Exception {
 
+        if (userRep.existsByName("root")) {
+            System.out.println("[DataInitializer] 'root' 유저가 이미 존재합니다. 초기화를 생략합니다.");
+            return;
+        }
+
         List<String> roles = new ArrayList<>();
         roles.add("USER");
         List<String> roles2 = new ArrayList<>();
@@ -300,8 +305,7 @@ public class DataInitializer implements CommandLineRunner {
         PostEntity asdfPost4 = PostEntity.builder()
             .title("콩이랑 여행 다녀왔어요! 후기 공유")
             .content("말티즈 콩이와 함께 1박 2일 펫캉스 다녀왔습니다. 팁 공유해요~")
-            .category("토픽")
-            .subCategory("일상")
+            .category("일상")
             .user(asdf)
             .viewCount(210)
             .commentCount(2)
