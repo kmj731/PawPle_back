@@ -150,7 +150,7 @@ public class DataInitializer implements CommandLineRunner {
                 LocalDateTime.now(),
                 null,
                 new ArrayList<>(),
-                0
+                1
             );
 
             PetEntity pet1 = new PetEntity(

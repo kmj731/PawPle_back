@@ -21,6 +21,9 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.OneToMany;
+import jakarta.persistence.PostLoad;
+import jakarta.persistence.PrePersist;
+import jakarta.persistence.PreUpdate;
 import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
 import jakarta.persistence.Transient;
@@ -77,6 +80,7 @@ public class UserEntity {
     @Column(name= "\"POINT\"")
     private Integer point=0;
 
+    
     public void addPoint(Integer point){
         if(this.point == null){
             this.point = 0;
