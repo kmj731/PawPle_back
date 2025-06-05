@@ -75,9 +75,12 @@ public class UserEntity {
     private List<PetEntity> pets = new ArrayList<>();
 
     @Column(name= "\"POINT\"")
-    private Integer point;
+    private Integer point=0;
 
     public void addPoint(Integer point){
+        if(this.point == null){
+            this.point = 0;
+        }
         this.point += point;
     }
 
