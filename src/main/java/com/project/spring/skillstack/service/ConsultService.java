@@ -17,6 +17,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -34,7 +35,7 @@ public class ConsultService {
     );
 
     @Autowired
-    private ConsultRepository consultPostRepo;
+    private ConsultRepository consultRep;
 
     @Autowired
     private UserRepository userRep;
@@ -60,14 +61,14 @@ public class ConsultService {
                 .orElseThrow(() -> new EntityNotFoundException("반려동물을 찾을 수 없습니다."));
 
         ConsultEntity post = dto.toEntity(user, pet);
-        ConsultEntity saved = consultPostRepo.save(post);
+        ConsultEntity saved = consultRep.save(post);
         return ConsultDto.fromEntity(saved);
     }
 
 
     @Transactional(readOnly = true)
     public ConsultDto getConsultPost(Long id) {
-        ConsultEntity post = consultPostRepo.findById(id)
+        ConsultEntity post = consultRep.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("상담글을 찾을 수 없습니다."));
         return ConsultDto.fromEntity(post);
     }
@@ -75,7 +76,7 @@ public class ConsultService {
     @Transactional(readOnly = true)
     public Page<ConsultDto> getAllConsultPosts(int page, int size) {
         Pageable pageable = PageRequest.of(page, size);
-        return consultPostRepo.findAllByOrderByCreatedAtDesc(pageable)
+        return consultRep.findAllByOrderByCreatedAtDesc(pageable)
                 .map(ConsultDto::fromEntity);
     }
 
@@ -86,20 +87,20 @@ public class ConsultService {
             throw new IllegalArgumentException("유효하지 않은 상태입니다: " + status);
         }
 
-        ConsultEntity post = consultPostRepo.findById(id)
+        ConsultEntity post = consultRep.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("상담글을 찾을 수 없습니다."));
         post.setStatus(upper);
-        consultPostRepo.save(post);
+        consultRep.save(post);
     }
 
     @Transactional
     public void deleteConsultPost(Long id, String username) {
-        ConsultEntity post = consultPostRepo.findById(id)
+        ConsultEntity post = consultRep.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("상담글을 찾을 수 없습니다."));
         if (!post.getUser().getName().equals(username)) {
             throw new SecurityException("삭제 권한이 없습니다.");
         }
-        consultPostRepo.delete(post);
+        consultRep.delete(post);
     }
 
     @Transactional(readOnly = true)
@@ -112,23 +113,30 @@ public class ConsultService {
 
         // 상태와 카테고리 둘 다 있을 경우
         if (status != null && category != null) {
-            return consultPostRepo.findByStatusAndSubCategoryOrderByCreatedAtDesc(status, category, pageable)
+            return consultRep.findByStatusAndSubCategoryOrderByCreatedAtDesc(status, category, pageable)
                     .map(ConsultDto::fromEntity);
         }
 
         if (status != null) {
-            return consultPostRepo.findByStatusOrderByCreatedAtDesc(status, pageable)
+            return consultRep.findByStatusOrderByCreatedAtDesc(status, pageable)
                     .map(ConsultDto::fromEntity);
         }
 
         if (category != null) {
-            return consultPostRepo.findBySubCategoryOrderByCreatedAtDesc(category, pageable)
+            return consultRep.findBySubCategoryOrderByCreatedAtDesc(category, pageable)
                     .map(ConsultDto::fromEntity);
         }
 
         // 둘 다 없음
-        return consultPostRepo.findAllByOrderByCreatedAtDesc(pageable)
+        return consultRep.findAllByOrderByCreatedAtDesc(pageable)
                 .map(ConsultDto::fromEntity);
     }
+
+    public Page<ConsultDto> getMyConsults(String username, int page, int size) {
+        Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());
+        Page<ConsultEntity> entities = consultRep.findByUserName(username, pageable);
+        return entities.map(ConsultDto::fromEntity);
+    }
+
 
 }

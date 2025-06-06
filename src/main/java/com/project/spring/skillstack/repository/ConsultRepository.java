@@ -21,6 +21,5 @@ public interface ConsultRepository extends JpaRepository<ConsultEntity, Long> {
 
     // 사용자 이름 + 상태 기준 필터링
     Page<ConsultEntity> findByUser_NameAndStatusOrderByCreatedAtDesc(String username, String status, Pageable pageable);
-
-
+    Page<ConsultEntity> findByUserName(String name, Pageable pageable);
 }

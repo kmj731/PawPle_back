@@ -24,7 +24,7 @@ import org.springframework.web.bind.annotation.*;
 public class ConsultController {
 
     @Autowired
-    private ConsultService consultPostService;
+    private ConsultService consultService;
     @Autowired
     private ConsultRepository consultRep;
 
@@ -38,14 +38,14 @@ public class ConsultController {
         }
 
         String username = userDetails.getUsername();
-        ConsultDto saved = consultPostService.createConsultPost(dto, username);
+        ConsultDto saved = consultService.createConsultPost(dto, username);
         return ResponseEntity.ok(saved);
     }
 
     // 단건 조회
     @GetMapping("/{id}")
     public ResponseEntity<ConsultDto> getConsult(@PathVariable Long id) {
-        ConsultDto dto = consultPostService.getConsultPost(id);
+        ConsultDto dto = consultService.getConsultPost(id);
         return ResponseEntity.ok(dto);
     }
 
@@ -58,7 +58,7 @@ public class ConsultController {
             @RequestParam(required = false) String category) {
 
         // 전체 조회 또는 필터 조회를 하나의 서비스에서 처리
-        Page<ConsultDto> posts = consultPostService.getConsultsFiltered(page, size, status, category);
+        Page<ConsultDto> posts = consultService.getConsultsFiltered(page, size, status, category);
         return ResponseEntity.ok(posts);
     }
 
@@ -67,7 +67,7 @@ public class ConsultController {
     public ResponseEntity<Void> updateStatus(
             @PathVariable Long id,
             @RequestParam String status) {
-        consultPostService.updateStatus(id, status);
+        consultService.updateStatus(id, status);
         return ResponseEntity.ok().build();
     }
 
@@ -77,10 +77,11 @@ public class ConsultController {
             @PathVariable Long id,
             @AuthenticationPrincipal UserDetails userDetails) {
         String username = userDetails.getUsername();
-        consultPostService.deleteConsultPost(id, username);
+        consultService.deleteConsultPost(id, username);
         return ResponseEntity.ok().build();
     }
 
+    // 답변 등록
     @PutMapping("/{id}/reply")
     public ResponseEntity<?> addReply(
             @PathVariable Long id,
@@ -106,5 +107,20 @@ public class ConsultController {
         return ResponseEntity.ok().build();
     }
 
+    // 본인이 작성한 상담글 조회
+    @GetMapping("/my")
+    public ResponseEntity<Page<ConsultDto>> getMyConsults(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @AuthenticationPrincipal UserDetails userDetails) {
+
+        if (userDetails == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+
+        String username = userDetails.getUsername();
+        Page<ConsultDto> myPosts = consultService.getMyConsults(username, page, size);
+        return ResponseEntity.ok(myPosts);
+    }
 
 }
