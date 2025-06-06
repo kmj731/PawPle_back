@@ -102,6 +102,7 @@ public class ConsultController {
         post.setReplyContent(body.get("content"));
         post.setReplyAuthor(userDetails.getUsername());
         post.setReplyCreatedAt(LocalDateTime.now());
+        post.setStatus("ANSWERED");
 
         consultRep.save(post);
         return ResponseEntity.ok().build();

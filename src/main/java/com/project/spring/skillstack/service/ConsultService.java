@@ -31,7 +31,7 @@ public class ConsultService {
     );
 
     private static final List<String> VALID_STATUSES = Arrays.asList(
-        "PENDING", "ANSWERED", "CLOSED"
+        "PENDING", "ANSWERED"
     );
 
     @Autowired
