@@ -48,6 +48,8 @@ public class PostService {
     PostEntity post = new PostEntity();
     post.setTitle(postDto.getTitle());
     post.setContent(postDto.getContent());
+    post.setCategory(postDto.getCategory());
+    post.setSubCategory(postDto.getSubCategory());
     post.setUser(user);
     post.setCreatedAt(LocalDateTime.now());
 
