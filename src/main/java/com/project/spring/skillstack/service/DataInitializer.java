@@ -12,13 +12,19 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
 import com.project.spring.skillstack.dao.CommentRepository;
+import com.project.spring.skillstack.dao.PetRepository;
 import com.project.spring.skillstack.dao.PostRepository;
 import com.project.spring.skillstack.dao.UserRepository;
 import com.project.spring.skillstack.entity.CommentEntity;
+import com.project.spring.skillstack.entity.ConsultEntity;
 import com.project.spring.skillstack.entity.HealthCheckRecord;
 import com.project.spring.skillstack.entity.PetEntity;
 import com.project.spring.skillstack.entity.PostEntity;
 import com.project.spring.skillstack.entity.UserEntity;
+import com.project.spring.skillstack.entity.VaccinationRecord;
+import com.project.spring.skillstack.repository.ConsultRepository;
+import com.project.spring.skillstack.repository.HealthCheckRecordRepository;
+import com.project.spring.skillstack.repository.VaccinationRecordRepository;
 
 @Component
 public class DataInitializer implements CommandLineRunner {
@@ -31,6 +37,14 @@ public class DataInitializer implements CommandLineRunner {
     PostRepository postRep;
     @Autowired
     CommentRepository commentRep;
+    @Autowired
+    VaccinationRecordRepository vaccineRep;
+    @Autowired
+    PetRepository petRep;
+    @Autowired
+    HealthCheckRecordRepository healthRecordRep;
+    @Autowired
+    ConsultRepository consultRep;
 
     @Override
     public void run(String... args) throws Exception {
@@ -47,12 +61,44 @@ public class DataInitializer implements CommandLineRunner {
 
         UserEntity root = new UserEntity(null, "root", passwordEncoder.encode("1234"), "root", List.of("ADMIN"), null, "010-0000-0000", LocalDate.of(1999,9,9), null, null, LocalDateTime.now(), null, new ArrayList<>(),99999);
         UserEntity abcd = new UserEntity(null, "abcd", passwordEncoder.encode("1234"), "abcd", roles, "abc123@pawple.com", "010-1234-5678", null, null, null, LocalDateTime.now(), null, new ArrayList<>(),100);
-        UserEntity vet = new UserEntity(null, "vet", passwordEncoder.encode("1234"), "vet", roles, "vet123@pawple.com", "010-4321-8765", null, null, null, LocalDateTime.now(), null,new ArrayList<>(),0);
+        UserEntity vet = new UserEntity(null, "vet", passwordEncoder.encode("1234"), "vet", roles2, "vet123@pawple.com", "010-4321-8765", null, null, null, LocalDateTime.now(), null,new ArrayList<>(),0);
+
 
         PetEntity abcdPet = new PetEntity("고양이", 4.0, "나비", 2025, "수컷", "코숏", LocalDate.now(), abcd);
         abcd.getPets().add(abcdPet);
         PetEntity abcdPet2 = new PetEntity("강아지", 4.0, "바둑이", 2024, "암컷", "진돗개", LocalDate.now(), abcd);
         abcd.getPets().add(abcdPet2);
+
+        userRep.save(root);
+        userRep.save(abcd);
+        userRep.save(vet);
+
+        VaccinationRecord vaccine1 = VaccinationRecord.builder()
+            .pet(abcdPet)
+            .step(1)
+            .vaccineName("1차접종(종합백신+코로나 장염)")
+            .vaccinatedAt(LocalDate.of(2025, 6, 6))
+            .nextVaccinationDate(LocalDate.of(2025, 6, 20))
+            .build();
+
+        VaccinationRecord vaccine2 = VaccinationRecord.builder()
+            .pet(abcdPet)
+            .step(2)
+            .vaccineName("2차접종(종합백신+코로나 장염)")
+            .vaccinatedAt(LocalDate.of(2025, 6, 20))
+            .nextVaccinationDate(LocalDate.of(2025, 7, 4))
+            .build();
+
+        VaccinationRecord vaccine3 = VaccinationRecord.builder()
+            .pet(abcdPet2)
+            .step(1)
+            .vaccineName("1차접종(종합백신+코로나 장염)")
+            .vaccinatedAt(LocalDate.of(2025, 6, 1))
+            .nextVaccinationDate(LocalDate.of(2025, 6, 15))
+            .build();
+
+        petRep.saveAll(List.of(abcdPet, abcdPet2));
+        vaccineRep.saveAll(List.of(vaccine1, vaccine2, vaccine3));
 
         PostEntity abcdPost1 = PostEntity.builder()
             .title("첫 글을 올립니다!")
@@ -91,6 +137,11 @@ public class DataInitializer implements CommandLineRunner {
             .commentCount(1)
             .build();
 
+        postRep.save(abcdPost1);
+        postRep.save(abcdPost2);
+        postRep.save(abcdPost3);
+        postRep.save(abcdPost4);
+
         HealthCheckRecord record1 = new HealthCheckRecord();
         record1.setUserId(abcd.getId()); 
         record1.setTotalScore(80);
@@ -106,15 +157,32 @@ public class DataInitializer implements CommandLineRunner {
         record2.setCheckedAt(LocalDateTime.now().minusDays(2));
         record2.setPet(abcdPet2);
         abcdPet2.getHealthRecords().add(record2);
-
-        userRep.save(root);
-        userRep.save(abcd);
-        userRep.save(vet);
-        postRep.save(abcdPost1);
-        postRep.save(abcdPost2);
-        postRep.save(abcdPost3);
-        postRep.save(abcdPost4);
         
+        healthRecordRep.save(record1);
+        healthRecordRep.save(record2);
+
+        ConsultEntity abcdConsult1 = ConsultEntity.builder()
+            .title("고양이 나비가 밥을 잘 안 먹어요")
+            .content("안녕하세요. 고양이 나비가 요즘 밥을 잘 먹지 않고 기운이 없어 보여 걱정입니다. 사료를 바꿔야 할지 병원을 가야 할지 고민됩니다.")
+            .createdAt(LocalDateTime.now().minusDays(3))
+            .status("대기")
+            .subCategory("식이관리")
+            .user(abcd)
+            .pet(abcdPet)
+            .build();
+
+        ConsultEntity abcdConsult2 = ConsultEntity.builder()
+            .title("강아지 바둑이가 산책 중 다리를 절어요")
+            .content("최근에 바둑이와 산책을 나갔는데, 갑자기 한쪽 다리를 들고 절기 시작했습니다. 혹시 어디 삐었을까요? 어떻게 조치해야 할까요?")
+            .createdAt(LocalDateTime.now().minusDays(1))
+            .status("대기")
+            .subCategory("행동")
+            .user(abcd)
+            .pet(abcdPet2)
+            .build();
+
+        consultRep.save(abcdConsult1);
+        consultRep.save(abcdConsult2);
 
         UserEntity qwer = new UserEntity(null, "qwer", passwordEncoder.encode("1234"), "qwer", roles, "qwer123@pawple.com", "010-5678-1234", null, null, null, LocalDateTime.now(), null, new ArrayList<>(),999);
 
@@ -129,6 +197,59 @@ public class DataInitializer implements CommandLineRunner {
         asdf.getPets().add(asdfPet1);
         PetEntity asdfPet2 = new PetEntity("강아지", 6.0, "콩이", 2023, "수컷", "말티즈", LocalDate.now(), asdf);
         asdf.getPets().add(asdfPet2);
+
+        userRep.save(qwer);
+        userRep.save(asdf);
+        petRep.saveAll(List.of(qwerPet1, qwerPet2, asdfPet1, asdfPet2));
+
+        ConsultEntity consult1 = ConsultEntity.builder()
+            .title("초코가 자꾸 긁어요")
+            .content("최근 초코가 자주 몸을 긁고 있어요. 알러지일까요?")
+            .createdAt(LocalDateTime.now().minusDays(4))
+            .status("ANSWERED")
+            .subCategory("피부")
+            .user(qwer)
+            .pet(qwerPet1)
+            .replyContent("가려움이 지속된다면 피부염일 수 있습니다. 병원 방문을 권장합니다.")
+            .replyAuthor(vet.getName())
+            .replyCreatedAt(LocalDateTime.now().minusDays(2))
+            .build();
+
+        ConsultEntity consult2 = ConsultEntity.builder()
+            .title("하양이가 물을 너무 많이 마셔요")
+            .content("며칠 전부터 물을 자주 마시는 것 같은데 문제일까요?")
+            .createdAt(LocalDateTime.now().minusDays(3))
+            .status("PENDING")
+            .subCategory("내분비")
+            .user(qwer)
+            .pet(qwerPet2)
+            .build();
+
+        ConsultEntity consult3 = ConsultEntity.builder()
+            .title("미미가 자꾸 구토를 해요")
+            .content("먹고 바로 토하거나 공복에도 구토 증상이 있어요.")
+            .createdAt(LocalDateTime.now().minusDays(5))
+            .status("ANSWERED")
+            .subCategory("소화기")
+            .user(asdf)
+            .pet(asdfPet1)
+            .replyContent("잦은 구토는 위염이나 헤어볼 때문일 수 있습니다. 진료를 받아보세요.")
+            .replyAuthor(vet.getName())
+            .replyCreatedAt(LocalDateTime.now().minusDays(4))
+            .build();
+
+        ConsultEntity consult4 = ConsultEntity.builder()
+            .title("콩이가 산책 중에 자꾸 멈춰요")
+            .content("산책하다가 중간에 멈추고 안 가려고 하는데 무슨 이유일까요?")
+            .createdAt(LocalDateTime.now().minusDays(2))
+            .status("PENDING")
+            .subCategory("행동")
+            .user(asdf)
+            .pet(asdfPet2)
+            .build();
+
+        consultRep.saveAll(List.of(consult1, consult2, consult3, consult4));
+
 
         // 유저 초기화 데이터
         
@@ -157,7 +278,7 @@ public class DataInitializer implements CommandLineRunner {
                 "강아지",
                 5.0 + i % 3,
                 "댕댕이" + suffix,
-                1 + i % 5,
+                2020 + i % 5,
                 (i % 2 == 0) ? "수컷" : "암컷",
                 "푸들",
                 LocalDate.now().minusYears(1 + i % 3),
@@ -168,7 +289,7 @@ public class DataInitializer implements CommandLineRunner {
                 "고양이",
                 4.0 + i % 2,
                 "냐옹이" + suffix,
-                2 + i % 4,
+                2021 + i % 4,
                 (i % 2 == 0) ? "암컷" : "수컷",
                 "러시안블루",
                 LocalDate.now().minusYears(2 + i % 2),

@@ -1,0 +1,110 @@
+package com.project.spring.skillstack.controller;
+
+import com.project.spring.skillstack.dto.ConsultDto;
+import com.project.spring.skillstack.entity.ConsultEntity;
+import com.project.spring.skillstack.repository.ConsultRepository;
+import com.project.spring.skillstack.service.ConsultService;
+
+import jakarta.persistence.EntityNotFoundException;
+import jakarta.validation.Valid;
+
+import java.time.LocalDateTime;
+import java.util.Map;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.web.bind.annotation.*;
+
+@RestController
+@RequestMapping("/consult")
+public class ConsultController {
+
+    @Autowired
+    private ConsultService consultPostService;
+    @Autowired
+    private ConsultRepository consultRep;
+
+    // 상담글 등록
+    @PostMapping
+    public ResponseEntity<ConsultDto> createConsult(
+            @Valid @RequestBody ConsultDto dto,
+            @AuthenticationPrincipal UserDetails userDetails) {
+        if (userDetails == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+
+        String username = userDetails.getUsername();
+        ConsultDto saved = consultPostService.createConsultPost(dto, username);
+        return ResponseEntity.ok(saved);
+    }
+
+    // 단건 조회
+    @GetMapping("/{id}")
+    public ResponseEntity<ConsultDto> getConsult(@PathVariable Long id) {
+        ConsultDto dto = consultPostService.getConsultPost(id);
+        return ResponseEntity.ok(dto);
+    }
+
+    // 전체 조회 (페이징)
+    @GetMapping
+    public ResponseEntity<Page<ConsultDto>> getConsults(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(required = false) String status,
+            @RequestParam(required = false) String category) {
+
+        // 전체 조회 또는 필터 조회를 하나의 서비스에서 처리
+        Page<ConsultDto> posts = consultPostService.getConsultsFiltered(page, size, status, category);
+        return ResponseEntity.ok(posts);
+    }
+
+    // 상태 변경 (예: PENDING → ANSWERED)
+    @PutMapping("/{id}/status")
+    public ResponseEntity<Void> updateStatus(
+            @PathVariable Long id,
+            @RequestParam String status) {
+        consultPostService.updateStatus(id, status);
+        return ResponseEntity.ok().build();
+    }
+
+    // 삭제
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteConsult(
+            @PathVariable Long id,
+            @AuthenticationPrincipal UserDetails userDetails) {
+        String username = userDetails.getUsername();
+        consultPostService.deleteConsultPost(id, username);
+        return ResponseEntity.ok().build();
+    }
+
+    @PutMapping("/{id}/reply")
+    public ResponseEntity<?> addReply(
+            @PathVariable Long id,
+            @RequestBody Map<String, String> body,
+            @AuthenticationPrincipal UserDetails userDetails) {
+
+        if (userDetails == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+
+        ConsultEntity post = consultRep.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("상담글이 없습니다."));
+
+        if (post.getReplyContent() != null) {
+            return ResponseEntity.badRequest().body("이미 답글이 등록된 상담입니다.");
+        }
+
+        post.setReplyContent(body.get("content"));
+        post.setReplyAuthor(userDetails.getUsername());
+        post.setReplyCreatedAt(LocalDateTime.now());
+
+        consultRep.save(post);
+        return ResponseEntity.ok().build();
+    }
+
+
+}

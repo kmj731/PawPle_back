@@ -58,8 +58,8 @@ public class PostEntity {
     @Column
     private LocalDateTime updatedAt;
     
-    @Column
-    private Integer viewCount;
+    @Column(nullable = false)
+    private Integer viewCount = 0;
 
     @Builder.Default
     @Column(name = "COMMENT_COUNT")
