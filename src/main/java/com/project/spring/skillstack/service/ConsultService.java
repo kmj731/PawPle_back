@@ -10,7 +10,6 @@ import com.project.spring.skillstack.entity.UserEntity;
 
 import jakarta.persistence.EntityNotFoundException;
 
-import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.List;
 
@@ -49,7 +48,7 @@ public class ConsultService {
             throw new IllegalArgumentException("유효하지 않은 상담 주제입니다: " + dto.getSubCategory());
         }
 
-        String status = dto.getStatus() != null ? dto.getStatus().toUpperCase() : "PENDING";
+        String status = dto.getStatus() != null ? dto.getStatus().toUpperCase() : "대기";
         if (!VALID_STATUSES.contains(status)) {
             throw new IllegalArgumentException("유효하지 않은 상태 값입니다: " + status);
         }
@@ -57,19 +56,14 @@ public class ConsultService {
         UserEntity user = userRep.findByName(username)
                 .orElseThrow(() -> new UsernameNotFoundException("사용자를 찾을 수 없습니다."));
 
-        ConsultEntity post = dto.toEntity();
-        post.setUser(user);
-        post.setCreatedAt(LocalDateTime.now());
+        PetEntity pet = petRep.findById(dto.getPetId())
+                .orElseThrow(() -> new EntityNotFoundException("반려동물을 찾을 수 없습니다."));
 
-        if (dto.getPetId() != null) {
-            PetEntity pet = petRep.findById(dto.getPetId())
-                    .orElseThrow(() -> new EntityNotFoundException("반려동물을 찾을 수 없습니다."));
-            post.setPet(pet);
-        }
-
+        ConsultEntity post = dto.toEntity(user, pet);
         ConsultEntity saved = consultPostRepo.save(post);
         return ConsultDto.fromEntity(saved);
     }
+
 
     @Transactional(readOnly = true)
     public ConsultDto getConsultPost(Long id) {

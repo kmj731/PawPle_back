@@ -1,6 +1,8 @@
 package com.project.spring.skillstack.dto;
 
 import com.project.spring.skillstack.entity.ConsultEntity;
+import com.project.spring.skillstack.entity.PetEntity;
+import com.project.spring.skillstack.entity.UserEntity;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -32,8 +34,11 @@ public class ConsultDto {
 
     @NotNull(message = "반려동물을 선택해주세요.")
     private Long petId;
-
     private String petName;
+    private String petType;
+    private String breed;
+    private String gender;
+    private Integer birthYear;
 
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
@@ -53,6 +58,10 @@ public class ConsultDto {
                 .username(entity.getUser().getName())
                 .petId(entity.getPet() != null ? entity.getPet().getId() : null)
                 .petName(entity.getPet() != null ? entity.getPet().getPetName() : null)
+                .petType(entity.getPet() != null ? entity.getPet().getPetType() : null)
+                .breed(entity.getPet() != null ? entity.getPet().getPetBreed() : null)
+                .gender(entity.getPet() != null ? entity.getPet().getPetGender() : null)
+                .birthYear(entity.getPet() != null ? entity.getPet().getPetAge() : null)
                 .createdAt(entity.getCreatedAt())
                 .updatedAt(entity.getUpdatedAt())
                 .replyContent(entity.getReplyContent())
@@ -61,15 +70,18 @@ public class ConsultDto {
                 .build();
     }
 
-    public ConsultEntity toEntity() {
+    public ConsultEntity toEntity(UserEntity user, PetEntity pet) {
         return ConsultEntity.builder()
                 .title(this.title)
                 .content(this.content)
                 .subCategory(this.subCategory)
-                .status(this.status != null ? this.status.toUpperCase() : "PENDING")
+                .status(this.status != null ? this.status.toUpperCase() : "대기")
                 .replyContent(this.replyContent)
                 .replyAuthor(this.replyAuthor)
                 .replyCreatedAt(this.replyCreatedAt)
+                .createdAt(LocalDateTime.now())
+                .user(user)
+                .pet(pet)
                 .build();
     }
 }
