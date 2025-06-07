@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -35,9 +36,11 @@ import com.project.spring.skillstack.dto.UserSimpleInfoDto;
 import com.project.spring.skillstack.dto.VisibilityUpdateRequest;
 import com.project.spring.skillstack.entity.PetEntity;
 import com.project.spring.skillstack.entity.PostEntity;
+import com.project.spring.skillstack.entity.ProductEntity;
 import com.project.spring.skillstack.entity.UserEntity;
 import com.project.spring.skillstack.service.PostManagerService;
 import com.project.spring.skillstack.service.PostService;
+import com.project.spring.skillstack.service.ProductService;
 import com.project.spring.skillstack.service.UserService;
 
 import lombok.RequiredArgsConstructor;
@@ -56,11 +59,13 @@ public class ManagerController {
 
     private final PostRepository postRepository;
 
-    public ManagerController(UserService userService, PostService postService, PostManagerService postManagerService, PostRepository postRepository){
+    private final ProductService productService;
+    public ManagerController(UserService userService, PostService postService, PostManagerService postManagerService, PostRepository postRepository,ProductService productService){
         this.userService = userService;
         this.postService = postService;
         this.postManagerService = postManagerService;
         this.postRepository = postRepository;
+        this.productService = productService;
     }
 
     // 전체 회원 조회
@@ -389,7 +394,38 @@ public class ManagerController {
     }
     return ResponseEntity.ok(PostDto.fromEntity(updatedPost));
     }
+    
+
+    // 상품 목록 반환
+    @GetMapping("/product{id}")
+    public List<ProductEntity> getAllProducts() {
+        return productService.findAll();
     }
+
+    @PostMapping("/product/{id}")
+    public ProductEntity createProduct(@RequestBody ProductEntity product) {
+        return productService.save(product);
+    }
+
+    @PutMapping("/product/{id}")
+    public ProductEntity updateProduct(@PathVariable Long id, @RequestBody ProductEntity product) {
+        return productService.update(id, product);
+    }
+
+    @DeleteMapping("/product/{id}")
+    public void deleteProduct(@PathVariable Long id) {
+        productService.delete(id);
+    }
+}
+
+
+
+
+
+
+
+
+
     
 
     

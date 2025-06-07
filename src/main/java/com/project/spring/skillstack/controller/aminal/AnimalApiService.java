@@ -19,7 +19,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 @Service
 public class AnimalApiService {
 
-    @Value("${ANIMAL_API_KEY}")
+    @Value("${ANIMAL_API_KEY:defaultValue}")
     private String apiKey;
 
     private final RestTemplate restTemplate = new RestTemplate();
