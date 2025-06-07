@@ -71,7 +71,8 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.GET, "/comments/**").permitAll() 
                         .requestMatchers(HttpMethod.GET, "/api/posts/**").permitAll() // GET 요청은 인증없이 허용
                         .requestMatchers("/api/**").authenticated() // 나머지 API는 인증 필요
-                        .requestMatchers("/posts/**", "/public/**", "/permit/**", "/docs", "/swagger-ui/**", "/v3/**", "/vaccine/**", "/favicon.ico").permitAll()
+                        .requestMatchers("/docs", "/swagger-ui/**", "/v3/**", "/vaccine/**", "/favicon.ico").permitAll()
+                        .requestMatchers("/posts/**", "/public/**", "/permit/**", "/animal/**").permitAll()
                         .requestMatchers("/oauth2/**", "/logout").permitAll()
                         .requestMatchers("/auth/**", "/user/**", "/pet/**", "/consult/**").authenticated()
                         .requestMatchers("/admin/**").hasRole("ADMIN")
