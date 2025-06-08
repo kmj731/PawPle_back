@@ -1,5 +1,7 @@
 package com.project.spring.skillstack.repository;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -13,7 +15,8 @@ public interface HealthCheckRecordRepository extends JpaRepository<HealthCheckRe
     Optional<HealthCheckRecord> findTopByUserIdOrderByCheckedAtDesc(Long userId);
     List<HealthCheckRecord> findByPetId(Long petId);
     Optional<HealthCheckRecord> findTopByPetIdOrderByCheckedAtDesc(Long petId);
-    
-}
+    Optional<HealthCheckRecord> findByPetIdAndCheckedAt(Long petId, LocalDateTime checkedAt);
+    List<HealthCheckRecord> findByPetIdOrderByCheckedAtDesc(Long petId);
 
+}
 
