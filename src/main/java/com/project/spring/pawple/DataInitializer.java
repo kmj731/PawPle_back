@@ -17,8 +17,6 @@ import com.project.spring.pawple.application.consult.ConsultEntity;
 import com.project.spring.pawple.application.consult.ConsultRepository;
 import com.project.spring.pawple.application.health.HealthCheckRecord;
 import com.project.spring.pawple.application.health.HealthCheckRecordRepository;
-import com.project.spring.pawple.application.health.VaccinationRecord;
-import com.project.spring.pawple.application.health.VaccinationRecordRepository;
 import com.project.spring.pawple.application.pet.PetEntity;
 import com.project.spring.pawple.application.pet.PetRepository;
 import com.project.spring.pawple.application.post.PostEntity;
@@ -27,6 +25,8 @@ import com.project.spring.pawple.application.store.ProductEntity;
 import com.project.spring.pawple.application.store.ProductRepository;
 import com.project.spring.pawple.application.user.UserEntity;
 import com.project.spring.pawple.application.user.UserRepository;
+import com.project.spring.pawple.application.vaccine.VaccinationRecord;
+import com.project.spring.pawple.application.vaccine.VaccinationRecordRepository;
 
 @Component
 public class DataInitializer implements CommandLineRunner {

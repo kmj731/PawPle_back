@@ -1,4 +1,4 @@
-package com.project.spring.pawple.application.health;
+package com.project.spring.pawple.application.vaccine;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.format.annotation.DateTimeFormat;

@@ -1,4 +1,4 @@
-package com.project.spring.pawple.application.health;
+package com.project.spring.pawple.application.vaccine;
 
 import jakarta.persistence.*;
 import lombok.*;
