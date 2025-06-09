@@ -41,22 +41,22 @@ public class PostController {
     // private final PointService pointService;
 
     // public PostController(PointService pointService){
-    //     this.pointService = pointService;
+    // this.pointService = pointService;
     // }
-    
+
     // 게시글 생성
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<?> createPost(
-        @RequestPart("post") String postDtoJson, // String으로 받기
-        @RequestPart(value = "mediaFiles", required = false) List<MultipartFile> mediaFiles,
-        @RequestPart(value = "videoFile", required = false) MultipartFile videoFile,
-        @AuthenticationPrincipal CustomUserDetails userDetails) {
-        
+            @RequestPart("post") String postDtoJson, // String으로 받기
+            @RequestPart(value = "mediaFiles", required = false) List<MultipartFile> mediaFiles,
+            @RequestPart(value = "videoFile", required = false) MultipartFile videoFile,
+            @AuthenticationPrincipal CustomUserDetails userDetails) {
+
         try {
             // JSON 문자열을 PostDto로 변환
             ObjectMapper objectMapper = new ObjectMapper();
             PostDto postDto = objectMapper.readValue(postDtoJson, PostDto.class);
-            
+
             PostDto result = postService.createPostWithMedia(postDto, mediaFiles, videoFile, userDetails.getUsername());
             return ResponseEntity.ok(result);
         } catch (Exception e) {
@@ -67,17 +67,17 @@ public class PostController {
 
         // 포인트 적립 시도 : 30% 확률로 5 ~ 15점 랜덤 적립
         // try {
-        //     boolean awarded = pointService.awardRandomPoints(username, "게시글 작성 포인트 적립");
-        //     if (awarded) {
-        //         // 성공 시 로그 출력 또는 별도 알림 처리 가능
-        //         System.out.println("포인트가 적립되었습니다.");
-        //     }
+        // boolean awarded = pointService.awardRandomPoints(username, "게시글 작성 포인트 적립");
+        // if (awarded) {
+        // // 성공 시 로그 출력 또는 별도 알림 처리 가능
+        // System.out.println("포인트가 적립되었습니다.");
+        // }
         // } catch (Exception e) {
-        //     // 포인트 적립 실패해도 게시글 작성은 성공적으로 처리됨
-        //     System.err.println("포인트 적립 중 오류 발생: " + e.getMessage());
+        // // 포인트 적립 실패해도 게시글 작성은 성공적으로 처리됨
+        // System.err.println("포인트 적립 중 오류 발생: " + e.getMessage());
         // }
     }
-    
+
     // 게시글 목록 조회 (페이징)
     @GetMapping
     public ResponseEntity<Page<PostDto>> getAllPosts(
@@ -127,7 +127,7 @@ public class PostController {
         PostDto post = postService.getPostById(id);
         return ResponseEntity.ok(post);
     }
-    
+
     // 게시글 수정
     @PutMapping("/{id}")
     public ResponseEntity<PostDto> updatePost(
@@ -135,7 +135,7 @@ public class PostController {
             @RequestBody PostDto postDto) {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         String username = auth.getName();
-        
+
         try {
             PostDto updatedPost = postService.updatePost(id, postDto, username);
             return ResponseEntity.ok(updatedPost);
@@ -143,13 +143,13 @@ public class PostController {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
         }
     }
-    
+
     // 게시글 삭제
     @DeleteMapping("/{id}")
     public ResponseEntity<Map<String, String>> deletePost(@PathVariable Long id) {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         String username = auth.getName();
-        
+
         try {
             postService.deletePost(id, username);
             Map<String, String> response = new HashMap<>();
@@ -159,7 +159,7 @@ public class PostController {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
         }
     }
-    
+
     // 특정 사용자의 게시글 조회
     @GetMapping("/user/{username}")
     public ResponseEntity<Page<PostDto>> getPostsByUser(
@@ -180,7 +180,7 @@ public class PostController {
         Page<PostDto> posts = postService.getPostsByUserAndCategory(username, category, page, size);
         return ResponseEntity.ok(posts);
     }
-    
+
     // 게시글 검색 (제목 또는 내용)
     @GetMapping("/search")
     public ResponseEntity<Page<PostDto>> searchPosts(
@@ -196,16 +196,16 @@ public class PostController {
         }
         return ResponseEntity.ok(posts);
     }
-    
+
     // 내 게시글 조회
     @GetMapping("/my-posts")
     public ResponseEntity<Page<PostDto>> getMyPosts(
             @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size, 
+            @RequestParam(defaultValue = "10") int size,
             @RequestParam(required = false) String category) {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         String username = auth.getName();
-        
+
         Page<PostDto> posts;
         if (category != null && !category.isEmpty()) {
             posts = postService.getPostsByUserAndCategory(username, category, page, size);
@@ -250,15 +250,15 @@ public class PostController {
     public ResponseEntity<Map<String, Object>> toggleLike(@PathVariable Long id) {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         String username = auth.getName();
-        
+
         boolean isLiked = likeService.toggleLike(id, username);
         long likeCount = likeService.getLikeCount(id);
-        
+
         Map<String, Object> response = new HashMap<>();
         response.put("isLiked", isLiked);
         response.put("likeCount", likeCount);
         response.put("message", isLiked ? "좋아요를 눌렀습니다." : "좋아요를 취소했습니다.");
-        
+
         return ResponseEntity.ok(response);
     }
 
@@ -267,14 +267,14 @@ public class PostController {
     public ResponseEntity<Map<String, Object>> getLikeStatus(@PathVariable Long id) {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         String username = auth.getName();
-        
+
         boolean isLiked = likeService.isLikedByUser(id, username);
         long likeCount = likeService.getLikeCount(id);
-        
+
         Map<String, Object> response = new HashMap<>();
         response.put("isLiked", isLiked);
         response.put("likeCount", likeCount);
-        
+
         return ResponseEntity.ok(response);
     }
 
@@ -300,21 +300,42 @@ public class PostController {
             @RequestParam(defaultValue = "10") int size) {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         String username = auth.getName();
-        
+
         Page<PostDto> posts = likeService.getLikedPostsByUser(username, page, size);
         return ResponseEntity.ok(posts);
-            }
-    
-        // 게시글 블라인드
+    }
+
+    // 게시글 블라인드
     @GetMapping("/post/{id}")
     public ResponseEntity<PostDto> getPostDetail(@PathVariable Long id) {
         PostEntity post = postService.findById(id);
         if (post == null) {
-        return ResponseEntity.notFound().build();
+            return ResponseEntity.notFound().build();
         }
         if (!post.getIsPublic()) {
             return ResponseEntity.ok(PostDto.blinded(post.getId()));
         }
         return ResponseEntity.ok(PostDto.fromEntity(post));
     }
+
+    // 이전 글 조회
+@GetMapping("/{id}/previous")
+public ResponseEntity<PostDto> getPreviousPost(@PathVariable Long id) {
+    PostDto previousPost = postService.findPrevious(id);
+    if (previousPost == null) {
+        return ResponseEntity.noContent().build(); // 204
+    }
+    return ResponseEntity.ok(previousPost);
+}
+
+// 다음 글 조회
+@GetMapping("/{id}/next")
+public ResponseEntity<PostDto> getNextPost(@PathVariable Long id) {
+    PostDto nextPost = postService.findNext(id);
+    if (nextPost == null) {
+        return ResponseEntity.noContent().build(); // 204
+    }
+    return ResponseEntity.ok(nextPost);
+}
+    
 }
