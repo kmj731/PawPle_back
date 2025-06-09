@@ -7,6 +7,7 @@ import java.util.Map;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -20,10 +21,14 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.project.spring.skillstack.dto.PostDto;
 import com.project.spring.skillstack.entity.PostEntity;
+import com.project.spring.skillstack.service.CustomUserDetails;
 import com.project.spring.skillstack.service.PostLikeService;
 // import com.project.spring.skillstack.service.PointService;
 import com.project.spring.skillstack.service.PostService;
@@ -45,11 +50,25 @@ public class PostController {
     // }
     
     // 게시글 생성
-    @PostMapping
-    public ResponseEntity<?> createPost(@RequestBody PostDto postDto,
-                                    @AuthenticationPrincipal UserDetails userDetails) {
-        String username = userDetails.getUsername();
-        PostEntity savedPost = postService.createPost(postDto, username);
+    @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<?> createPost(
+        @RequestPart("post") String postDtoJson, // String으로 받기
+        @RequestPart(value = "mediaFiles", required = false) List<MultipartFile> mediaFiles,
+        @RequestPart(value = "videoFile", required = false) MultipartFile videoFile,
+        @AuthenticationPrincipal CustomUserDetails userDetails) {
+        
+        try {
+            // JSON 문자열을 PostDto로 변환
+            ObjectMapper objectMapper = new ObjectMapper();
+            PostDto postDto = objectMapper.readValue(postDtoJson, PostDto.class);
+            
+            PostDto result = postService.createPostWithMedia(postDto, mediaFiles, videoFile, userDetails.getUsername());
+            return ResponseEntity.ok(result);
+        } catch (Exception e) {
+            Map<String, String> errorResponse = new HashMap<>();
+            errorResponse.put("error", "게시글 생성 중 오류가 발생했습니다: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
+        }
 
         // 포인트 적립 시도 : 30% 확률로 5 ~ 15점 랜덤 적립
         // try {
@@ -62,7 +81,6 @@ public class PostController {
         //     // 포인트 적립 실패해도 게시글 작성은 성공적으로 처리됨
         //     System.err.println("포인트 적립 중 오류 발생: " + e.getMessage());
         // }
-        return ResponseEntity.ok(savedPost);
     }
     
     // 게시글 목록 조회 (페이징)

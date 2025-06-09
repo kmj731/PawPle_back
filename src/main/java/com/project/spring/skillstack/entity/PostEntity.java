@@ -98,6 +98,9 @@ public class PostEntity {
     @JoinColumn(name = "pet_id")
     private PetEntity pet;
 
+    @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<MediaEntity> mediaList = new ArrayList<>();    
+
     @PrePersist
     protected void onCreate() {
         this.createdAt = LocalDateTime.now();
