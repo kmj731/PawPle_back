@@ -7,20 +7,21 @@ import java.util.stream.Collectors;
 
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.project.spring.skillstack.dao.CommentRepository;
 import com.project.spring.skillstack.dao.PetRepository;
 import com.project.spring.skillstack.dao.PostRepository;
 import com.project.spring.skillstack.dao.UserRepository;
-
-
+import com.project.spring.skillstack.dto.UserDto;
 import com.project.spring.skillstack.dto.UserDtoWithoutPass;
+import com.project.spring.skillstack.dto.UserSimpleInfoDto;
 import com.project.spring.skillstack.entity.HealthCheckRecord;
 import com.project.spring.skillstack.entity.PetEntity;
 import com.project.spring.skillstack.entity.UserEntity;
 
 import jakarta.persistence.EntityNotFoundException;
-import jakarta.transaction.Transactional;
+
 
 
 
@@ -130,33 +131,71 @@ public class UserService {
     }
     
 
-    // 회원 삭제
-    public void deleteUserByID(Long userId) {
+
+    // 회원 삭제 
+    public void deleteUser(Long userId) {
         UserEntity user = userRepository.findById(userId)
-            .orElseThrow(() -> new EntityNotFoundException("User not found"));
+            .orElseThrow(() -> new RuntimeException("사용자를 찾을 수 없습니다."));
 
-        // 1. PetEntity의 healthRecords 자식 삭제
-        for (PetEntity pet : user.getPets()) {
-            pet.getHealthRecords().clear(); // HealthCheckRecord 삭제 (orphanRemoval)
+        
+        // 자식 Pet의 healthRecord도 비워야 Pet이 삭제 가능
+        for(PetEntity pet : user.getPets()) {
+            pet.getHealthRecords().clear();
         }
-
-        // 2. User의 pets 컬렉션에서 PetEntity 제거 (orphanRemoval에 의해 pet 삭제)
+        
         user.getPets().clear();
-
-        // 3. User 삭제
+        // PetEntity는 cascade + orphanRemoval로 인해 자동 삭제됨
         userRepository.delete(user);
     }
 
+
     // roles 변경
     @Transactional
-    public void updateUserRoles(Long userId, List<String> newRoles) {
+    public UserDto updateRoles(Long userId, List<String> newRoles) {
         UserEntity user = userRepository.findById(userId)
             .orElseThrow(() -> new RuntimeException("User not found"));
 
-        user.setRoles(newRoles); // ElementCollection은 내부적으로 DELETE 후 INSERT 처리됨
-        userRepository.save(user); // 생략해도 트랜잭션 종료 시 flush됨
+        user.setRoles(newRoles); // roles만 수정됨
+
+        // 변경 감지(dirty checking)로 자동 update
+        return user.toDto(); // ✅ UserDto 반환
     }
 
+    // 게시글 삭제
 
+
+    // roles 변경
+//     @Transactional
+//     public UserDto updateRoles(Long userId, List<String> newRoles) {
+//     UserEntity user = userRepository.findById(userId)
+//         .orElseThrow(() -> new RuntimeException("User not found"));
+
+//     // 필요한 경우 역할 유효성 검사 추가 가능
+//     validateRoles(newRoles);
+
+//     user.setRoles(newRoles);
+
+//     // JPA 변경 감지로 업데이트 처리됨
+//     return user.toDto();
+// }
+
+//     private void validateRoles(List<String> roles) {
+//         List<String> validRoles = List.of("ADMIN", "USER", "VET");
+//         for (String role : roles) {
+//             if (!validRoles.contains(role)) {
+//             throw new IllegalArgumentException("Invalid role: " + role);
+//         }
+//     }
+// }
+
+
+
+    // 회원 상세 정보 조회
+    public UserSimpleInfoDto getUserSimpleInfoDto(Long UserId){
+        UserEntity user = userRepository.findById(UserId)
+            .orElseThrow(() -> new IllegalArgumentException("해당 사용자가 존재하지 않습니다."));
+        
+        return new UserSimpleInfoDto(user.getPhoneNumber(), user.getBirthDate(), user.getAttr());
+    }
     
 }

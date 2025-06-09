@@ -37,6 +37,24 @@ public class PetDto {
         
     }
 
+    // 정적 변환 메서드
+    public static PetDto fromEntity(PetEntity pet) {
+        if (pet == null) return null;
+        PetDto dto = new PetDto();
+        dto.id = pet.getId();
+        dto.petName = pet.getPetName();
+        dto.petType = pet.getPetType();
+        dto.petAge = pet.getPetAge();
+        dto.petGender = pet.getPetGender();
+        dto.petBreed = pet.getPetBreed();
+        dto.weight = pet.getWeight();
+        dto.registrationDate = pet.getRegistrationDate();
+        dto.imageUrl = pet.getImageUrl();
+        dto.thumbnailUrl = pet.getThumbnailUrl();
+        dto.healthRecords = pet.getHealthRecords();
+        return dto;
+    }
+
     public Long getId() { return id; }
     public String getPetName() { return petName; }
     public String getPetType() { return petType; }

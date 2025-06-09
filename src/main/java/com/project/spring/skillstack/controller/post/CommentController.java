@@ -20,6 +20,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.project.spring.skillstack.dao.UserRepository;
 import com.project.spring.skillstack.dto.CommentDto;
 import com.project.spring.skillstack.entity.UserEntity;
+import com.project.spring.skillstack.service.CommentLikeService;
 import com.project.spring.skillstack.service.CommentService;
 
 import lombok.RequiredArgsConstructor;
@@ -30,6 +31,7 @@ import lombok.RequiredArgsConstructor;
 public class CommentController {
     
     private final CommentService commentService;
+    private final CommentLikeService commentLikeService;
     private final UserRepository userRepository;
     
     @PostMapping
@@ -127,4 +129,45 @@ public class CommentController {
         List<CommentDto> comments = commentService.getCommentsByUserId(user.getId());
         return new ResponseEntity<>(comments, HttpStatus.OK);
     }
+
+     // 댓글 좋아요 토글 API
+    @PostMapping("/{commentId}/like")
+    public ResponseEntity<Map<String, Object>> toggleLike(@PathVariable Long commentId) {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        String username = auth.getName();
+
+        UserEntity user = userRepository.findByName(username)
+            .orElseThrow(() -> new RuntimeException("User not found"));
+
+        boolean isLiked = commentLikeService.toggleLike(commentId, user);
+        long likeCount = commentLikeService.getLikeCount(commentId);
+
+        Map<String, Object> response = new HashMap<>();
+        response.put("isLiked", isLiked);
+        response.put("likeCount", likeCount);
+        response.put("message", isLiked ? "좋아요를 눌렀습니다." : "좋아요를 취소했습니다.");
+
+        return ResponseEntity.ok(response);
+    }
+
+    // 댓글 좋아요 상태 조회 API
+    @GetMapping("/{commentId}/like/status")
+    public ResponseEntity<Map<String, Object>> getLikeStatus(@PathVariable Long id) {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        String username = auth.getName();
+
+        UserEntity user = userRepository.findByName(username)
+            .orElseThrow(() -> new RuntimeException("User not found"));
+
+
+        boolean isLiked = commentLikeService.isLikedByUser(id, user);
+        long likeCount = commentLikeService.getLikeCount(id);
+
+        Map<String, Object> response = new HashMap<>();
+        response.put("isLiked", isLiked);
+        response.put("likeCount", likeCount);
+
+        return ResponseEntity.ok(response);
+    }
+
 }

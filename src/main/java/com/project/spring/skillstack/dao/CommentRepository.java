@@ -9,7 +9,6 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import com.project.spring.skillstack.entity.CommentEntity;
-import com.project.spring.skillstack.entity.PostEntity;
 
 import jakarta.transaction.Transactional;
 
@@ -19,6 +18,7 @@ public interface CommentRepository extends JpaRepository<CommentEntity, Long> {
     List<CommentEntity> findByUserId(Long userId);
     
     @Modifying
+    @Transactional
     @Query("DELETE FROM CommentEntity c WHERE c.post.id = :postId")
     void deleteByPost(@Param("postId") Long postId);
 

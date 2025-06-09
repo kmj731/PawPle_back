@@ -1,6 +1,8 @@
 package com.project.spring.skillstack.dto;
 
 import java.time.LocalDateTime;
+import java.util.List;
+import java.util.stream.Collectors;
 
 import com.project.spring.skillstack.entity.PostEntity;
 
@@ -24,9 +26,15 @@ public class PostDto {
     private LocalDateTime updatedAt;
     private Integer viewCount;
     private Integer commentCount;
+    private Integer likeCount;
+    private Boolean isLiked; // 현재 사용자 좋아요 상태
     private String category;
     private String subCategory;
     private Boolean isPublic;
+    private Long petId; // 클라이언트에서 보낼 반려동물 ID
+    private PetDto pet;
+    private List<MediaDto> mediaList;
+
     
     // 요청 데이터용 생성자
     public PostDto(String title, String content, String category) {
@@ -47,9 +55,17 @@ public class PostDto {
                 .updatedAt(entity.getUpdatedAt())
                 .viewCount(entity.getViewCount())
                 .commentCount(entity.getCommentCount())
+                .likeCount(entity.getLikeCount())
                 .category(entity.getCategory())
                 .subCategory(entity.getSubCategory())
                 .isPublic(entity.getIsPublic())
+                .pet(entity.getPet() != null ? PetDto.fromEntity(entity.getPet()) : null)
+                .petId(entity.getPet() != null ? entity.getPet().getId() : null)
+                .mediaList(
+                    entity.getMediaList().stream()
+                    .map(MediaDto::fromEntity)
+                    .collect(Collectors.toList())
+                )
                 .build();
     }
     

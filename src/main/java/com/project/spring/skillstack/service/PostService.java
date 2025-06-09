@@ -2,9 +2,14 @@ package com.project.spring.skillstack.service;
 
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
+import java.util.UUID;
+import java.io.File;
+import java.io.IOException;
+
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -13,10 +18,14 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.project.spring.skillstack.dao.PostRepository;
 import com.project.spring.skillstack.dao.UserRepository;
+import com.project.spring.skillstack.dao.PetRepository;
 import com.project.spring.skillstack.dto.PostDto;
+import com.project.spring.skillstack.entity.MediaEntity;
+import com.project.spring.skillstack.entity.PetEntity;
 import com.project.spring.skillstack.entity.PostEntity;
 import com.project.spring.skillstack.entity.UserEntity;
 
@@ -31,19 +40,84 @@ public class PostService {
     @Autowired
     private UserRepository userRepository;
     
+    @Autowired
+    private PetRepository petRepository;
+
     private final Random random = new Random();
+
     // 게시글 생성
     @Transactional
-    public PostDto createPost(PostDto postDto, String username) {
-        UserEntity user = userRepository.findByName(username)
-                .orElseThrow(() -> new UsernameNotFoundException("사용자를 찾을 수 없습니다: " + username));
-        
-        PostEntity post = postDto.toEntity();
-        post.setUser(user);
-        
-        PostEntity savedPost = postRepository.save(post);
-        return PostDto.fromEntity(savedPost);
+    public PostDto createPostWithMedia(PostDto postDto, List<MultipartFile> mediaFiles, MultipartFile videoFile, String username) {
+        try {
+            UserEntity user = userRepository.findByName(username)
+                    .orElseThrow(() -> new RuntimeException("User not found"));
+
+            PostEntity post = postDto.toEntity();
+            post.setUser(user);
+            post.setCreatedAt(LocalDateTime.now());
+
+            // Pet 설정
+            if (postDto.getPetId() != null) {
+                PetEntity pet = petRepository.findById(postDto.getPetId())
+                        .orElseThrow(() -> new RuntimeException("Pet not found"));
+                post.setPet(pet);
+            } else {
+                List<PetEntity> pets = petRepository.findByOwner(user);
+                if (!pets.isEmpty()) {
+                    post.setPet(pets.get(0));
+                }
+            }
+
+            // 📁 uploads 디렉토리 설정
+            String baseDir = System.getProperty("user.dir") + File.separator + "uploads";
+            File uploadDir = new File(baseDir);
+            if (!uploadDir.exists()) {
+                uploadDir.mkdirs();
+            }
+
+            List<MediaEntity> mediaEntities = new ArrayList<>();
+
+            // 📷 이미지 파일 저장
+            if (mediaFiles != null && !mediaFiles.isEmpty()) {
+                for (MultipartFile file : mediaFiles) {
+                    if (!file.isEmpty()) {
+                        String fileName = UUID.randomUUID() + "_" + file.getOriginalFilename();
+                        File dest = new File(baseDir, fileName);
+                        file.transferTo(dest);
+
+                        mediaEntities.add(MediaEntity.builder()
+                            .fileName(fileName)
+                            .fileUrl("/uploads/" + fileName)
+                            .mediaType("IMAGE")
+                            .post(post)
+                            .build());
+                    }
+                }
+            }
+
+            // 🎥 영상 파일 저장
+            if (videoFile != null && !videoFile.isEmpty()) {
+                String fileName = UUID.randomUUID() + "_" + videoFile.getOriginalFilename();
+                File dest = new File(baseDir, fileName);
+                videoFile.transferTo(dest);
+
+                mediaEntities.add(MediaEntity.builder()
+                    .fileName(fileName)
+                    .fileUrl("/uploads/" + fileName)
+                    .mediaType("VIDEO")
+                    .post(post)
+                    .build());
+            }
+
+            post.setMediaList(mediaEntities);
+            PostEntity saved = postRepository.save(post);
+            return PostDto.fromEntity(saved);
+
+        } catch (IOException e) {
+            throw new RuntimeException("파일 업로드 중 오류가 발생했습니다: " + e.getMessage(), e);
+        }
     }
+
     
     // 모든 게시글 페이징 조회
     @Transactional(readOnly = true)
@@ -238,6 +312,22 @@ public class PostService {
         return postRepository.count();
     }
 
+    // 좋아요 수 기준 인기글 조회
+    @Transactional(readOnly = true)
+    public Page<PostDto> getPopularPostsByLikes(int page, int size) {
+        Pageable pageable = PageRequest.of(page, size);
+        Page<PostEntity> postPage = postRepository.findAllByOrderByLikeCountDescCreatedAtDesc(pageable);
+        return postPage.map(PostDto::fromEntity);
+    }
+
+    // 카테고리별 좋아요 수 기준 인기글 조회
+    @Transactional(readOnly = true)
+    public Page<PostDto> getPopularPostsByLikesInCategory(String category, int page, int size) {
+        Pageable pageable = PageRequest.of(page, size);
+        Page<PostEntity> postPage = postRepository.findByCategoryOrderByLikeCountDescCreatedAtDesc(category, pageable);
+        return postPage.map(PostDto::fromEntity);
+    }
+    
     // // 랜덤 포인트 적립 메서드
     // public boolean awardRandomPoints(String username) {
     //     // 30% 확률 체크

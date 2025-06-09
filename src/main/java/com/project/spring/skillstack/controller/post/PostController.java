@@ -7,9 +7,12 @@ import java.util.Map;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -18,9 +21,15 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.project.spring.skillstack.dto.PostDto;
+import com.project.spring.skillstack.entity.PostEntity;
+import com.project.spring.skillstack.service.CustomUserDetails;
+import com.project.spring.skillstack.service.PostLikeService;
 // import com.project.spring.skillstack.service.PointService;
 import com.project.spring.skillstack.service.PostService;
 
@@ -31,6 +40,9 @@ public class PostController {
     @Autowired
     private PostService postService;
 
+    @Autowired
+    private PostLikeService likeService;
+
     // private final PointService pointService;
 
     // public PostController(PointService pointService){
@@ -38,12 +50,25 @@ public class PostController {
     // }
     
     // 게시글 생성
-    @PostMapping
-    public ResponseEntity<PostDto> createPost(@RequestBody PostDto postDto) {
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        String username = auth.getName();
+    @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<?> createPost(
+        @RequestPart("post") String postDtoJson, // String으로 받기
+        @RequestPart(value = "mediaFiles", required = false) List<MultipartFile> mediaFiles,
+        @RequestPart(value = "videoFile", required = false) MultipartFile videoFile,
+        @AuthenticationPrincipal CustomUserDetails userDetails) {
         
-        PostDto createdPost = postService.createPost(postDto, username);
+        try {
+            // JSON 문자열을 PostDto로 변환
+            ObjectMapper objectMapper = new ObjectMapper();
+            PostDto postDto = objectMapper.readValue(postDtoJson, PostDto.class);
+            
+            PostDto result = postService.createPostWithMedia(postDto, mediaFiles, videoFile, userDetails.getUsername());
+            return ResponseEntity.ok(result);
+        } catch (Exception e) {
+            Map<String, String> errorResponse = new HashMap<>();
+            errorResponse.put("error", "게시글 생성 중 오류가 발생했습니다: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
+        }
 
         // 포인트 적립 시도 : 30% 확률로 5 ~ 15점 랜덤 적립
         // try {
@@ -56,7 +81,6 @@ public class PostController {
         //     // 포인트 적립 실패해도 게시글 작성은 성공적으로 처리됨
         //     System.err.println("포인트 적립 중 오류 발생: " + e.getMessage());
         // }
-        return new ResponseEntity<>(createdPost, HttpStatus.CREATED);
     }
     
     // 게시글 목록 조회 (페이징)
@@ -75,6 +99,17 @@ public class PostController {
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size) {
         Page<PostDto> posts = postService.getPostsByCategory(category, page, size);
+        return ResponseEntity.ok(posts);
+    }
+
+    // 카테고리-서브카테고리별 게시글 목록 조회
+    @GetMapping("/category/{category}/sub/{subCategory}")
+    public ResponseEntity<Page<PostDto>> getPostsByCategoryAndSubCategory(
+            @PathVariable String category,
+            @PathVariable String subCategory,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size) {
+        Page<PostDto> posts = postService.getPostsByCategoryAndSubCategory(category, subCategory, page, size);
         return ResponseEntity.ok(posts);
     }
 
@@ -212,6 +247,66 @@ public class PostController {
         } else {
             posts = postService.getPopularPostsByComments(page, size);
         }
+        return ResponseEntity.ok(posts);
+    }
+
+    // 좋아요 토글
+    @PostMapping("/{id}/like")
+    public ResponseEntity<Map<String, Object>> toggleLike(@PathVariable Long id) {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        String username = auth.getName();
+        
+        boolean isLiked = likeService.toggleLike(id, username);
+        long likeCount = likeService.getLikeCount(id);
+        
+        Map<String, Object> response = new HashMap<>();
+        response.put("isLiked", isLiked);
+        response.put("likeCount", likeCount);
+        response.put("message", isLiked ? "좋아요를 눌렀습니다." : "좋아요를 취소했습니다.");
+        
+        return ResponseEntity.ok(response);
+    }
+
+    // 좋아요 상태 확인
+    @GetMapping("/{id}/like/status")
+    public ResponseEntity<Map<String, Object>> getLikeStatus(@PathVariable Long id) {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        String username = auth.getName();
+        
+        boolean isLiked = likeService.isLikedByUser(id, username);
+        long likeCount = likeService.getLikeCount(id);
+        
+        Map<String, Object> response = new HashMap<>();
+        response.put("isLiked", isLiked);
+        response.put("likeCount", likeCount);
+        
+        return ResponseEntity.ok(response);
+    }
+
+    // 좋아요 수 기준 인기글 조회
+    @GetMapping("/popular/likes")
+    public ResponseEntity<Page<PostDto>> getPopularPostsByLikes(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(required = false) String category) {
+        Page<PostDto> posts;
+        if (category != null && !category.isEmpty()) {
+            posts = postService.getPopularPostsByLikesInCategory(category, page, size);
+        } else {
+            posts = postService.getPopularPostsByLikes(page, size);
+        }
+        return ResponseEntity.ok(posts);
+    }
+
+    // 내가 좋아요한 게시글 조회
+    @GetMapping("/liked")
+    public ResponseEntity<Page<PostDto>> getLikedPosts(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size) {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        String username = auth.getName();
+        
+        Page<PostDto> posts = likeService.getLikedPostsByUser(username, page, size);
         return ResponseEntity.ok(posts);
     }
 }
