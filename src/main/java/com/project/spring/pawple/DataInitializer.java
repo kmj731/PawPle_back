@@ -11,22 +11,22 @@ import org.springframework.boot.CommandLineRunner;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
-import com.project.spring.pawple.application.comment.CommentEntity;
-import com.project.spring.pawple.application.comment.CommentRepository;
-import com.project.spring.pawple.application.consult.ConsultEntity;
-import com.project.spring.pawple.application.consult.ConsultRepository;
-import com.project.spring.pawple.application.health.HealthCheckRecord;
-import com.project.spring.pawple.application.health.HealthCheckRecordRepository;
-import com.project.spring.pawple.application.pet.PetEntity;
-import com.project.spring.pawple.application.pet.PetRepository;
-import com.project.spring.pawple.application.post.PostEntity;
-import com.project.spring.pawple.application.post.PostRepository;
-import com.project.spring.pawple.application.store.ProductEntity;
-import com.project.spring.pawple.application.store.ProductRepository;
-import com.project.spring.pawple.application.user.UserEntity;
-import com.project.spring.pawple.application.user.UserRepository;
-import com.project.spring.pawple.application.vaccine.VaccinationRecord;
-import com.project.spring.pawple.application.vaccine.VaccinationRecordRepository;
+import com.project.spring.pawple.app.comment.CommentEntity;
+import com.project.spring.pawple.app.comment.CommentRepository;
+import com.project.spring.pawple.app.consult.ConsultEntity;
+import com.project.spring.pawple.app.consult.ConsultRepository;
+import com.project.spring.pawple.app.health.HealthCheckRecord;
+import com.project.spring.pawple.app.health.HealthCheckRecordRepository;
+import com.project.spring.pawple.app.pet.PetEntity;
+import com.project.spring.pawple.app.pet.PetRepository;
+import com.project.spring.pawple.app.post.PostEntity;
+import com.project.spring.pawple.app.post.PostRepository;
+import com.project.spring.pawple.app.store.ProductEntity;
+import com.project.spring.pawple.app.store.ProductRepository;
+import com.project.spring.pawple.app.user.UserEntity;
+import com.project.spring.pawple.app.user.UserRepository;
+import com.project.spring.pawple.app.vaccine.VaccinationRecord;
+import com.project.spring.pawple.app.vaccine.VaccinationRecordRepository;
 
 @Component
 public class DataInitializer implements CommandLineRunner {

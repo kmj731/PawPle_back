@@ -17,10 +17,10 @@ import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
-import com.project.spring.pawple.application.auth.CookieUtil;
-import com.project.spring.pawple.application.auth.CustomUserDetailService;
-import com.project.spring.pawple.application.auth.JwtAuthorizationFilter;
-import com.project.spring.pawple.application.auth.JwtUtil;
+import com.project.spring.pawple.app.auth.CookieUtil;
+import com.project.spring.pawple.app.auth.CustomUserDetailService;
+import com.project.spring.pawple.app.auth.JwtAuthorizationFilter;
+import com.project.spring.pawple.app.auth.JwtUtil;
 
 import jakarta.servlet.http.HttpServletResponse;
 
