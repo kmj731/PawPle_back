@@ -11,6 +11,7 @@ import java.io.File;
 import java.io.IOException;
 
 
+import org.attoparser.dom.Comment;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -20,6 +21,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.project.spring.skillstack.config.PointPolicy;
 import com.project.spring.skillstack.dao.PostRepository;
 import com.project.spring.skillstack.dao.UserRepository;
 import com.project.spring.skillstack.dao.PetRepository;
@@ -52,11 +54,21 @@ public class PostService {
             UserEntity user = userRepository.findByName(username)
                     .orElseThrow(() -> new RuntimeException("User not found"));
 
-            PostEntity post = postDto.toEntity();
+            // 게시글 객체 생성
+            PostEntity post = new PostEntity();
+            post.setTitle(postDto.getTitle());
+            post.setContent(postDto.getContent());
+            post.setCategory(postDto.getCategory());
+            post.setSubCategory(postDto.getSubCategory());
+            post.setIsPublic(postDto.getIsPublic() != null ? postDto.getIsPublic() : true);
             post.setUser(user);
             post.setCreatedAt(LocalDateTime.now());
 
-            // Pet 설정
+            // ✅ 포인트 10점 적립
+            user.addPoint(10);
+            userRepository.save(user);
+
+            // ✅ 반려동물 자동 연결
             if (postDto.getPetId() != null) {
                 PetEntity pet = petRepository.findById(postDto.getPetId())
                         .orElseThrow(() -> new RuntimeException("Pet not found"));
@@ -68,7 +80,7 @@ public class PostService {
                 }
             }
 
-            // 📁 uploads 디렉토리 설정
+            // ✅ uploads 경로 생성
             String baseDir = System.getProperty("user.dir") + File.separator + "uploads";
             File uploadDir = new File(baseDir);
             if (!uploadDir.exists()) {
@@ -77,7 +89,7 @@ public class PostService {
 
             List<MediaEntity> mediaEntities = new ArrayList<>();
 
-            // 📷 이미지 파일 저장
+            // ✅ 이미지 저장
             if (mediaFiles != null && !mediaFiles.isEmpty()) {
                 for (MultipartFile file : mediaFiles) {
                     if (!file.isEmpty()) {
@@ -86,30 +98,33 @@ public class PostService {
                         file.transferTo(dest);
 
                         mediaEntities.add(MediaEntity.builder()
-                            .fileName(fileName)
-                            .fileUrl("/uploads/" + fileName)
-                            .mediaType("IMAGE")
-                            .post(post)
-                            .build());
+                                .fileName(fileName)
+                                .fileUrl("/uploads/" + fileName)
+                                .mediaType("IMAGE")
+                                .post(post)
+                                .build());
                     }
                 }
             }
 
-            // 🎥 영상 파일 저장
+            // ✅ 영상 저장
             if (videoFile != null && !videoFile.isEmpty()) {
                 String fileName = UUID.randomUUID() + "_" + videoFile.getOriginalFilename();
                 File dest = new File(baseDir, fileName);
                 videoFile.transferTo(dest);
 
                 mediaEntities.add(MediaEntity.builder()
-                    .fileName(fileName)
-                    .fileUrl("/uploads/" + fileName)
-                    .mediaType("VIDEO")
-                    .post(post)
-                    .build());
+                        .fileName(fileName)
+                        .fileUrl("/uploads/" + fileName)
+                        .mediaType("VIDEO")
+                        .post(post)
+                        .build());
             }
 
+            // ✅ 게시글에 미디어 연결
             post.setMediaList(mediaEntities);
+
+            // 저장 및 반환
             PostEntity saved = postRepository.save(post);
             return PostDto.fromEntity(saved);
 
@@ -344,6 +359,10 @@ public class PostService {
     //     }
     //     return false; // 적립 안됨 (확률 미충족)
     // } 
+    // 게시글 블라인드처리
+    public PostEntity findById(Long id) {
+        return postRepository.findById(id).orElse(null);
+    }
 
     
 }

@@ -4,21 +4,28 @@ import com.project.spring.skillstack.dao.PetRepository;
 import com.project.spring.skillstack.dao.UserRepository;
 import com.project.spring.skillstack.dto.HealthCheckRequest;
 import com.project.spring.skillstack.dto.HealthCheckResultResponse;
+import com.project.spring.skillstack.entity.HealthCheckDetail;
 import com.project.spring.skillstack.entity.HealthCheckRecord;
 import com.project.spring.skillstack.entity.PetEntity;
 import com.project.spring.skillstack.entity.UserEntity;
 import com.project.spring.skillstack.repository.HealthCheckRecordRepository;
 import com.project.spring.skillstack.service.CustomUserDetails;
 
+import lombok.RequiredArgsConstructor;
+
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
 import java.util.*;
+import java.util.stream.Collectors;
 
+@RequiredArgsConstructor
 @RestController
 @RequestMapping("/health")
 public class HealthCheckController {
@@ -31,6 +38,8 @@ public class HealthCheckController {
 
     @Autowired
     private HealthCheckRecordRepository recordRepository;
+
+    private final HealthCheckRecordRepository healthCheckRecordRepository;
 
     // 점수 기준 문항 정의
     private static final Map<String, List<String>> QUESTION_SCORES = Map.of(
@@ -81,19 +90,9 @@ public class HealthCheckController {
             }
         }
 
-        // ✅ 감점 방식: 기본 100점 - (2점 * '없어요' 제외 선택 개수)
-        int deduction = request.getSelectedOptions().values().stream()
-            .flatMap(List::stream)
-            .filter(answer -> !"없어요".equals(answer))
-            .mapToInt(answer -> 2)
-            .sum();
+        int totalScore = calculateTotalScore(request.getSelectedOptions());
+        String status = determineStatus(totalScore);
 
-        int totalScore = 100 - deduction;
-
-        String status;
-        if (totalScore >= 70) status = "양호";
-        else if (totalScore >= 40) status = "경고";
-        else status = "위험";
 
         // 기록 저장
         HealthCheckRecord record = new HealthCheckRecord();
@@ -102,7 +101,8 @@ public class HealthCheckController {
         record.setCheckedAt(LocalDateTime.now());
         record.setTotalScore(totalScore);
         record.setResultStatus(status);
-        record.setWarnings(getTopCategories(request));
+        record.setWarnings(new ArrayList<>(getTopCategories(request)));
+
 
         recordRepository.save(record);
 
@@ -110,7 +110,8 @@ public class HealthCheckController {
         HealthCheckResultResponse response = new HealthCheckResultResponse();
         response.setScore(totalScore);
         response.setStatus(status);
-        response.setWarnings(getTopCategories(request));
+        record.setWarnings(new ArrayList<>(getTopCategories(request)));
+
 
         return ResponseEntity.ok(response);
     }
@@ -133,6 +134,115 @@ public class HealthCheckController {
             .sorted((a, b) -> Integer.compare(b.getValue().size(), a.getValue().size()))
             .limit(3)
             .map(entry -> entry.getKey().replaceAll("^\\d+\\.\\s*", ""))  // ← 숫자 제거
-            .toList();
+            .collect(Collectors.toList());
     }
+
+
+    @PutMapping("/update/{recordId}")
+    public ResponseEntity<String> updateByRecordId(
+    @PathVariable Long recordId,
+    @RequestBody HealthCheckRequest request,
+    @AuthenticationPrincipal UserDetails userDetails
+) {
+    String username = userDetails.getUsername();
+    Long userId = userRepository.findByName(username)
+        .orElseThrow(() -> new RuntimeException("로그인한 유저 정보를 찾을 수 없습니다."))
+        .getId();
+
+    HealthCheckRecord record = healthCheckRecordRepository.findById(recordId)
+        .orElseThrow(() -> new RuntimeException("기록을 찾을 수 없습니다."));
+
+    // 사용자가 자신의 반려동물 기록만 수정할 수 있도록 검증
+    if (!record.getPet().getOwner().getId().equals(userId)) {
+        throw new RuntimeException("권한이 없습니다.");
+    }
+
+    // '없어요' 체크 검사
+    for (Map.Entry<String, List<String>> entry : request.getSelectedOptions().entrySet()) {
+        List<String> selected = entry.getValue();
+        if (selected.contains("없어요") && selected.size() > 1) {
+            return ResponseEntity.badRequest().body(
+                String.format("'%s' 항목에서 '없어요'는 다른 보기와 함께 선택할 수 없습니다.", entry.getKey())
+            );
+        }
+    }
+
+    // 기존 리스트를 새로운 리스트로 대체
+    // ✅ 누락된 항목도 기존 점수 유지
+    Map<String, HealthCheckDetail> existingMap = record.getDetails().stream()
+    .collect(Collectors.toMap(HealthCheckDetail::getCategory, d -> d));
+
+    List<HealthCheckDetail> newDetails = new ArrayList<>();
+    for (String category : QUESTION_SCORES.keySet()) {
+    int score = request.getAnswers().getOrDefault(
+        category,
+        existingMap.containsKey(category) ? existingMap.get(category).getScore() : 0
+    );
+    HealthCheckDetail detail = HealthCheckDetail.builder()
+        .record(record)
+        .category(category)
+        .score(score)
+        .build();
+    newDetails.add(detail);
+    }
+    record.getDetails().clear();
+    record.getDetails().addAll(newDetails);
+
+
+
+
+    // 점수 재계산 및 상태 갱신
+    int totalScore = calculateTotalScore(request.getSelectedOptions());
+    String status = determineStatus(totalScore);
+    List<String> warnings = getTopCategories(request);
+
+    record.setTotalScore(totalScore);
+    record.setResultStatus(status);
+    record.setWarnings(warnings);
+
+    healthCheckRecordRepository.save(record);
+    return ResponseEntity.ok("기록이 성공적으로 수정되었습니다!");
+}
+
+    
+
+
+    @DeleteMapping("/delete/{recordId}")
+    public ResponseEntity<String> deleteByRecordId(
+    @PathVariable Long recordId,
+    @AuthenticationPrincipal UserDetails userDetails
+) {
+    String username = userDetails.getUsername();
+    Long userId = userRepository.findByName(username)
+        .orElseThrow(() -> new RuntimeException("로그인한 유저 정보를 찾을 수 없습니다."))
+        .getId();
+
+    HealthCheckRecord record = healthCheckRecordRepository.findById(recordId)
+        .orElseThrow(() -> new RuntimeException("기록을 찾을 수 없습니다."));
+
+    if (!record.getPet().getOwner().getId().equals(userId)) {
+        return ResponseEntity.status(403).body("해당 기록에 대한 삭제 권한이 없습니다.");
+    }
+
+    healthCheckRecordRepository.delete(record);
+    return ResponseEntity.ok("건강 기록이 성공적으로 삭제되었습니다!");
+    }
+
+
+
+    private int calculateTotalScore(Map<String, List<String>> selectedOptions) {
+        return 100 - selectedOptions.values().stream()
+            .flatMap(List::stream)
+            .filter(answer -> !"없어요".equals(answer))
+            .mapToInt(answer -> 2)
+            .sum();
+    }
+
+    private String determineStatus(int score) {
+        if (score >= 70) return "양호";
+            else if (score >= 40) return "경고";
+                else return "위험";
+    }
+
+
 }

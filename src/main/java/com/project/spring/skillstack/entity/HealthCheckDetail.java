@@ -15,6 +15,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -24,6 +25,7 @@ import lombok.Setter;
 @Table(name = "HEALTH_CHECK_DETAIL")
 @Getter @Setter
 @NoArgsConstructor
+
 public class HealthCheckDetail {
 
     @Id
@@ -44,4 +46,12 @@ public class HealthCheckDetail {
     @JoinColumn(name = "record_id")
     @JsonIgnore
     private HealthCheckRecord record;
+
+    @Builder
+    public HealthCheckDetail(String category, List<String> selectedAnswers, int score, HealthCheckRecord record) {
+        this.category = category;
+        this.selectedAnswers = selectedAnswers;
+        this.score = score;
+        this.record = record;
+    }
 }

@@ -15,7 +15,7 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class UserDto {
+public class PetUserDto {
 
 private Long id;
 
@@ -38,11 +38,13 @@ private Long id;
 
     private Map<String, Object> attr;
 
-    private List<PetEntity> pets;
+    private List<PetShowing> pets;
     private Integer point;
+    
     
     
 
     
 
 }
+

@@ -42,6 +42,13 @@ public class JwtAuthorizationFilter extends OncePerRequestFilter {
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
             throws ServletException, IOException {
+    // String uri = request.getRequestURI();
+    // // ✅ 구조동물 API는 인증 로직 생략
+    // if (uri.startsWith("/api/animals")) {
+    //     System.out.println("🟢 인증 우회됨: " + uri);
+    //     filterChain.doFilter(request, response);
+    //     return;
+    // }
 
         String token = null;
 

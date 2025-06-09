@@ -65,6 +65,6 @@ public class HealthCheckService {
     private String evaluateStatus(int score) {
         if (score >= 80) return "양호";
         if (score >= 50) return "경고";
-        return "위험";
+        else { return "위험"; }
     }
 }
