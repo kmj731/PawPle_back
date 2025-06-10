@@ -16,6 +16,8 @@ import com.project.spring.pawple.app.user.UserEntity;
 
 @Repository
 public interface PostRepository extends JpaRepository<PostEntity, Long> {
+    // 모든 게시글 수 조회
+    long count();
 
     // 모든 게시글 페이징 조회
     Page<PostEntity> findAllByOrderByCreatedAtDesc(Pageable pageable);
