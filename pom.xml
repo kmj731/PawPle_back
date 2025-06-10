@@ -9,9 +9,9 @@
 		<relativePath/> <!-- lookup parent from repository -->
 	</parent>
 	<groupId>com.project.spring</groupId>
-	<artifactId>skillstack</artifactId>
+	<artifactId>pawple</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
-	<name>skillstack</name>
+	<name>pawple</name>
 	<description>스프링 부트를 이용한 프로젝트</description>
 	<url/>
 	<licenses>
