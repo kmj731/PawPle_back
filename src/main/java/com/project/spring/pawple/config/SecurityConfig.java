@@ -73,7 +73,7 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.PUT, "/vaccine/**").authenticated()
                         .requestMatchers("/api/**").authenticated() // 나머지 API는 인증 필요
                         .requestMatchers("/docs", "/swagger-ui/**", "/v3/**", "/vaccine/**", "/favicon.ico").permitAll()
-                        .requestMatchers("/posts/**", "/public/**", "/permit/**", "/animal/**").permitAll()
+                        .requestMatchers("/posts/**", "/public/**", "/permit/**", "/animal/**", "/store/**").permitAll()
                         .requestMatchers("/oauth2/**", "/logout").permitAll()
                         .requestMatchers("/auth/**", "/user/**", "/pet/**", "/consult/**").authenticated()
                         .requestMatchers("/admin/**").hasRole("ADMIN")

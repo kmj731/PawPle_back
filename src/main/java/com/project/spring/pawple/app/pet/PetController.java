@@ -15,12 +15,15 @@ import com.project.spring.pawple.app.auth.CustomUserDetails;
 import com.project.spring.pawple.app.health.HealthCheckRecord;
 import com.project.spring.pawple.app.health.HealthCheckRecordRepository;
 import com.project.spring.pawple.app.media.ImageUtil;
+import com.project.spring.pawple.app.post.PostEntity;
+import com.project.spring.pawple.app.post.PostRepository;
 import com.project.spring.pawple.app.user.UserEntity;
 import com.project.spring.pawple.app.user.UserRepository;
 
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
@@ -37,6 +40,8 @@ public class PetController {
 
     @Autowired
     private HealthCheckRecordRepository recordRepository;
+
+    private PostRepository postRepository;
 
     @Value("${spring.security.cors.site}")
     private String corsOrigin;
@@ -164,6 +169,40 @@ public class PetController {
         return ResponseEntity.ok(Map.of("message", "펫 이미지 삭제 완료"));
     }
 
+    /////////////////////////// 펫 삭제 ///////////////////////////
+    @DeleteMapping("/delete/{id}")
+    @Transactional
+    public ResponseEntity<?> deletePet(
+        @PathVariable Long id,
+        @AuthenticationPrincipal CustomUserDetails userDetails
+    ) {
+        System.out.println("[🐾 deletePet] 호출됨 - petId: " + id); // 1️⃣ 기본 로그
+
+        if (userDetails == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("message", "로그인 정보 없음"));
+        }
+
+        Optional<UserEntity> optionalUser = userRepository.findByName(userDetails.getUsername());
+        if (optionalUser.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("message", "사용자 없음"));
+        }
+
+        Optional<PetEntity> optionalPet = petRepository.findById(id);
+        if (optionalPet.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("message", "반려동물 정보 없음"));
+        }
+
+        PetEntity pet = optionalPet.get();
+
+        if (!pet.getOwner().getId().equals(optionalUser.get().getId())) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(Map.of("message", "삭제 권한 없음"));
+        }
+
+        petRepository.delete(pet);
+        System.out.println("[🗑️ deletePet] 삭제 실행 완료");
+        
+        return ResponseEntity.ok(Map.of("message", "반려동물 삭제 완료"));
+    }
 
 
 
@@ -214,6 +253,5 @@ public class PetController {
 
         return ResponseEntity.ok(result);
     }
-
 
 }
