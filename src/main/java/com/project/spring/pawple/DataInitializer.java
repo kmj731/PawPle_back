@@ -21,6 +21,7 @@ import com.project.spring.pawple.app.pet.PetEntity;
 import com.project.spring.pawple.app.pet.PetRepository;
 import com.project.spring.pawple.app.post.PostEntity;
 import com.project.spring.pawple.app.post.PostRepository;
+import com.project.spring.pawple.app.store.ProductEntity;
 // import com.project.spring.pawple.app.store.ProductEntity;
 import com.project.spring.pawple.app.store.ProductRepository;
 import com.project.spring.pawple.app.user.UserEntity;
@@ -68,9 +69,9 @@ public class DataInitializer implements CommandLineRunner {
         UserEntity vet = new UserEntity(null, "vet", passwordEncoder.encode("1234"), "vet", roles2, "vet123@pawple.com", "010-4321-8765", null, null, null, null, null, LocalDateTime.now(), null,new ArrayList<>(), 0);
 
 
-        PetEntity abcdPet = new PetEntity("고양이", 4.0, "나비", 2025, "수컷", "코숏", LocalDate.now(), abcd);
+        PetEntity abcdPet = new PetEntity("cat", 4.0, "나비", 2025, "male", "코숏", LocalDate.now(), abcd);
         abcd.getPets().add(abcdPet);
-        PetEntity abcdPet2 = new PetEntity("강아지", 4.0, "바둑이", 2024, "암컷", "진돗개", LocalDate.now(), abcd);
+        PetEntity abcdPet2 = new PetEntity("dog", 4.0, "바둑이", 2024, "female", "진돗개", LocalDate.now(), abcd);
         abcd.getPets().add(abcdPet2);
 
         userRep.save(root);
@@ -190,16 +191,16 @@ public class DataInitializer implements CommandLineRunner {
 
         UserEntity qwer = new UserEntity(null, "qwer", passwordEncoder.encode("1234"), "qwer", roles, "qwer123@pawple.com", "010-5678-1234", null, null, null, null, null, LocalDateTime.now(), null, new ArrayList<>(),999);
 
-        PetEntity qwerPet1 = new PetEntity("강아지", 5.5, "초코", 2023, "수컷", "푸들", LocalDate.now(), qwer);
+        PetEntity qwerPet1 = new PetEntity("dog", 5.5, "초코", 2023, "male", "푸들", LocalDate.now(), qwer);
         qwer.getPets().add(qwerPet1);
-        PetEntity qwerPet2 = new PetEntity("고양이", 3.2, "하양이", 2024, "암컷", "페르시안", LocalDate.now(), qwer);
+        PetEntity qwerPet2 = new PetEntity("cat", 3.2, "하양이", 2024, "female", "페르시안", LocalDate.now(), qwer);
         qwer.getPets().add(qwerPet2);
         
         UserEntity asdf = new UserEntity(null, "asdf", passwordEncoder.encode("1234"), "asdf", roles, "asdf123@pawple.com", "010-8888-9999", null, null, null, null, null, LocalDateTime.now(), null, new ArrayList<>(),0);
 
-        PetEntity asdfPet1 = new PetEntity("고양이", 2.8, "미미", 2022, "암컷", "러시안블루", LocalDate.now(), asdf);
+        PetEntity asdfPet1 = new PetEntity("cat", 2.8, "미미", 2022, "female", "러시안블루", LocalDate.now(), asdf);
         asdf.getPets().add(asdfPet1);
-        PetEntity asdfPet2 = new PetEntity("강아지", 6.0, "콩이", 2023, "수컷", "말티즈", LocalDate.now(), asdf);
+        PetEntity asdfPet2 = new PetEntity("dog", 6.0, "콩이", 2023, "male", "말티즈", LocalDate.now(), asdf);
         asdf.getPets().add(asdfPet2);
 
         userRep.save(qwer);
@@ -281,22 +282,22 @@ public class DataInitializer implements CommandLineRunner {
             );
 
             PetEntity pet1 = new PetEntity(
-                "강아지",
+                "dog",
                 5.0 + i % 3,
                 "댕댕이" + suffix,
                 2020 + i % 5,
-                (i % 2 == 0) ? "수컷" : "암컷",
+                (i % 2 == 0) ? "male" : "female",
                 "푸들",
                 LocalDate.now().minusYears(1 + i % 3),
                 user
             );
 
             PetEntity pet2 = new PetEntity(
-                "고양이",
+                "cat",
                 4.0 + i % 2,
                 "냐옹이" + suffix,
                 2021 + i % 4,
-                (i % 2 == 0) ? "암컷" : "수컷",
+                (i % 2 == 0) ? "female" : "male",
                 "러시안블루",
                 LocalDate.now().minusYears(2 + i % 2),
                 user
@@ -480,16 +481,43 @@ public class DataInitializer implements CommandLineRunner {
 
         commentRep.saveAll(List.of(comment1, comment2, comment3, comment4));
 
-        // userRep.save(new UserEntity(null, "root", passwordEncoder.encode("1234"), "root", List.of("ADMIN"), null, null, null, LocalDateTime.now(), null, null));
-        // userRep.save(new UserEntity(null, "abcd", passwordEncoder.encode("1234"), "abcd", List.of("USER"), null, null, null, LocalDateTime.now(), null, null));
-    
-        // if (productRepository.count() == 0) { // DB가 비어 있을 때만 삽입
-        //     ProductEntity p1 = new ProductEntity(null, "액티베이트 스몰 60p (종합 영양제)", "벳플러스", 4.9, 224, 17, 64900, 78000, List.of("무료배송", "BEST", "특가"), "/images/aktivait.jpg");
-        //     ProductEntity p2 = new ProductEntity(null, "프리미엄 비프(소 단일) (100gx10팩)", "바프독", 5.0, 3, 4, 54900, 57000, List.of("BEST"), "/images/synoquin.jpg");
-        //     // ... 나머지 상품도 동일하게 생성
+        List<ProductEntity> products = List.of(
+            ProductEntity.builder()
+                .name("미니파미케어 라이스(신장관리) 10개입")
+                .brand("닥터맘마")
+                .discount(10)
+                .originalPrice(13500)
+                .rating(0.1)
+                .category("영양제")
+                .tags(List.of("강아지","고양이","신장"))
+                .image("/images/samylin.jpg")
+                .build(),
 
-        //     productRepository.saveAll(List.of(p1, p2 /*, ... */));
-        // }
+            ProductEntity.builder()
+                .name("프리미엄 비프(소 단일) (100gx10팩)")
+                .brand("바프독")
+                .discount(5)
+                .originalPrice(54900)
+                .rating(0.1)
+                .category("사료")
+                .tags(List.of("강아지", "소고기"))
+                .image("/images/synoquin.jpg")
+                .build(),
+
+            ProductEntity.builder()
+                .name("액티베이트 스몰 60p (종합 영양제)")
+                .brand("벳플러스")
+                .discount(10)
+                .originalPrice(78000)
+                .price(70200)
+                .rating(0.1)
+                .category("영양제")
+                .tags(List.of("영양제"))
+                .image("/images/aktivait.jpg")
+                .build()
+        );
+
+        productRepository.saveAll(products);
     
     
     
