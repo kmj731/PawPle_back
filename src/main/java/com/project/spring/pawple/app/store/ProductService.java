@@ -6,6 +6,7 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class ProductService {
+
     private final ProductRepository productRepository;
 
     public ProductService(ProductRepository productRepository) {
@@ -14,6 +15,10 @@ public class ProductService {
 
     public List<ProductEntity> findAll() {
         return productRepository.findAll();
+    }
+
+    public List<ProductEntity> findByCategory(String category) {
+        return productRepository.findByCategory(category);
     }
 
     public ProductEntity save(ProductEntity product) {
@@ -28,7 +33,6 @@ public class ProductService {
         ProductEntity product = productRepository.findById(id)
             .orElseThrow(() -> new RuntimeException("상품 없음"));
 
-        // 필요한 필드만 수정
         product.setName(updated.getName());
         product.setBrand(updated.getBrand());
         product.setRating(updated.getRating());
@@ -38,6 +42,7 @@ public class ProductService {
         product.setOriginalPrice(updated.getOriginalPrice());
         product.setTags(updated.getTags());
         product.setImage(updated.getImage());
+        product.setCategory(updated.getCategory());
 
         return productRepository.save(product);
     }
