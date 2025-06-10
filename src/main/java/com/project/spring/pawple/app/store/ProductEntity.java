@@ -47,5 +47,7 @@ public class ProductEntity {
     private String image;         // 이미지 URL
 
     private String category;      // 카테고리 (사료, 간식, 영양제, 용품 등)
+
+    private int quantity;         // 수량
 }
 

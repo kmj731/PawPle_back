@@ -25,6 +25,7 @@ public class ProductDto {
     private List<String> tags;
     private String image;
     private String category;
+    private int quantity;
 
     public static ProductDto fromEntity(ProductEntity entity) {
         return ProductDto.builder()
@@ -39,6 +40,7 @@ public class ProductDto {
                 .tags(entity.getTags())
                 .image(entity.getImage())
                 .category(entity.getCategory())
+                .quantity(entity.getQuantity())
                 .build();
     }
 
@@ -55,6 +57,7 @@ public class ProductDto {
                 .tags(this.tags)
                 .image(this.image)
                 .category(this.category)
+                .quantity(quantity)
                 .build();
     }
 }
