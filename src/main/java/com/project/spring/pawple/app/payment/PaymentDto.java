@@ -1,4 +1,4 @@
-package com.project.spring.skillstack.dto;
+package com.project.spring.pawple.app.payment;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;

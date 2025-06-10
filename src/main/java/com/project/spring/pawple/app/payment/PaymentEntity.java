@@ -1,4 +1,4 @@
-package com.project.spring.skillstack.entity;
+package com.project.spring.pawple.app.payment;
 
 import java.time.LocalDateTime;
 

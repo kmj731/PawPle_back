@@ -1,8 +1,6 @@
-package com.project.spring.skillstack.dto;
+package com.project.spring.pawple.app.store;
 
 import java.util.List;
-
-import com.project.spring.skillstack.entity.ProductEntity;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;

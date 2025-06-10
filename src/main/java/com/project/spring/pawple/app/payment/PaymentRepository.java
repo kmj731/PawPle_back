@@ -1,10 +1,8 @@
-package com.project.spring.skillstack.dao;
+package com.project.spring.pawple.app.payment;
 
 import java.util.List;
 
 import org.springframework.data.jpa.repository.JpaRepository;
-
-import com.project.spring.skillstack.entity.PaymentEntity;
 
 public interface PaymentRepository extends JpaRepository<PaymentEntity, Long> {
     List<PaymentEntity> findByUserId(Long userId);

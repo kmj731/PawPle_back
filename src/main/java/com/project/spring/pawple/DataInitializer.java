@@ -21,7 +21,7 @@ import com.project.spring.pawple.app.pet.PetEntity;
 import com.project.spring.pawple.app.pet.PetRepository;
 import com.project.spring.pawple.app.post.PostEntity;
 import com.project.spring.pawple.app.post.PostRepository;
-import com.project.spring.pawple.app.store.ProductEntity;
+// import com.project.spring.pawple.app.store.ProductEntity;
 import com.project.spring.pawple.app.store.ProductRepository;
 import com.project.spring.pawple.app.user.UserEntity;
 import com.project.spring.pawple.app.user.UserRepository;
@@ -481,13 +481,13 @@ public class DataInitializer implements CommandLineRunner {
         // userRep.save(new UserEntity(null, "root", passwordEncoder.encode("1234"), "root", List.of("ADMIN"), null, null, null, LocalDateTime.now(), null, null));
         // userRep.save(new UserEntity(null, "abcd", passwordEncoder.encode("1234"), "abcd", List.of("USER"), null, null, null, LocalDateTime.now(), null, null));
     
-        if (productRepository.count() == 0) { // DB가 비어 있을 때만 삽입
-            ProductEntity p1 = new ProductEntity(null, "액티베이트 스몰 60p (종합 영양제)", "벳플러스", 4.9, 224, 17, 64900, 78000, List.of("무료배송", "BEST", "특가"), "/images/aktivait.jpg");
-            ProductEntity p2 = new ProductEntity(null, "프리미엄 비프(소 단일) (100gx10팩)", "바프독", 5.0, 3, 4, 54900, 57000, List.of("BEST"), "/images/synoquin.jpg");
-            // ... 나머지 상품도 동일하게 생성
+        // if (productRepository.count() == 0) { // DB가 비어 있을 때만 삽입
+        //     ProductEntity p1 = new ProductEntity(null, "액티베이트 스몰 60p (종합 영양제)", "벳플러스", 4.9, 224, 17, 64900, 78000, List.of("무료배송", "BEST", "특가"), "/images/aktivait.jpg");
+        //     ProductEntity p2 = new ProductEntity(null, "프리미엄 비프(소 단일) (100gx10팩)", "바프독", 5.0, 3, 4, 54900, 57000, List.of("BEST"), "/images/synoquin.jpg");
+        //     // ... 나머지 상품도 동일하게 생성
 
-            productRepository.saveAll(List.of(p1, p2 /*, ... */));
-        }
+        //     productRepository.saveAll(List.of(p1, p2 /*, ... */));
+        // }
     
     
     

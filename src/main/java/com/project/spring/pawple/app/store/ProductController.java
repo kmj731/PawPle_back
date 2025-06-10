@@ -1,4 +1,4 @@
-package com.project.spring.skillstack.controller.store;
+package com.project.spring.pawple.app.store;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -12,9 +12,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.project.spring.skillstack.dto.ProductDto;
-import com.project.spring.skillstack.entity.ProductEntity;
-import com.project.spring.skillstack.service.ProductService;
 
 import lombok.RequiredArgsConstructor;
 

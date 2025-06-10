@@ -1,14 +1,9 @@
-package com.project.spring.skillstack.service;
+package com.project.spring.pawple.app.payment;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
 
 import org.springframework.stereotype.Service;
-
-import com.project.spring.skillstack.dao.PaymentRepository;
-import com.project.spring.skillstack.dto.PaymentDto;
-import com.project.spring.skillstack.dto.PaymentResultDto;
-import com.project.spring.skillstack.entity.PaymentEntity;
 
 import lombok.RequiredArgsConstructor;
 
