@@ -28,23 +28,21 @@ public class PostDto {
     private Integer viewCount;
     private Integer commentCount;
     private Integer likeCount;
-    private Boolean isLiked; // 현재 사용자 좋아요 상태
+    private Boolean isLiked;
     private String category;
     private String subCategory;
     private Boolean isPublic;
-    private Long petId; // 클라이언트에서 보낼 반려동물 ID
+    private Long petId;
     private PetDto pet;
     private List<MediaDto> mediaList;
+    private Boolean isNew; // 추가된 필드
 
-    
-    // 요청 데이터용 생성자
     public PostDto(String title, String content, String category) {
         this.title = title;
         this.content = content;
-        this.category = category;
+        this.category = category;     
     }
-    
-    // 엔티티를 DTO로 변환
+
     public static PostDto fromEntity(PostEntity entity) {
         return PostDto.builder()
                 .id(entity.getId())
@@ -67,10 +65,10 @@ public class PostDto {
                     .map(MediaDto::fromEntity)
                     .collect(Collectors.toList())
                 )
+                .isNew(entity.getCreatedAt().isAfter(LocalDateTime.now().minusDays(1)))
                 .build();
     }
-    
-    // DTO를 엔티티로 변환 (생성용)
+
     public PostEntity toEntity() {
         return PostEntity.builder()
                 .title(this.title)
@@ -81,7 +79,6 @@ public class PostDto {
                 .build();
     }
 
-    // 블라인드 처리용 팩토리
     public static PostDto blinded(Long postId) {
         return PostDto.builder()
                 .id(postId)
