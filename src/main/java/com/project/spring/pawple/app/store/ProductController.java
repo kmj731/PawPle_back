@@ -54,4 +54,10 @@ public class ProductController {
     public void deleteProduct(@PathVariable Long id) {
         productService.delete(id);
     }
+
+    @GetMapping("/{id}")
+    public ProductDto getProductById(@PathVariable Long id) {
+        ProductEntity product = productService.findById(id);
+        return ProductDto.fromEntity(product);
+    }
 }
