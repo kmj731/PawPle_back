@@ -30,22 +30,22 @@ import lombok.NoArgsConstructor;
 public class ProductEntity {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "ProductSeq")
     private Long id;
 
-    private String name;         // 상품명
-    private String brand;        // 브랜드
-    private double rating;       // 평점
-    private int reviews;         // 리뷰 수
-    private int discount;        // 할인율 (%)
-    private int price;           // 할인가
-    private int originalPrice;   // 원가
+    private String name;          // 상품명
+    private String brand;         // 브랜드
+    private double rating;        // 평점
+    private int reviews;          // 리뷰 수
+    private int discount;         // 할인율 (%)
+    private int price;            // 할인가
+    private int originalPrice;    // 원가
 
     @ElementCollection
     private List<String> tags = new ArrayList<>(); // 태그들
 
-    private String image;        // 이미지 URL
+    private String image;         // 이미지 URL
 
-    // 생성자, Getter/Setter 등 생략 가능 (Lombok 사용 시)
+    private String category;      // 카테고리 (사료, 간식, 영양제, 용품 등)
 }
 
