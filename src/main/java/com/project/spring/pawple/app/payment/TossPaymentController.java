@@ -26,31 +26,33 @@ public class TossPaymentController {
 
     @Value("${toss.secret-key}")
     private String tossSecretKey;
+    @Value("${spring.security.cors.site}")
+    String corsOrigin;
 
-    @PostMapping("/pay")
-    public ResponseEntity<String> requestPayment(@RequestBody TossPaymentRequestDto dto) {
-        String basicAuth = Base64.getEncoder().encodeToString((tossSecretKey + ":").getBytes());
+    // @PostMapping("/pay")
+    // public ResponseEntity<String> requestPayment(@RequestBody TossPaymentRequestDto dto) {
+    //     String basicAuth = Base64.getEncoder().encodeToString((tossSecretKey + ":").getBytes());
 
-        RestTemplate restTemplate = new RestTemplate();
+    //     RestTemplate restTemplate = new RestTemplate();
 
-        HttpHeaders headers = new HttpHeaders();
-        headers.set("Authorization", "Basic " + basicAuth);
-        headers.setContentType(MediaType.APPLICATION_JSON);
+    //     HttpHeaders headers = new HttpHeaders();
+    //     headers.set("Authorization", "Basic " + basicAuth);
+    //     headers.setContentType(MediaType.APPLICATION_JSON);
 
-        Map<String, Object> request = new HashMap<>();
-        request.put("amount", dto.getAmount());
-        request.put("orderId", dto.getOrderId());
-        request.put("orderName", dto.getOrderName());
-        request.put("successUrl", "http://localhost:9999/store/toss/success");
-        request.put("failUrl", "http://localhost:9999/store/toss/fail");
+    //     Map<String, Object> request = new HashMap<>();
+    //     request.put("amount", dto.getAmount());
+    //     request.put("orderId", dto.getOrderId());
+    //     request.put("orderName", dto.getOrderName());
+    //     request.put("successUrl", corsOrigin + "/store/success");
+    //     // request.put("failUrl", "http://localhost:9999/store/toss/fail");
 
-        HttpEntity<Map<String, Object>> httpEntity = new HttpEntity<>(request, headers);
+    //     HttpEntity<Map<String, Object>> httpEntity = new HttpEntity<>(request, headers);
 
-        String url = "https://api.tosspayments.com/v1/payments";
+    //     String url = "https://api.tosspayments.com/v1/payments";
 
-        ResponseEntity<String> response = restTemplate.postForEntity(url, httpEntity, String.class);
-        return ResponseEntity.ok(response.getBody());
-    }
+    //     ResponseEntity<String> response = restTemplate.postForEntity(url, httpEntity, String.class);
+    //     return ResponseEntity.ok(response.getBody());
+    // }
 
     @GetMapping("/success")
     public String success(@RequestParam String paymentKey,
@@ -64,6 +66,33 @@ public class TossPaymentController {
                         @RequestParam String message,
                         @RequestParam String orderId) {
         return "결제 실패: " + message;
+    }
+
+    @PostMapping("/confirm")
+    public ResponseEntity<String> confirmPayment(
+        @RequestParam String paymentKey,
+        @RequestParam String orderId,
+        @RequestParam int amount
+    ) {
+        String basicAuth = Base64.getEncoder().encodeToString((tossSecretKey + ":").getBytes());
+
+        RestTemplate restTemplate = new RestTemplate();
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.set("Authorization", "Basic " + basicAuth);
+        headers.setContentType(MediaType.APPLICATION_JSON);
+
+        Map<String, Object> body = new HashMap<>();
+        body.put("orderId", orderId);
+        body.put("amount", amount);
+
+        HttpEntity<Map<String, Object>> request = new HttpEntity<>(body, headers);
+        String url = "https://api.tosspayments.com/v1/payments/" + paymentKey;
+
+        ResponseEntity<String> response = restTemplate.postForEntity(url, request, String.class);
+        System.out.println("✅ Toss 승인 응답: " + response.getBody()); // 🔍 이거 꼭 찍어주세요
+
+        return ResponseEntity.ok(response.getBody());
     }
 }
 
