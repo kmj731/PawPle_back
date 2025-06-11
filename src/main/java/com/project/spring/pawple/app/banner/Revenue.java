@@ -11,26 +11,22 @@ public class Revenue {
 
     private int amount;
 
-    // 기본 생성자 (JPA 필수)
+    // 기본 생성자 (
     public Revenue() {
     }
-
     // 생성자
     public Revenue(int amount) {
         this.amount = amount;
     }
 
-    // Getter
+    // Getter Setter
     public int getAmount() {
         return amount;
     }
-
-    // Setter
     public void setAmount(int amount) {
         this.amount = amount;
     }
-
-    // (선택) id에 대한 getter
+    
     public Long getId() {
         return id;
     }
