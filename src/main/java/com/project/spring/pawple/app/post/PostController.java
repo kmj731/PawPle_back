@@ -43,6 +43,13 @@ public class PostController {
     // public PostController(PointService pointService){
     // this.pointService = pointService;
     // }
+    // 게시글 총 갯수
+    @GetMapping("/count")
+    public ResponseEntity<Long> getPostCount() {
+        long count = postService.getPostCount();
+        return ResponseEntity.ok(count);
+    }
+
 
     // 게시글 생성
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
@@ -219,7 +226,7 @@ public class PostController {
     @GetMapping("/popular/views")
     public ResponseEntity<Page<PostDto>> getPopularPostsByViews(
             @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(defaultValue = "20") int size,
             @RequestParam(required = false) String category) {
         Page<PostDto> posts;
         if (category != null && !category.isEmpty()) {
@@ -234,7 +241,7 @@ public class PostController {
     @GetMapping("/popular/comments")
     public ResponseEntity<Page<PostDto>> getPopularPostsByComments(
             @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(defaultValue = "20") int size,
             @RequestParam(required = false) String category) {
         Page<PostDto> posts;
         if (category != null && !category.isEmpty()) {
@@ -282,7 +289,7 @@ public class PostController {
     @GetMapping("/popular/likes")
     public ResponseEntity<Page<PostDto>> getPopularPostsByLikes(
             @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(defaultValue = "20") int size,
             @RequestParam(required = false) String category) {
         Page<PostDto> posts;
         if (category != null && !category.isEmpty()) {

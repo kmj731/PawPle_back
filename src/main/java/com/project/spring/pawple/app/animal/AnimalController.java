@@ -17,7 +17,6 @@ public class AnimalController {
 
     @GetMapping
     public ResponseEntity<String> getAnimals() {
-        System.out.println("🐾 AnimalController 진입");
         return ResponseEntity.ok(service.getAnimalsJson());
     }
 

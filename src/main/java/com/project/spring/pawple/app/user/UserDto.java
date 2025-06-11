@@ -34,11 +34,15 @@ private Long id;
     private String imageUrl;
     private String thumbnailUrl;
 
+    private List<Long> followingIds;
+    private List<Long> blockedIds;
+
     private LocalDateTime created;
 
     private Map<String, Object> attr;
 
     private List<PetEntity> pets;
+    
     private Integer point;
     
     

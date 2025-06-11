@@ -53,7 +53,8 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration config = new CorsConfiguration();
-        config.addAllowedOriginPattern(corsOrigin);
+        config.addAllowedOrigin(corsOrigin);
+        // config.addAllowedOriginPattern(corsOrigin);
         config.addAllowedMethod("*");
         config.addAllowedHeader("*");
         config.setAllowCredentials(true);
@@ -80,7 +81,7 @@ public class SecurityConfig {
                         .requestMatchers("/oauth2/**", "/logout").permitAll()
                         .requestMatchers("/auth/**", "/user/**", "/pet/**", "/consult/**").authenticated()
                         .requestMatchers("/admin/**").hasRole("ADMIN")
-                        .requestMatchers("/health/**", "/", "/css/**", "/js/**", "/images/**").permitAll()
+                        .requestMatchers("/health/**", "/", "/css/**", "/js/**", "/images/**", "/uploads/images/**", "/uploads/thumb/**").permitAll()
                         .anyRequest().authenticated())
 
                 .formLogin(form -> form

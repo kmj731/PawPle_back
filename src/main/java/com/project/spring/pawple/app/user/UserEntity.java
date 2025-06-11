@@ -19,6 +19,9 @@ import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.JoinTable;
+import jakarta.persistence.ManyToMany;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.PostLoad;
 import jakarta.persistence.PrePersist;
@@ -66,6 +69,22 @@ public class UserEntity {
 
     private String imageUrl;
     private String thumbnailUrl;
+    
+    @ManyToMany
+    @JoinTable(
+        name = "user_following",
+        joinColumns = @JoinColumn(name = "follower_id"),
+        inverseJoinColumns = @JoinColumn(name = "following_id")
+    )
+    private List<UserEntity> following = new ArrayList<>();
+
+    @ManyToMany
+    @JoinTable(
+        name = "user_blocked",
+        joinColumns = @JoinColumn(name = "blocker_id"),
+        inverseJoinColumns = @JoinColumn(name = "blocked_id")
+    )
+    private List<UserEntity> blockedUsers = new ArrayList<>();
 
     private LocalDateTime created;
 
@@ -89,7 +108,24 @@ public class UserEntity {
 
 
     public UserDto toDto() {
-        return new UserDto(id, name, pass, socialName, getRoles().stream().map(String::toString).collect(Collectors.toList()), email, phoneNumber, birthDate, imageUrl, thumbnailUrl, created, attr, pets,point);
+        return new UserDto(
+            id,
+            name,
+            pass,
+            socialName,
+            roles.stream().map(String::toString).collect(Collectors.toList()),
+            email,
+            phoneNumber,
+            birthDate,
+            imageUrl,
+            thumbnailUrl,
+            following.stream().map(UserEntity::getId).collect(Collectors.toList()),
+            blockedUsers.stream().map(UserEntity::getId).collect(Collectors.toList()),
+            created,
+            attr,
+            pets,
+            point
+        );
     }
 
     public UserDtoWithoutPass toDtoWithoutPass(){
