@@ -73,6 +73,8 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(HttpMethod.GET, "/comments/**").permitAll() 
                         .requestMatchers(HttpMethod.GET, "/api/posts/**").permitAll() // GET 요청은 인증없이 허용
+                        .requestMatchers(HttpMethod.GET, "/notifications").authenticated()  // 댓글알림
+                        .requestMatchers(HttpMethod.PATCH, "/notifications/**").authenticated()  // 댓글알림
                         .requestMatchers(HttpMethod.PUT, "/vaccine/**").authenticated()
                         .requestMatchers("/api/**").authenticated() // 나머지 API는 인증 필요
                         .requestMatchers("/docs", "/swagger-ui/**", "/v3/**", "/vaccine/**", "/favicon.ico").permitAll()
