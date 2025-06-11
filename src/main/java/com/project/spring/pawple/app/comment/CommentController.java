@@ -26,21 +26,21 @@ import lombok.RequiredArgsConstructor;
 @RequestMapping("/comments")
 @RequiredArgsConstructor
 public class CommentController {
-    
+
     private final CommentService commentService;
     private final CommentLikeService commentLikeService;
     private final UserRepository userRepository;
-    
+
     @PostMapping
     public ResponseEntity<CommentDto> createComment(@RequestBody CommentDto commentDto) {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         String username = auth.getName();
-        
+
         UserEntity user = userRepository.findByName(username)
                 .orElseThrow(() -> new RuntimeException("User not found"));
-        
+
         commentDto.setUserId(user.getId());
-        
+
         CommentDto createdComment = commentService.createComment(commentDto);
         return new ResponseEntity<>(createdComment, HttpStatus.CREATED);
     }
@@ -50,14 +50,14 @@ public class CommentController {
         List<CommentDto> comments = commentService.getAllComments();
         return new ResponseEntity<>(comments, HttpStatus.OK);
     }
-    
+
     // 게시글 번호 별 댓글 조회
     @GetMapping("/post/{postId}")
     public ResponseEntity<List<CommentDto>> getCommentsByPostId(@PathVariable Long postId) {
         List<CommentDto> comments = commentService.getCommentsByPostId(postId);
         return new ResponseEntity<>(comments, HttpStatus.OK);
     }
-    
+
     // 댓글 번호 별 댓글 수정
     @PutMapping("/{commentId}")
     public ResponseEntity<?> updateComment(
@@ -65,12 +65,12 @@ public class CommentController {
             @RequestBody CommentDto commentDto) {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         String username = auth.getName();
-        
+
         UserEntity user = userRepository.findByName(username)
                 .orElseThrow(() -> new RuntimeException("User not found"));
-        
+
         commentDto.setUserId(user.getId());
-        
+
         try {
             CommentDto updatedComment = commentService.updateComment(commentId, commentDto);
             return new ResponseEntity<>(updatedComment, HttpStatus.OK);
@@ -80,18 +80,18 @@ public class CommentController {
             return new ResponseEntity<>(response, HttpStatus.FORBIDDEN);
         }
     }
-    
+
     // 댓글 삭제
     @DeleteMapping("/{commentId}")
     public ResponseEntity<?> deleteComment(@PathVariable Long commentId) {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         String username = auth.getName();
-        
+
         UserEntity user = userRepository.findByName(username)
                 .orElseThrow(() -> new RuntimeException("User not found"));
-        
+
         Long userId = user.getId();
-        
+
         try {
             commentService.deleteComment(commentId, userId);
             Map<String, String> response = new HashMap<>();
@@ -103,38 +103,38 @@ public class CommentController {
             return new ResponseEntity<>(response, HttpStatus.FORBIDDEN);
         }
     }
-    
+
     // 특정 사용자의 댓글 조회
     @GetMapping("/user/{username}")
     public ResponseEntity<List<CommentDto>> getCommentsByUser(@PathVariable String username) {
         UserEntity user = userRepository.findByName(username)
                 .orElseThrow(() -> new RuntimeException("User not found"));
-        
+
         List<CommentDto> comments = commentService.getCommentsByUserId(user.getId());
         return new ResponseEntity<>(comments, HttpStatus.OK);
     }
-    
+
     // 내 댓글 조회
     @GetMapping("/my-comments")
     public ResponseEntity<List<CommentDto>> getMyComments() {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         String username = auth.getName();
-        
+
         UserEntity user = userRepository.findByName(username)
                 .orElseThrow(() -> new RuntimeException("User not found"));
-        
+
         List<CommentDto> comments = commentService.getCommentsByUserId(user.getId());
         return new ResponseEntity<>(comments, HttpStatus.OK);
     }
 
-     // 댓글 좋아요 토글 API
+    // 댓글 좋아요 토글 API
     @PostMapping("/{commentId}/like")
     public ResponseEntity<Map<String, Object>> toggleLike(@PathVariable Long commentId) {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         String username = auth.getName();
 
         UserEntity user = userRepository.findByName(username)
-            .orElseThrow(() -> new RuntimeException("User not found"));
+                .orElseThrow(() -> new RuntimeException("User not found"));
 
         boolean isLiked = commentLikeService.toggleLike(commentId, user);
         long likeCount = commentLikeService.getLikeCount(commentId);
@@ -154,8 +154,7 @@ public class CommentController {
         String username = auth.getName();
 
         UserEntity user = userRepository.findByName(username)
-            .orElseThrow(() -> new RuntimeException("User not found"));
-
+                .orElseThrow(() -> new RuntimeException("User not found"));
 
         boolean isLiked = commentLikeService.isLikedByUser(id, user);
         long likeCount = commentLikeService.getLikeCount(id);
@@ -165,6 +164,24 @@ public class CommentController {
         response.put("likeCount", likeCount);
 
         return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/mentionable")
+    public ResponseEntity<List<MentionUserDto>> getMentionableUsers() {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        String currentUsername = auth.getName();
+
+        // 현재 로그인 유저 제외
+        List<UserEntity> allUsers = userRepository.findAll().stream()
+                .filter(user -> !user.getName().equals(currentUsername))
+                .toList();
+
+        // 필요한 정보만 DTO로 변환
+        List<MentionUserDto> mentionable = allUsers.stream()
+                .map(user -> new MentionUserDto(user.getId(), user.getSocialName()))
+                .toList();
+
+        return ResponseEntity.ok(mentionable);
     }
 
 }
