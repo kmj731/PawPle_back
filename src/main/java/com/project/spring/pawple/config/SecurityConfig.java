@@ -125,7 +125,8 @@ public class SecurityConfig {
                                     .write("{\"message\":\"Authentication Error\",\"type\":\"Failed Authenticate\"}");
                         }))
                 .sessionManagement(session -> session
-                        .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                        // .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                        .sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED))
                 .addFilterBefore(jwtAuthorizationFilter, UsernamePasswordAuthenticationFilter.class)
                 .userDetailsService(customUserDetailService);
 
