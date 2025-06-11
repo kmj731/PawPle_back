@@ -23,6 +23,8 @@ public class PostDto {
     private String content;
     private String authorName;
     private Long authorId;
+    private String authorImageUrl;
+    private String authorThumbnailUrl;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
     private Integer viewCount;
@@ -50,6 +52,8 @@ public class PostDto {
                 .content(entity.getContent())
                 .authorName(entity.getUser().getName())
                 .authorId(entity.getUser().getId())
+                .authorImageUrl(entity.getUser().getImageUrl())
+                .authorThumbnailUrl(entity.getUser().getThumbnailUrl())
                 .createdAt(entity.getCreatedAt())
                 .updatedAt(entity.getUpdatedAt())
                 .viewCount(entity.getViewCount())
@@ -65,6 +69,7 @@ public class PostDto {
                     .map(MediaDto::fromEntity)
                     .collect(Collectors.toList())
                 )
+
                 .isNew(entity.getCreatedAt().isAfter(LocalDateTime.now().minusDays(1)))
                 .build();
     }

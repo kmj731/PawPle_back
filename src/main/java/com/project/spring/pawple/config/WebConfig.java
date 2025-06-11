@@ -9,8 +9,13 @@ public class WebConfig implements WebMvcConfigurer {
 
     @Override
     public void addResourceHandlers(ResourceHandlerRegistry registry) {
-        registry.addResourceHandler("/images/**")
+        // 원본 이미지 (예: /uploads/images/abc.jpg)
+        registry.addResourceHandler("/uploads/images/**")
                 .addResourceLocations("file:" + System.getProperty("user.dir") + "/uploads/images/");
+
+        // 썸네일 이미지 (예: /uploads/thumb/thumb_abc.jpg)
+        registry.addResourceHandler("/uploads/thumb/**")
+                .addResourceLocations("file:" + System.getProperty("user.dir") + "/uploads/thumb/");
     }
     
 }
