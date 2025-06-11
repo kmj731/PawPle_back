@@ -3,6 +3,7 @@ package com.project.spring.pawple.app.order;
 import lombok.*;
 
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 @Data
@@ -14,6 +15,7 @@ public class OrderDto {
     private int totalAmount;
     private String status;
     private List<OrderItemDto> items;
+    private String orderDate;
 
     public OrderEntity toEntity() {
         OrderEntity order = OrderEntity.builder()
@@ -37,6 +39,7 @@ public class OrderDto {
                 .userId(order.getUserId())
                 .totalAmount(order.getTotalAmount())
                 .status(order.getStatus())
+                .orderDate(order.getOrderDate().format(DateTimeFormatter.ofPattern("yy/MM/dd HH:mm:ss.SSS")))
                 .items(
                     order.getItems().stream()
                         .map(OrderItemDto::fromEntity)
