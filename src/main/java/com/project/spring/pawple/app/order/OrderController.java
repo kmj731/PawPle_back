@@ -40,9 +40,10 @@ public class OrderController {
                 .toList();
     }
 
-    @DeleteMapping("/{id}")
-    public void deleteOrder(@PathVariable Long id) {
-        orderService.deleteById(id);
+    @DeleteMapping("/{id}/cancel")
+    public ResponseEntity<?> cancelOrder(@PathVariable Long id) {
+        orderService.cancelOrder(id);
+        return ResponseEntity.ok().build();
     }
 
     @PatchMapping("/{id}/status")
@@ -53,5 +54,14 @@ public class OrderController {
         
         orderService.updateStatus(id, status, trackingNumber);
         return ResponseEntity.ok().build();
+    }
+
+    @PatchMapping("/{id}/delivery")
+    public ResponseEntity<OrderDto> updateDeliveryInfo(
+            @PathVariable Long id,
+            @RequestBody OrderDto dto) {
+
+        OrderEntity updated = orderService.updateDeliveryInfo(id, dto);
+        return ResponseEntity.ok(OrderDto.fromEntity(updated));
     }
 }

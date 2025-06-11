@@ -1,7 +1,6 @@
 package com.project.spring.pawple.app.order;
 
 import lombok.*;
-
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
@@ -24,10 +23,14 @@ public class OrderDto {
     private String orderDate;
 
     public OrderEntity toEntity() {
+        if (this.id != null) {
+            throw new IllegalStateException("toEntity()는 새 주문 저장에만 사용됩니다.");
+        }
+
         OrderEntity order = OrderEntity.builder()
                 .userId(userId)
                 .totalAmount(totalAmount)
-                .status(status)
+                .status(status != null ? status : "결제완료")
                 .orderDate(LocalDateTime.now())
                 .recipientName(recipientName)
                 .recipientPhone(recipientPhone)
@@ -46,12 +49,19 @@ public class OrderDto {
     }
 
     public static OrderDto fromEntity(OrderEntity order) {
+        String formattedDate = "-";
+        try {
+            formattedDate = order.getOrderDate().format(DateTimeFormatter.ofPattern("yy/MM/dd HH:mm:ss.SSS"));
+        } catch (Exception e) {
+            // 생략 가능
+        }
+
         return OrderDto.builder()
                 .id(order.getId())
                 .userId(order.getUserId())
                 .totalAmount(order.getTotalAmount())
                 .status(order.getStatus())
-                .orderDate(order.getOrderDate().format(DateTimeFormatter.ofPattern("yy/MM/dd HH:mm:ss.SSS")))
+                .orderDate(formattedDate)
                 .recipientName(order.getRecipientName())
                 .recipientPhone(order.getRecipientPhone())
                 .address(order.getAddress())

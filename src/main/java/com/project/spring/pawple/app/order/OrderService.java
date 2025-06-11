@@ -1,10 +1,9 @@
 package com.project.spring.pawple.app.order;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
 
 import java.util.List;
-
-import org.springframework.stereotype.Service;
 
 @Service
 @RequiredArgsConstructor
@@ -29,21 +28,34 @@ public class OrderService {
         return orderRepository.findAll();
     }
 
-    public void deleteById(Long id) {
-        orderRepository.deleteById(id);
+    // 주문 취소 = 삭제 대신 status 변경
+    public void cancelOrder(Long id) {
+        OrderEntity order = findById(id);
+        order.setStatus("주문취소");
+        orderRepository.save(order);
     }
 
     public void updateStatus(Long orderId, String status, String trackingNumber) {
-        OrderEntity order = orderRepository.findById(orderId)
-                .orElseThrow(() -> new RuntimeException("해당 주문이 존재하지 않습니다."));
-
+        OrderEntity order = findById(orderId);
         order.setStatus(status);
 
-        // 상태가 '배송중'일 경우에만 송장번호 저장
         if ("배송중".equals(status) && trackingNumber != null && !trackingNumber.trim().isEmpty()) {
             order.setTrackingNumber(trackingNumber.trim());
+        } else if (!"배송중".equals(status)) {
+            order.setTrackingNumber(null); // 다른 상태에서는 송장 제거 (선택)
         }
 
         orderRepository.save(order);
+    }
+
+    public OrderEntity updateDeliveryInfo(Long orderId, OrderDto dto) {
+        OrderEntity order = findById(orderId);
+
+        // 필드만 수정
+        order.setRecipientName(dto.getRecipientName());
+        order.setRecipientPhone(dto.getRecipientPhone());
+        order.setAddress(dto.getAddress());
+
+        return orderRepository.save(order);
     }
 }
