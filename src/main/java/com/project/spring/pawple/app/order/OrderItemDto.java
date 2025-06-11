@@ -20,4 +20,13 @@ public class OrderItemDto {
                 .price(price)
                 .build();
     }
+
+    public static OrderItemDto fromEntity(OrderItemEntity item) {
+        return OrderItemDto.builder()
+                .productId(item.getProductId())
+                .productName(item.getProductName())
+                .quantity(item.getQuantity())
+                .price(item.getPrice())
+                .build();
+    }
 }

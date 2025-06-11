@@ -31,4 +31,17 @@ public class OrderDto {
         order.setItems(itemEntities);
         return order;
     }
+
+    public static OrderDto fromEntity(OrderEntity order) {
+        return OrderDto.builder()
+                .userId(order.getUserId())
+                .totalAmount(order.getTotalAmount())
+                .status(order.getStatus())
+                .items(
+                    order.getItems().stream()
+                        .map(OrderItemDto::fromEntity)
+                        .toList()
+                )
+                .build();
+    }
 }
