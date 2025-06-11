@@ -16,6 +16,10 @@ public class WebConfig implements WebMvcConfigurer {
         // 썸네일 이미지 (예: /uploads/thumb/thumb_abc.jpg)
         registry.addResourceHandler("/uploads/thumb/**")
                 .addResourceLocations("file:" + System.getProperty("user.dir") + "/uploads/thumb/");
-    }
-    
+                
+        // ✅ 상품 이미지
+        registry.addResourceHandler("/uploads/product/**")
+                .addResourceLocations("file:" + System.getProperty("user.dir") + "/uploads/product/");
+
+    }    
 }

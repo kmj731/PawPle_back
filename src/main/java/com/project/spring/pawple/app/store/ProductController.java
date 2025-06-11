@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -11,7 +12,9 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
 import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
@@ -39,14 +42,32 @@ public class ProductController {
                 .collect(Collectors.toList());
     }
 
-    @PostMapping
-    public ProductDto createProduct(@RequestBody ProductDto dto) {
+    @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ProductDto createProduct(
+        @RequestPart("data") ProductDto dto,
+        @RequestPart(value = "image", required = false) MultipartFile image
+    ) {
+        String imageUrl = null;
+        if (image != null && !image.isEmpty()) {
+            imageUrl = productService.storeImage(image); // 저장 경로 리턴
+            dto.setImage(imageUrl);
+        }
+
         ProductEntity saved = productService.save(dto.toEntity());
         return ProductDto.fromEntity(saved);
     }
 
-    @PutMapping("/{id}")
-    public ProductDto updateProduct(@PathVariable Long id, @RequestBody ProductDto dto) {
+    @PutMapping(value = "/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ProductDto updateProduct(
+        @PathVariable Long id,
+        @RequestPart("data") ProductDto dto,
+        @RequestPart(value = "image", required = false) MultipartFile image
+    ) {
+        if (image != null && !image.isEmpty()) {
+            String imageUrl = productService.storeImage(image);
+            dto.setImage(imageUrl);
+        }
+
         ProductEntity updated = productService.update(id, dto.toEntity());
         return ProductDto.fromEntity(updated);
     }
