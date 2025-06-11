@@ -43,6 +43,8 @@ public class SecurityConfig {
     @Value("${spring.security.cors.same.domain}")
     String corsDomain;
 
+
+    
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
@@ -73,6 +75,7 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.PUT, "/vaccine/**").authenticated()
                         .requestMatchers("/api/**").authenticated() // 나머지 API는 인증 필요
                         .requestMatchers("/docs", "/swagger-ui/**", "/v3/**", "/vaccine/**", "/favicon.ico").permitAll()
+                        .requestMatchers("/store/payments/**", "/store/toss/**").permitAll()
                         .requestMatchers("/posts/**", "/public/**", "/permit/**", "/animal/**").permitAll()
                         .requestMatchers("/oauth2/**", "/logout").permitAll()
                         .requestMatchers("/auth/**", "/user/**", "/pet/**", "/consult/**").authenticated()
@@ -123,7 +126,10 @@ public class SecurityConfig {
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .addFilterBefore(jwtAuthorizationFilter, UsernamePasswordAuthenticationFilter.class)
                 .userDetailsService(customUserDetailService);
+
+                
         return http.getOrBuild();
     }
+    
 
 }
