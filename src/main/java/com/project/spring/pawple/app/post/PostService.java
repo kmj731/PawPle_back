@@ -10,6 +10,7 @@ import java.io.File;
 import java.io.IOException;
 
 import org.attoparser.dom.Comment;
+import org.springframework.data.domain.Sort;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -372,5 +373,11 @@ public class PostService {
                 .map(PostDto::fromEntity)
                 .orElse(null);
     }
+
+    public Page<PostDto> getPostsByUserId(Long userId, int page, int size) {
+    Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());
+    Page<PostEntity> postPage = postRepository.findByUserId(userId, pageable);
+    return postPage.map(PostDto::fromEntity);
+}
 
 }

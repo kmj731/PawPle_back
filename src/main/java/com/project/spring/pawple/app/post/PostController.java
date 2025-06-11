@@ -50,7 +50,6 @@ public class PostController {
         return ResponseEntity.ok(count);
     }
 
-
     // 게시글 생성
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<?> createPost(
@@ -326,23 +325,33 @@ public class PostController {
     }
 
     // 이전 글 조회
-@GetMapping("/{id}/previous")
-public ResponseEntity<PostDto> getPreviousPost(@PathVariable Long id) {
-    PostDto previousPost = postService.findPrevious(id);
-    if (previousPost == null) {
-        return ResponseEntity.noContent().build(); // 204
+    @GetMapping("/{id}/previous")
+    public ResponseEntity<PostDto> getPreviousPost(@PathVariable Long id) {
+        PostDto previousPost = postService.findPrevious(id);
+        if (previousPost == null) {
+            return ResponseEntity.noContent().build(); // 204
+        }
+        return ResponseEntity.ok(previousPost);
     }
-    return ResponseEntity.ok(previousPost);
-}
 
-// 다음 글 조회
-@GetMapping("/{id}/next")
-public ResponseEntity<PostDto> getNextPost(@PathVariable Long id) {
-    PostDto nextPost = postService.findNext(id);
-    if (nextPost == null) {
-        return ResponseEntity.noContent().build(); // 204
+    // 다음 글 조회
+    @GetMapping("/{id}/next")
+    public ResponseEntity<PostDto> getNextPost(@PathVariable Long id) {
+        PostDto nextPost = postService.findNext(id);
+        if (nextPost == null) {
+            return ResponseEntity.noContent().build(); // 204
+        }
+        return ResponseEntity.ok(nextPost);
     }
-    return ResponseEntity.ok(nextPost);
-}
-    
+
+    // userId 기반 게시글 조회
+    @GetMapping("/user/id/{userId}")
+    public ResponseEntity<Page<PostDto>> getPostsByUserId(
+            @PathVariable Long userId,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size) {
+        Page<PostDto> posts = postService.getPostsByUserId(userId, page, size);
+        return ResponseEntity.ok(posts);
+    }
+
 }

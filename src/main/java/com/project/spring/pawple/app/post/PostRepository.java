@@ -121,4 +121,7 @@ public interface PostRepository extends JpaRepository<PostEntity, Long> {
     // 게시글 ID보다 큰 가장 오래된 글 (다음 글)
     Optional<PostEntity> findTopByIdGreaterThanAndIsPublicTrueOrderByIdAsc(Long id);
 
+    Page<PostEntity> findByUserId(Long userId, Pageable pageable);
+
+
 }
