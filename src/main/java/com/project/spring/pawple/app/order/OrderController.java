@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 
 import java.util.List;
 
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -30,5 +31,27 @@ public class OrderController {
         return orderService.findByUserId(userId).stream()
                 .map(OrderDto::fromEntity)
                 .toList();
+    }
+
+    @GetMapping("/all")
+    public List<OrderDto> getAllOrders() {
+        return orderService.findAll().stream()
+                .map(OrderDto::fromEntity)
+                .toList();
+    }
+
+    @DeleteMapping("/{id}")
+    public void deleteOrder(@PathVariable Long id) {
+        orderService.deleteById(id);
+    }
+
+    @PatchMapping("/{id}/status")
+    public ResponseEntity<?> updateOrderStatus(
+        @PathVariable Long id,
+        @RequestParam String status,
+        @RequestParam(required = false) String trackingNumber) {
+        
+        orderService.updateStatus(id, status, trackingNumber);
+        return ResponseEntity.ok().build();
     }
 }

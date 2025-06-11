@@ -27,4 +27,10 @@ public class OrderEntity {
 
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<OrderItemEntity> items = new ArrayList<>();
+
+    private String recipientName;     // 수령인 이름
+    private String recipientPhone;    // 수령인 전화번호
+    private String address;           // 주소 (전체 주소 문자열 또는 우편번호+주소 분리도 가능)
+    private String deliveryMemo;      // 배송 요청사항 메모 (선택사항)
+    private String trackingNumber;
 }
