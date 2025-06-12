@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -38,6 +39,7 @@ import com.project.spring.pawple.app.post.PostRepository;
 import com.project.spring.pawple.app.post.PostService;
 import com.project.spring.pawple.app.report.ReportEntity;
 import com.project.spring.pawple.app.report.ReportRepository;
+import com.project.spring.pawple.app.report.ReportService;
 import com.project.spring.pawple.app.store.ProductEntity;
 import com.project.spring.pawple.app.store.ProductService;
 import com.project.spring.pawple.app.user.UserDto;
@@ -46,6 +48,7 @@ import com.project.spring.pawple.app.user.UserEntity;
 import com.project.spring.pawple.app.user.UserService;
 import com.project.spring.pawple.app.user.UserSimpleInfoDto;
 
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 
 
@@ -59,6 +62,8 @@ public class ManagerController {
     private final UserService userService;
     private final PostService postService;
     private final PostManagerService postManagerService;
+    @Autowired
+    private final ReportService reportService;
 
     private final PostRepository postRepository;
     private final ProductService productService;
@@ -67,13 +72,14 @@ public class ManagerController {
     @Autowired
     private ReportRepository reportRepository;
 
-    public ManagerController(UserService userService, PostService postService, PostManagerService postManagerService, PostRepository postRepository,ProductService productService, OrderRepository orderRepository){
+    public ManagerController(UserService userService, PostService postService, PostManagerService postManagerService, PostRepository postRepository,ProductService productService, OrderRepository orderRepository,ReportService reportService){
         this.userService = userService;
         this.postService = postService;
         this.postManagerService = postManagerService;
         this.postRepository = postRepository;
         this.productService = productService;
         this.orderRepository = orderRepository;
+        this.reportService = reportService;
     }
 
     // 전체 회원 조회
@@ -457,6 +463,45 @@ public ResponseEntity<List<MonthlySalesDto>> getMonthlySales() {
     public List<ReportEntity> getAllReports() {
         return reportRepository.findAll();
     }
+
+    @PatchMapping("/reports/{id}")
+    public ResponseEntity<?> updateReportStatus(
+        @PathVariable Long id,
+        @RequestBody Map<String, String> updateData
+    ) {
+        Optional<ReportEntity> optionalReport = reportRepository.findById(id);
+        if (!optionalReport.isPresent()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("해당 신고가 존재하지 않습니다.");
+        }
+
+        ReportEntity report = optionalReport.get();
+        String newStatus = updateData.get("status");
+        report.setStatus(newStatus);
+        reportRepository.save(report);
+
+        return ResponseEntity.ok("상태가 업데이트되었습니다.");
+    }
+
+
+    @DeleteMapping("/reports/{id}")
+    public ResponseEntity<?> deleteReport(@PathVariable Long id) {
+    if (!reportRepository.existsById(id)) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body("해당 신고가 존재하지 않습니다.");
+    }
+
+    reportRepository.deleteById(id);
+    return ResponseEntity.ok("신고가 삭제되었습니다.");
+}
+
+@PatchMapping("/reports/{id}/status")
+public ResponseEntity<String> updateStatus(
+        @PathVariable Long id,
+        @RequestBody Map<String, String> requestBody
+) {
+    String newStatus = requestBody.get("status");
+    reportService.updateStatus(id, newStatus);
+    return ResponseEntity.ok("상태가 변경되었습니다.");
+}
 
 
 
