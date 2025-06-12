@@ -19,6 +19,8 @@ public class ReportEntity {
 
     private Long reporterId;
     private Long reportedUserId;
+    private Long postId;
+    private Long commentId;
     private String reason;
     private String targetType;
     private LocalDateTime reportedAt;

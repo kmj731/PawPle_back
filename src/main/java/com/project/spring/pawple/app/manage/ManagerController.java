@@ -45,6 +45,7 @@ import com.project.spring.pawple.app.store.ProductService;
 import com.project.spring.pawple.app.user.UserDto;
 import com.project.spring.pawple.app.user.UserDtoWithoutPass;
 import com.project.spring.pawple.app.user.UserEntity;
+import com.project.spring.pawple.app.user.UserRepository;
 import com.project.spring.pawple.app.user.UserService;
 import com.project.spring.pawple.app.user.UserSimpleInfoDto;
 
@@ -71,8 +72,12 @@ public class ManagerController {
 
     @Autowired
     private ReportRepository reportRepository;
+    @Autowired
+    private final UserRepository userRepository;
 
-    public ManagerController(UserService userService, PostService postService, PostManagerService postManagerService, PostRepository postRepository,ProductService productService, OrderRepository orderRepository,ReportService reportService){
+    public ManagerController(UserService userService, PostService postService, PostManagerService postManagerService,
+                             PostRepository postRepository,ProductService productService, OrderRepository orderRepository,
+                             ReportService reportService, UserRepository userRepository){
         this.userService = userService;
         this.postService = postService;
         this.postManagerService = postManagerService;
@@ -80,6 +85,7 @@ public class ManagerController {
         this.productService = productService;
         this.orderRepository = orderRepository;
         this.reportService = reportService;
+        this.userRepository = userRepository;
     }
 
     // 전체 회원 조회
