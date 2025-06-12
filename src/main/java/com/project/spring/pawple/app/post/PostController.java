@@ -1,8 +1,11 @@
 package com.project.spring.pawple.app.post;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -50,7 +53,6 @@ public class PostController {
         return ResponseEntity.ok(count);
     }
 
-
     // 게시글 생성
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<?> createPost(
@@ -83,6 +85,26 @@ public class PostController {
         // // 포인트 적립 실패해도 게시글 작성은 성공적으로 처리됨
         // System.err.println("포인트 적립 중 오류 발생: " + e.getMessage());
         // }
+    }
+    
+    // 이미지 저장
+    @PostMapping("/image-upload")
+    public Map<String, String> uploadImage(@RequestParam("image") MultipartFile file) {
+        try {
+            String baseDir = System.getProperty("user.dir") + "/uploads/post/";
+            File dir = new File(baseDir);
+            if (!dir.exists()) dir.mkdirs();
+
+            String uuidName = UUID.randomUUID() + "_" + file.getOriginalFilename();
+            File targetFile = new File(baseDir + uuidName);
+            file.transferTo(targetFile);
+
+            Map<String, String> response = new HashMap<>();
+            response.put("imageUrl", "/uploads/post/" + uuidName);
+            return response;
+        } catch (IOException e) {
+            throw new RuntimeException("이미지 업로드 실패", e);
+        }
     }
 
     // 게시글 목록 조회 (페이징)
@@ -326,23 +348,33 @@ public class PostController {
     }
 
     // 이전 글 조회
-@GetMapping("/{id}/previous")
-public ResponseEntity<PostDto> getPreviousPost(@PathVariable Long id) {
-    PostDto previousPost = postService.findPrevious(id);
-    if (previousPost == null) {
-        return ResponseEntity.noContent().build(); // 204
+    @GetMapping("/{id}/previous")
+    public ResponseEntity<PostDto> getPreviousPost(@PathVariable Long id) {
+        PostDto previousPost = postService.findPrevious(id);
+        if (previousPost == null) {
+            return ResponseEntity.noContent().build(); // 204
+        }
+        return ResponseEntity.ok(previousPost);
     }
-    return ResponseEntity.ok(previousPost);
-}
 
-// 다음 글 조회
-@GetMapping("/{id}/next")
-public ResponseEntity<PostDto> getNextPost(@PathVariable Long id) {
-    PostDto nextPost = postService.findNext(id);
-    if (nextPost == null) {
-        return ResponseEntity.noContent().build(); // 204
+    // 다음 글 조회
+    @GetMapping("/{id}/next")
+    public ResponseEntity<PostDto> getNextPost(@PathVariable Long id) {
+        PostDto nextPost = postService.findNext(id);
+        if (nextPost == null) {
+            return ResponseEntity.noContent().build(); // 204
+        }
+        return ResponseEntity.ok(nextPost);
     }
-    return ResponseEntity.ok(nextPost);
-}
-    
+
+    // userId 기반 게시글 조회
+    @GetMapping("/user/id/{userId}")
+    public ResponseEntity<Page<PostDto>> getPostsByUserId(
+            @PathVariable Long userId,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size) {
+        Page<PostDto> posts = postService.getPostsByUserId(userId, page, size);
+        return ResponseEntity.ok(posts);
+    }
+
 }

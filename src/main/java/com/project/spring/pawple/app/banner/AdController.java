@@ -16,7 +16,7 @@ public class AdController {
 
     @PostMapping("/click")
     public ResponseEntity<?> recordAdClick() {
-        revenueService.addRevenue(10); // 클릭당 10원 증가
+        revenueService.addRevenue(1000); // 클릭당 1000원 증가
         return ResponseEntity.ok().build();
     }
 

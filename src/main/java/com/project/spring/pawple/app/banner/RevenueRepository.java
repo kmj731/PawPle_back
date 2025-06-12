@@ -6,5 +6,5 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 
 public interface RevenueRepository extends JpaRepository<Revenue, Long> {
-    Optional<Revenue> findTopByOrderByIdAsc();  // 또는 findTopByOrderByIdDesc()
+    Optional<Revenue> findTopByOrderByIdAsc();  
 }

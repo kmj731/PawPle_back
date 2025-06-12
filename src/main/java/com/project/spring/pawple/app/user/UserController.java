@@ -4,6 +4,7 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -20,7 +21,7 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.ResponseBody;
-import org.springframework.web.bind.annotation.RequestBody; 
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -36,8 +37,7 @@ import jakarta.transaction.Transactional;
 @RestController
 @RequestMapping("/user")
 public class UserController {
-    
-    
+
     @Autowired
     UserRepository userRep;
     @Autowired
@@ -52,9 +52,6 @@ public class UserController {
     JwtUtil jwtUtil;
     @Value("${spring.security.jwt.cookie.name}")
     String jwtCookieName;
-
-
-
 
     // 회원정보 조회
     @ResponseBody
@@ -94,7 +91,7 @@ public class UserController {
     // 비밀번호 확인
     @PostMapping("/checkpw")
     public ResponseEntity<?> checkPassword(@AuthenticationPrincipal UserDetails userDetails,
-                                        @RequestBody Map<String, String> body) {
+            @RequestBody Map<String, String> body) {
         if (userDetails == null || userDetails.getUsername() == null) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("message", "로그인 정보 없음"));
         }
@@ -118,49 +115,53 @@ public class UserController {
     // 회원정보 수정
     // @PutMapping("/update")
     // @Transactional
-    // public ResponseEntity<?> updateUser(@AuthenticationPrincipal UserDetails userDetails,
-    //                                     @RequestBody Map<String, String> updateData,
-    //                                     HttpServletResponse response) {
-    //     if (userDetails == null || userDetails.getUsername() == null) {
-    //         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("message", "로그인 정보 없음"));
-    //     }
+    // public ResponseEntity<?> updateUser(@AuthenticationPrincipal UserDetails
+    // userDetails,
+    // @RequestBody Map<String, String> updateData,
+    // HttpServletResponse response) {
+    // if (userDetails == null || userDetails.getUsername() == null) {
+    // return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("message",
+    // "로그인 정보 없음"));
+    // }
 
-    //     Optional<UserEntity> optionalUser = userRep.findByName(userDetails.getUsername());
+    // Optional<UserEntity> optionalUser =
+    // userRep.findByName(userDetails.getUsername());
 
-    //     if (optionalUser.isEmpty()) {
-    //         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("message", "사용자 없음"));
-    //     }
+    // if (optionalUser.isEmpty()) {
+    // return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("message",
+    // "사용자 없음"));
+    // }
 
-    //     UserEntity user = optionalUser.get();
+    // UserEntity user = optionalUser.get();
 
-    //     String name = updateData.get("name");
-    //     String password = updateData.get("pass");
-    //     String phone = updateData.get("phone");
-    //     String birthDate = updateData.get("birthDate");
-    //     String email = updateData.get("email");
-        
-    //     if (name != null) user.setSocialName(name);
-    //     if (password != null && !password.isBlank()) user.setPass(passwordEncoder.encode(password));
-    //     if (phone != null) user.setPhoneNumber(phone);
-    //     if (birthDate != null && !birthDate.isBlank()) {
-    //         user.setBirthDate(LocalDate.parse(birthDate));
-    //     }
-    //     if (email != null) user.setEmail(email);
+    // String name = updateData.get("name");
+    // String password = updateData.get("pass");
+    // String phone = updateData.get("phone");
+    // String birthDate = updateData.get("birthDate");
+    // String email = updateData.get("email");
 
-    //     userRep.save(user);
+    // if (name != null) user.setSocialName(name);
+    // if (password != null && !password.isBlank())
+    // user.setPass(passwordEncoder.encode(password));
+    // if (phone != null) user.setPhoneNumber(phone);
+    // if (birthDate != null && !birthDate.isBlank()) {
+    // user.setBirthDate(LocalDate.parse(birthDate));
+    // }
+    // if (email != null) user.setEmail(email);
 
-    //     return ResponseEntity.ok(Map.of("message", "회원정보 수정 완료"));
+    // userRep.save(user);
+
+    // return ResponseEntity.ok(Map.of("message", "회원정보 수정 완료"));
     // }
 
     // 회원정보 수정
     @PutMapping(value = "/update", consumes = "multipart/form-data")
     @Transactional
     public ResponseEntity<?> updateUserWithImage(
-        @AuthenticationPrincipal UserDetails userDetails,
-        @RequestPart("data") Map<String, String> updateData,
-        @RequestPart(value = "image", required = false) MultipartFile image,
-        HttpServletResponse response
-    ) {
+            @AuthenticationPrincipal UserDetails userDetails,
+            @RequestPart("data") Map<String, String> updateData,
+            @RequestPart(value = "image", required = false) MultipartFile image,
+            HttpServletResponse response) {
         if (userDetails == null || userDetails.getUsername() == null) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("message", "로그인 정보 없음"));
         }
@@ -179,14 +180,18 @@ public class UserController {
         String phone = updateData.get("phone");
         String birthDate = updateData.get("birthDate");
         String email = updateData.get("email");
-        
-        if (name != null) user.setSocialName(name);
-        if (password != null && !password.isBlank()) user.setPass(passwordEncoder.encode(password));
-        if (phone != null) user.setPhoneNumber(phone);
+
+        if (name != null)
+            user.setSocialName(name);
+        if (password != null && !password.isBlank())
+            user.setPass(passwordEncoder.encode(password));
+        if (phone != null)
+            user.setPhoneNumber(phone);
         if (birthDate != null && !birthDate.isBlank()) {
             user.setBirthDate(LocalDate.parse(birthDate));
         }
-        if (email != null) user.setEmail(email);
+        if (email != null)
+            user.setEmail(email);
 
         // ✅ 이미지 저장
         if (image != null && !image.isEmpty()) {
@@ -246,12 +251,11 @@ public class UserController {
         return ResponseEntity.ok(Map.of("message", "회원 탈퇴가 완료되었습니다."));
     }
 
-
     // 팔로우
     @PostMapping("/follow/{targetId}")
     @Transactional
     public ResponseEntity<?> followUser(@AuthenticationPrincipal UserDetails userDetails,
-                                        @PathVariable Long targetId) {
+            @PathVariable Long targetId) {
         if (userDetails == null || userDetails.getUsername() == null) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("message", "로그인 정보 없음"));
         }
@@ -282,12 +286,11 @@ public class UserController {
         return ResponseEntity.ok(Map.of("message", "팔로우 완료"));
     }
 
-
     // 언팔로우
     @DeleteMapping("/unfollow/{targetId}")
     @Transactional
     public ResponseEntity<?> unfollowUser(@AuthenticationPrincipal UserDetails userDetails,
-                                        @PathVariable Long targetId) {
+            @PathVariable Long targetId) {
         if (userDetails == null || userDetails.getUsername() == null) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("message", "로그인 정보 없음"));
         }
@@ -312,7 +315,7 @@ public class UserController {
     @PostMapping("/block/{targetId}")
     @Transactional
     public ResponseEntity<?> blockUser(@AuthenticationPrincipal UserDetails userDetails,
-                                    @PathVariable Long targetId) {
+            @PathVariable Long targetId) {
         if (userDetails == null || userDetails.getUsername() == null) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("message", "로그인 정보 없음"));
         }
@@ -343,12 +346,11 @@ public class UserController {
         return ResponseEntity.ok(Map.of("message", "차단 완료"));
     }
 
-
     // 차단 해제
     @DeleteMapping("/unblock/{targetId}")
     @Transactional
     public ResponseEntity<?> unblockUser(@AuthenticationPrincipal UserDetails userDetails,
-                                        @PathVariable Long targetId) {
+            @PathVariable Long targetId) {
         if (userDetails == null || userDetails.getUsername() == null) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("message", "로그인 정보 없음"));
         }
@@ -369,5 +371,26 @@ public class UserController {
         return ResponseEntity.ok(Map.of("message", "차단 해제 완료"));
     }
 
+    // 프로필 조회
+    @GetMapping("/{userId}/profile")
+    public UserDto getUserProfile(@PathVariable Long userId) {
+        UserEntity user = userRep.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("해당 사용자가 존재하지 않습니다."));
 
+        // 엔티티를 DTO로 변환
+        UserDto dto = new UserDto();
+        dto.setId(user.getId());
+        dto.setName(user.getName());
+        dto.setSocialName(user.getSocialName());
+        dto.setEmail(user.getEmail());
+        dto.setPhoneNumber(user.getPhoneNumber());
+        dto.setBirthDate(user.getBirthDate());
+        dto.setImageUrl(user.getImageUrl());
+        dto.setThumbnailUrl(user.getThumbnailUrl());
+        dto.setCreated(user.getCreated());
+        dto.setPoint(user.getPoint());
+        dto.setPets(user.getPets());
+        dto.setBlockedIds(user.getBlockedUsers().stream().map(UserEntity::getId).collect(Collectors.toList()));
+        return dto;
+    }
 }

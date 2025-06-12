@@ -1,14 +1,19 @@
 package com.project.spring.pawple.app.auth;
 
+import java.util.Map;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-
+import org.springframework.security.core.Authentication;
 import com.project.spring.pawple.app.user.Role;
+import com.project.spring.pawple.app.user.UserEntity;
 import com.project.spring.pawple.app.user.UserRepository;
 
 @RestController
@@ -32,7 +37,14 @@ public class Auth {
     }
 
     @GetMapping("/me")
-    public CustomUserDetails getCurrentUser(@AuthenticationPrincipal CustomUserDetails user) {
-        return user;
+    public ResponseEntity<?> getCurrentUser(Authentication authentication) {
+        UserEntity user = userRep.findByName(authentication.getName())
+                .orElseThrow(() -> new UsernameNotFoundException("User not found"));
+
+        return ResponseEntity.ok(Map.of(
+                "id", user.getId(),
+                "nickname", user.getSocialName(),
+                "username", user.getName()));
     }
+
 }

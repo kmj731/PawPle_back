@@ -697,10 +697,9 @@ public class DataInitializer implements CommandLineRunner {
                 .brand("닥터맘마")
                 .discount(10)
                 .originalPrice(13500)
-                .rating(0.1)
                 .category("영양제")
                 .tags(List.of("강아지","고양이","신장"))
-                .image("/images/samylin.jpg")
+                .image("/images/product/samylin.jpg")
                 .build(),
 
             ProductEntity.builder()
@@ -708,10 +707,9 @@ public class DataInitializer implements CommandLineRunner {
                 .brand("바프독")
                 .discount(5)
                 .originalPrice(54900)
-                .rating(0.1)
                 .category("사료")
                 .tags(List.of("강아지", "소고기"))
-                .image("/images/synoquin.jpg")
+                .image("/images/product/synoquin.jpg")
                 .build(),
 
             ProductEntity.builder()
@@ -720,10 +718,20 @@ public class DataInitializer implements CommandLineRunner {
                 .discount(10)
                 .originalPrice(78000)
                 .price(70200)
-                .rating(0.1)
                 .category("영양제")
                 .tags(List.of("영양제"))
-                .image("/images/aktivait.jpg")
+                .image("/images/product/aktivait.jpg")
+                .build(),
+
+            ProductEntity.builder()
+                .name("하루조이 해피카우 펫밀크 100ml (10개입)")
+                .brand("펫생각")
+                .discount(30)
+                .originalPrice(18000)
+                .price(12600)
+                .category("간식")
+                .tags(List.of("펫밀크"))
+                .image("/images/product/petmilk.png")
                 .build()
         );
 

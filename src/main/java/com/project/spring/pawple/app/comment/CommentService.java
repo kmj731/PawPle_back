@@ -2,11 +2,14 @@ package com.project.spring.pawple.app.comment;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.project.spring.pawple.app.notification.NotificationService;
 import com.project.spring.pawple.app.post.PostEntity;
 import com.project.spring.pawple.app.post.PostRepository;
 import com.project.spring.pawple.app.user.UserEntity;
@@ -18,121 +21,144 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class CommentService {
 
-    // private final CommentLikeRepository commentLikeRepository;
-    private final CommentLikeService commentLikeService;
-    private final CommentRepository commentRepository;
-    private final PostRepository postRepository;
-    private final UserRepository userRepository;
-    
-    @Transactional
-    public CommentDto createComment(CommentDto commentDto) {
-        UserEntity user = userRepository.findById(commentDto.getUserId())
-                .orElseThrow(() -> new RuntimeException("User not found"));
-        
-        PostEntity post = postRepository.findById(commentDto.getPostId())
-                .orElseThrow(() -> new RuntimeException("Post not found"));
-        
-        CommentEntity parent = null;
-        if (commentDto.getParentId() != null) {
-            parent = commentRepository.findById(commentDto.getParentId())
-                    .orElseThrow(() -> new RuntimeException("Parent comment not found"));
+        private final CommentLikeService commentLikeService;
+        private final CommentRepository commentRepository;
+        private final PostRepository postRepository;
+        private final UserRepository userRepository;
+        private final NotificationService notificationService; // 알림 서비스 주입
+
+        @Transactional
+        public CommentDto createComment(CommentDto commentDto) {
+                UserEntity user = userRepository.findById(commentDto.getUserId())
+                                .orElseThrow(() -> new RuntimeException("User not found"));
+
+                PostEntity post = postRepository.findById(commentDto.getPostId())
+                                .orElseThrow(() -> new RuntimeException("Post not found"));
+
+                CommentEntity parent = null;
+                if (commentDto.getParentId() != null) {
+                        parent = commentRepository.findById(commentDto.getParentId())
+                                        .orElseThrow(() -> new RuntimeException("Parent comment not found"));
+                }
+
+                CommentEntity comment = CommentEntity.builder()
+                                .content(commentDto.getContent())
+                                .user(user)
+                                .post(post)
+                                .parent(parent)
+                                .build();
+
+                // 포인트 적립
+                user.addPoint(1);
+                userRepository.save(user);
+
+                comment = commentRepository.save(comment);
+                postRepository.increaseCommentCount(commentDto.getParentId());
+
+                // 게시글의 댓글 수 증가
+                postRepository.increaseCommentCount(commentDto.getPostId());
+                
+
+                // 알림 전송: 자신이 아닌 경우에만
+                UserEntity postAuthor = post.getUser();
+                if (!postAuthor.getId().equals(user.getId())) {
+                        notificationService.notifyPostAuthor(
+                                        postAuthor,
+                                        post,
+                                        user.getName() + "님이 게시글에 댓글을 남겼습니다.");
+                }
+                // 멘션된 사용자 알림 (@닉네임)
+                Pattern pattern = Pattern.compile("@(\\w+)");
+                Matcher matcher = pattern.matcher(commentDto.getContent());
+                
+                while (matcher.find()) {
+                        String mentionedName = matcher.group(1);
+                        userRepository.findByName(mentionedName).ifPresent(mentionedUser -> {
+                                if (!mentionedUser.getId().equals(user.getId())) {
+                                        notificationService.notifyPostAuthor(
+                                                        mentionedUser,
+                                                        post,
+                                                        user.getName() + "님이 댓글에서 당신을 언급했습니다.");
+                                }
+                        });
+                }
+
+                return mapToDto(comment);
         }
 
-        CommentEntity comment = CommentEntity.builder()
-                .content(commentDto.getContent())
-                .user(user)
-                .post(post)
-                .parent(parent)
-                .build();
-
-        // 포인트 적립
-        user.addPoint(1);
-        userRepository.save(user);
-        
-        comment = commentRepository.save(comment);
-        
-        // 게시글의 댓글 수 증가
-        postRepository.increaseCommentCount(commentDto.getPostId());
-
-        return mapToDto(comment);
-    }
-    
-    // 전체 댓글 조회
-    @Transactional(readOnly = true)
-    public List<CommentDto> getAllComments() {
-        return commentRepository.findAll().stream()
-                .map(this::mapToDto)
-                .collect(Collectors.toList());
-    }
-
-    @Transactional(readOnly = true)
-    public List<CommentDto> getCommentsByPostId(Long postId) {
-        return commentRepository.findByPostId(postId).stream()
-                .map(this::mapToDto)
-                .collect(Collectors.toList());
-    }
-    
-    @Transactional(readOnly = true)
-    public List<CommentDto> getCommentsByUserId(Long userId) {
-        return commentRepository.findByUserId(userId).stream()
-                .map(this::mapToDto)
-                .collect(Collectors.toList());
-    }
-
-    @Transactional
-    public CommentDto updateComment(Long commentId, CommentDto commentDto) {
-        CommentEntity comment = commentRepository.findById(commentId)
-                .orElseThrow(() -> new RuntimeException("Comment not found"));
-        
-        // 권한 확인 로직 추가 필요
-        if (!comment.getUser().getId().equals(commentDto.getUserId())) {
-            throw new RuntimeException("You are not authorized to update this comment");
+        @Transactional(readOnly = true)
+        public List<CommentDto> getAllComments() {
+                return commentRepository.findAll().stream()
+                                .map(this::mapToDto)
+                                .collect(Collectors.toList());
         }
-        
-        comment.setContent(commentDto.getContent());
-        comment = commentRepository.save(comment);
-        
-        return mapToDto(comment);
-    }
-    
-    @Transactional
-    public void deleteComment(Long commentId, Long userId) {
-        CommentEntity comment = commentRepository.findById(commentId)
-                .orElseThrow(() -> new RuntimeException("Comment not found"));
-        
-        // 권한 확인 로직 추가 필요
-        if (!comment.getUser().getId().equals(userId)) {
-            throw new RuntimeException("You are not authorized to delete this comment");
+
+        @Transactional(readOnly = true)
+        public List<CommentDto> getCommentsByPostId(Long postId) {
+                return commentRepository.findByPostId(postId).stream()
+                                .map(this::mapToDto)
+                                .collect(Collectors.toList());
         }
-        
-        Long postId = comment.getPost().getId();
-        commentRepository.delete(comment);
-        
-        // 게시글의 댓글 수 감소
-        postRepository.decreaseCommentCount(postId);
-    }
 
+        @Transactional(readOnly = true)
+        public List<CommentDto> getCommentsByUserId(Long userId) {
+                return commentRepository.findByUserId(userId).stream()
+                                .map(this::mapToDto)
+                                .collect(Collectors.toList());
+        }
 
-    public CommentDto mapToDto(CommentEntity comment) {
-        List<CommentDto> childDtos = comment.getChildren() != null ?
-                comment.getChildren().stream()
-                        .map(this::mapToDto)
-                        .collect(Collectors.toList())
-                : new ArrayList<>();
+        @Transactional
+        public CommentDto updateComment(Long commentId, CommentDto commentDto) {
+                CommentEntity comment = commentRepository.findById(commentId)
+                                .orElseThrow(() -> new RuntimeException("Comment not found"));
 
-        long likeCount = commentLikeService.getLikeCount(comment.getId());
+                if (!comment.getUser().getId().equals(commentDto.getUserId())) {
+                        throw new RuntimeException("You are not authorized to update this comment");
+                }
 
-        return CommentDto.builder()
-                .id(comment.getId())
-                .content(comment.getContent())
-                .createdAt(comment.getCreatedAt())
-                .updatedAt(comment.getUpdatedAt())
-                .userId(comment.getUser().getId())
-                .userName(comment.getUser().getName())
-                .postId(comment.getPost().getId())
-                .parentId(comment.getParent() != null ? comment.getParent().getId() : null)
-                .children(childDtos)
-                .likeCount(likeCount)
-                .build();
-    }
+                comment.setContent(commentDto.getContent());
+                comment = commentRepository.save(comment);
+
+                return mapToDto(comment);
+        }
+
+        @Transactional
+        public void deleteComment(Long commentId, Long userId) {
+                CommentEntity comment = commentRepository.findById(commentId)
+                                .orElseThrow(() -> new RuntimeException("Comment not found"));
+
+                if (!comment.getUser().getId().equals(userId)) {
+                        throw new RuntimeException("You are not authorized to delete this comment");
+                }
+
+                Long postId = comment.getPost().getId();
+                commentRepository.delete(comment);
+
+                // 댓글 수 감소
+                postRepository.decreaseCommentCount(postId);
+        }
+
+        public CommentDto mapToDto(CommentEntity comment) {
+                List<CommentDto> childDtos = comment.getChildren() != null ? comment.getChildren().stream()
+                                .map(this::mapToDto)
+                                .collect(Collectors.toList())
+                                : new ArrayList<>();
+
+                long likeCount = commentLikeService.getLikeCount(comment.getId());
+
+                return CommentDto.builder()
+                                .id(comment.getId())
+                                .content(comment.getContent())
+                                .createdAt(comment.getCreatedAt())
+                                .updatedAt(comment.getUpdatedAt())
+                                .userId(comment.getUser().getId())
+                                .userName(comment.getUser().getName())
+                                .userThumbnailUrl(comment.getUser().getThumbnailUrl())
+                                .userImageUrl(comment.getUser().getImageUrl())
+                                .postId(comment.getPost().getId())
+                                .parentId(comment.getParent() != null ? comment.getParent().getId() : null)
+                                .children(childDtos)
+                                .likeCount(likeCount)
+                                .build();
+        }
 }
