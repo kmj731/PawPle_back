@@ -1,8 +1,11 @@
 package com.project.spring.pawple.app.post;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -82,6 +85,26 @@ public class PostController {
         // // 포인트 적립 실패해도 게시글 작성은 성공적으로 처리됨
         // System.err.println("포인트 적립 중 오류 발생: " + e.getMessage());
         // }
+    }
+    
+    // 이미지 저장
+    @PostMapping("/image-upload")
+    public Map<String, String> uploadImage(@RequestParam("image") MultipartFile file) {
+        try {
+            String baseDir = System.getProperty("user.dir") + "/uploads/post/";
+            File dir = new File(baseDir);
+            if (!dir.exists()) dir.mkdirs();
+
+            String uuidName = UUID.randomUUID() + "_" + file.getOriginalFilename();
+            File targetFile = new File(baseDir + uuidName);
+            file.transferTo(targetFile);
+
+            Map<String, String> response = new HashMap<>();
+            response.put("imageUrl", "/uploads/post/" + uuidName);
+            return response;
+        } catch (IOException e) {
+            throw new RuntimeException("이미지 업로드 실패", e);
+        }
     }
 
     // 게시글 목록 조회 (페이징)

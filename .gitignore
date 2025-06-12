@@ -3,6 +3,7 @@ target/
 /uploads/images/
 /uploads/thumb/
 /uploads/product/
+/uploads/post/
 !.mvn/wrapper/maven-wrapper.jar
 !**/src/main/**/target/
 !**/src/test/**/target/

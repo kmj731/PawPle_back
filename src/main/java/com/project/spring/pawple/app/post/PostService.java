@@ -78,7 +78,7 @@ public class PostService {
             }
 
             // ✅ uploads 경로 생성
-            String baseDir = System.getProperty("user.dir") + File.separator + "uploads";
+            String baseDir = System.getProperty("user.dir") + File.separator + "uploads" + File.separator + "post";
             File uploadDir = new File(baseDir);
             if (!uploadDir.exists()) {
                 uploadDir.mkdirs();
@@ -96,7 +96,7 @@ public class PostService {
 
                         mediaEntities.add(MediaEntity.builder()
                                 .fileName(fileName)
-                                .fileUrl("/uploads/" + fileName)
+                                .fileUrl("/uploads/post/" + fileName)
                                 .mediaType("IMAGE")
                                 .post(post)
                                 .build());
@@ -112,7 +112,7 @@ public class PostService {
 
                 mediaEntities.add(MediaEntity.builder()
                         .fileName(fileName)
-                        .fileUrl("/uploads/" + fileName)
+                        .fileUrl("/uploads/post/" + fileName)
                         .mediaType("VIDEO")
                         .post(post)
                         .build());
