@@ -37,6 +37,7 @@ import com.project.spring.pawple.app.post.PostEntity;
 import com.project.spring.pawple.app.post.PostManagerService;
 import com.project.spring.pawple.app.post.PostRepository;
 import com.project.spring.pawple.app.post.PostService;
+import com.project.spring.pawple.app.report.ReportDto;
 import com.project.spring.pawple.app.report.ReportEntity;
 import com.project.spring.pawple.app.report.ReportRepository;
 import com.project.spring.pawple.app.report.ReportService;
@@ -350,47 +351,47 @@ public class ManagerController {
         @PathVariable Long id,
         @RequestBody VisibilityUpdateRequest request) {
 
-    PostEntity post = postRepository.findById(id)
-            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Post not found"));
+        PostEntity post = postRepository.findById(id)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Post not found"));
 
-    post.setIsPublic(request.getIsPublic());
-    PostEntity updatedPost = postRepository.save(post);
+        post.setIsPublic(request.getIsPublic());
+        PostEntity updatedPost = postRepository.save(post);
 
-    PostDto dto = new PostDto();
-    dto.setId(updatedPost.getId());
-    dto.setTitle(updatedPost.getTitle());
-    dto.setContent(updatedPost.getContent());
-    dto.setIsPublic(updatedPost.getIsPublic());
-    // 필요하다면 더 필드 추가
+        PostDto dto = new PostDto();
+        dto.setId(updatedPost.getId());
+        dto.setTitle(updatedPost.getTitle());
+        dto.setContent(updatedPost.getContent());
+        dto.setIsPublic(updatedPost.getIsPublic());
+        // 필요하다면 더 필드 추가
 
-    return ResponseEntity.ok(dto);
-}
+        return ResponseEntity.ok(dto);
+    }
 
 
     // 게시글 공개 수정
     @PreAuthorize("hasRole('ADMIN')")
     @GetMapping
     public ResponseEntity<List<VisibilityUpdateRequest>> getAllPosts(Authentication authentication) {
-    boolean isAdmin = authentication != null && authentication.getAuthorities()
-            .stream().anyMatch(auth -> auth.getAuthority().equals("ROLE_ADMIN"));
+        boolean isAdmin = authentication != null && authentication.getAuthorities()
+                .stream().anyMatch(auth -> auth.getAuthority().equals("ROLE_ADMIN"));
 
-    List<PostEntity> posts = isAdmin ?
-            postRepository.findAll() :
-            postRepository.findByIsPublicTrue();
+        List<PostEntity> posts = isAdmin ?
+                postRepository.findAll() :
+                postRepository.findByIsPublicTrue();
 
-    List<VisibilityUpdateRequest> result = posts.stream()
-            .map(p -> {
-                VisibilityUpdateRequest dto = new VisibilityUpdateRequest();
-                dto.setId(p.getId());
-                dto.setTitle(p.getTitle());
-                dto.setContent(p.getContent());
-                dto.setIsPublic(p.getIsPublic());
-                return dto;
-            })
-            .toList();
+        List<VisibilityUpdateRequest> result = posts.stream()
+                .map(p -> {
+                    VisibilityUpdateRequest dto = new VisibilityUpdateRequest();
+                    dto.setId(p.getId());
+                    dto.setTitle(p.getTitle());
+                    dto.setContent(p.getContent());
+                    dto.setIsPublic(p.getIsPublic());
+                    return dto;
+                })
+                .toList();
 
-    return ResponseEntity.ok(result);
-}
+        return ResponseEntity.ok(result);
+    }
 
     // 상세 정보 조회
     @PreAuthorize("hasRole('ADMIN')")
@@ -437,25 +438,24 @@ public class ManagerController {
         productService.delete(id);
     }
 
-@GetMapping("/sales/monthly")
-public ResponseEntity<List<MonthlySalesDto>> getMonthlySales() {
-    List<Object[]> raw = orderRepository.findMonthlySales();
+    @GetMapping("/sales/monthly")
+    public ResponseEntity<List<MonthlySalesDto>> getMonthlySales() {
+        List<Object[]> raw = orderRepository.findMonthlySales();
 
-    List<MonthlySalesDto> result = raw.stream()
-        .map(r -> {
-            try {
-                String month = Objects.toString(r[0], "Unknown");
-                Long total = r[1] != null ? ((Number) r[1]).longValue() : 0L;
-                return new MonthlySalesDto(month, total);
-            } catch (Exception e) {
-                return new MonthlySalesDto("오류", 0L);
-            }
-        })
-        .toList();
+        List<MonthlySalesDto> result = raw.stream()
+            .map(r -> {
+                try {
+                    String month = Objects.toString(r[0], "Unknown");
+                    Long total = r[1] != null ? ((Number) r[1]).longValue() : 0L;
+                    return new MonthlySalesDto(month, total);
+                } catch (Exception e) {
+                    return new MonthlySalesDto("오류", 0L);
+                }
+            })
+            .toList();
 
-    return ResponseEntity.ok(result);
-}
-
+        return ResponseEntity.ok(result);
+    }
 
     @GetMapping("/sales/total")
     public ResponseEntity<Long> getTotalSales() {
@@ -466,8 +466,35 @@ public ResponseEntity<List<MonthlySalesDto>> getMonthlySales() {
     
     @ResponseBody
     @GetMapping("/reports")
-    public List<ReportEntity> getAllReports() {
-        return reportRepository.findAll();
+    public ResponseEntity<List<ReportDto>> getAllReports() {
+
+         List<ReportEntity> reports = reportRepository.findAll();
+         
+        List<ReportDto> dtos = reports.stream().map(report -> {
+            String reporterName = userRepository.findById(report.getReporterId())
+                    .map(UserEntity::getName)
+                    .orElse("탈퇴한 사용자");
+
+            String reportedUserName = userRepository.findById(report.getReportedUserId())
+                    .map(UserEntity::getName)
+                    .orElse("탈퇴한 사용자");
+
+            return ReportDto.builder()
+                    .id(report.getId())
+                    .reporterId(report.getReporterId())
+                    .reporterName(reporterName)
+                    .reportedUserId(report.getReportedUserId())
+                    .reportedUserName(reportedUserName)
+                    .reason(report.getReason())
+                    .targetType(report.getTargetType())
+                    .commentId(report.getCommentId())
+                    .postId(report.getPostId())
+                    .status(report.getStatus())
+                    .reportedAt(report.getReportedAt())
+                    .build();
+        }).toList();
+
+        return ResponseEntity.ok(dtos);
     }
 
     @PatchMapping("/reports/{id}")
@@ -499,15 +526,15 @@ public ResponseEntity<List<MonthlySalesDto>> getMonthlySales() {
     return ResponseEntity.ok("신고가 삭제되었습니다.");
 }
 
-@PatchMapping("/reports/{id}/status")
-public ResponseEntity<String> updateStatus(
-        @PathVariable Long id,
-        @RequestBody Map<String, String> requestBody
-) {
-    String newStatus = requestBody.get("status");
-    reportService.updateStatus(id, newStatus);
-    return ResponseEntity.ok("상태가 변경되었습니다.");
-}
+    @PatchMapping("/reports/{id}/status")
+    public ResponseEntity<String> updateStatus(
+            @PathVariable Long id,
+            @RequestBody Map<String, String> requestBody
+    ) {
+        String newStatus = requestBody.get("status");
+        reportService.updateStatus(id, newStatus);
+        return ResponseEntity.ok("상태가 변경되었습니다.");
+    }
 
 
 
