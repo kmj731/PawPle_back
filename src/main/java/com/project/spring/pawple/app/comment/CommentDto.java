@@ -22,6 +22,7 @@ public class CommentDto {
     private String userThumbnailUrl;
     private String userImageUrl;
     private Long postId;
+    private String postTitle;
     private Long parentId; // 대댓글일 경우 부모 댓글 ID
     private List<CommentDto> children; // 응답 시 자식 댓글 포함
     private Long likeCount;

@@ -156,6 +156,7 @@ public class CommentService {
                                 .userThumbnailUrl(comment.getUser().getThumbnailUrl())
                                 .userImageUrl(comment.getUser().getImageUrl())
                                 .postId(comment.getPost().getId())
+                                .postTitle(comment.getPost().getTitle())
                                 .parentId(comment.getParent() != null ? comment.getParent().getId() : null)
                                 .children(childDtos)
                                 .likeCount(likeCount)
