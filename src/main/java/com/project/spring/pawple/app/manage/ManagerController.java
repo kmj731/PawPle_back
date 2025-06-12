@@ -7,6 +7,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -34,6 +35,8 @@ import com.project.spring.pawple.app.post.PostEntity;
 import com.project.spring.pawple.app.post.PostManagerService;
 import com.project.spring.pawple.app.post.PostRepository;
 import com.project.spring.pawple.app.post.PostService;
+import com.project.spring.pawple.app.report.ReportEntity;
+import com.project.spring.pawple.app.report.ReportRepository;
 import com.project.spring.pawple.app.store.ProductEntity;
 import com.project.spring.pawple.app.store.ProductService;
 import com.project.spring.pawple.app.user.UserDto;
@@ -59,6 +62,9 @@ public class ManagerController {
     private final PostRepository postRepository;
     private final ProductService productService;
     private final OrderRepository orderRepository;
+
+    @Autowired
+    private ReportRepository reportRepository;
 
     public ManagerController(UserService userService, PostService postService, PostManagerService postManagerService, PostRepository postRepository,ProductService productService, OrderRepository orderRepository){
         this.userService = userService;
@@ -443,6 +449,17 @@ public ResponseEntity<List<MonthlySalesDto>> getMonthlySales() {
         Long total = orderRepository.findTotalSales();
         return ResponseEntity.ok(total != null ? total : 0L); // null 방지
     }
+
+    
+
+    @GetMapping("/admin/report")
+    public List<ReportEntity> getAllReports() {
+        return reportRepository.findAll();
+    }
+
+
+
+
 }
 
 
