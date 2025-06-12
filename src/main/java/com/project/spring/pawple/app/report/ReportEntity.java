@@ -21,7 +21,6 @@ public class ReportEntity {
     private Long reportedUserId;
     private String reason;
     private String targetType;
-    private Long targetId;
     private LocalDateTime reportedAt;
     private String status;
 }
