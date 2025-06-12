@@ -153,6 +153,8 @@ public class CommentService {
                                 .updatedAt(comment.getUpdatedAt())
                                 .userId(comment.getUser().getId())
                                 .userName(comment.getUser().getName())
+                                .userThumbnailUrl(comment.getUser().getThumbnailUrl())
+                                .userImageUrl(comment.getUser().getImageUrl())
                                 .postId(comment.getPost().getId())
                                 .parentId(comment.getParent() != null ? comment.getParent().getId() : null)
                                 .children(childDtos)
