@@ -23,8 +23,10 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 
 import com.project.spring.pawple.app.order.OrderRepository;
@@ -428,9 +430,14 @@ public class ManagerController {
         return productService.save(product);
     }
 
-    @PutMapping("/product/{id}")
-    public ProductEntity updateProduct(@PathVariable Long id, @RequestBody ProductEntity product) {
-        return productService.update(id, product);
+    @PatchMapping("/product/{id}")
+    public ResponseEntity<ProductEntity> patchProduct(
+            @PathVariable Long id,
+            @RequestPart("data") ProductEntity patchData,
+            @RequestPart(value = "image", required = false) MultipartFile image
+    ) {
+        ProductEntity updated = productService.patchUpdate(id, patchData, image);
+        return ResponseEntity.ok(updated);
     }
 
     @DeleteMapping("/product/{id}")
