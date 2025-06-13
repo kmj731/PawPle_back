@@ -60,5 +60,39 @@ public class PointService {
 
         return ResponseEntity.ok("✅ 미션 완료! " + randomPoint + "점이 적립되었습니다!");
     }
+
+
+    @Transactional
+    public ResponseEntity<?> giveDailyAttendancePoint(Long userId) {
+    UserEntity user = userRepository.findById(userId)
+        .orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다."));
+
+    LocalDateTime startOfDay = LocalDate.now().atStartOfDay();
+    LocalDateTime endOfDay = startOfDay.plusDays(1);
+
+    boolean alreadyChecked = pointLogRepository.existsByUserIdAndReasonAndCreatedBetween(
+        userId, "ATTENDANCE", startOfDay, endOfDay
+    );
+
+    if (alreadyChecked) {
+        return ResponseEntity.badRequest().body("이미 오늘 출석체크를 완료했어요!");
+    }
+
+    int attendancePoint = 10;
+
+    PointLog log = PointLog.builder()
+        .user(user)
+        .amount(attendancePoint)
+        .reason("ATTENDANCE")
+        .type("EARN")
+        .build();
+
+    pointLogRepository.save(log);
+    user.addPoint(attendancePoint);
+    userRepository.save(user);
+
+    return ResponseEntity.ok("🎉 출석체크 완료! 10포인트가 적립되었습니다!");
+}
+
 }
 

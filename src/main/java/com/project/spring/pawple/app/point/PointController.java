@@ -24,4 +24,10 @@ public class PointController {
     ) {
         return pointService.completeMission(userId, missions);
     }
+
+    @PostMapping("/attendance")
+    public ResponseEntity<?> dailyAttendance(@RequestParam Long userId) {
+    return pointService.giveDailyAttendancePoint(userId);
+}
+
 }
