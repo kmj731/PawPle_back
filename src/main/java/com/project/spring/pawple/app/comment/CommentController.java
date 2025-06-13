@@ -114,6 +114,13 @@ public class CommentController {
         return new ResponseEntity<>(comments, HttpStatus.OK);
     }
 
+    // 특정 사용자의 댓글 조회 (id기반)
+    @GetMapping("/user/id/{userId}")
+    public ResponseEntity<List<CommentDto>> getCommentsByUserId(@PathVariable Long userId) {
+        List<CommentDto> comments = commentService.getCommentsByUserId(userId);
+        return new ResponseEntity<>(comments, HttpStatus.OK);
+    }
+
     // 내 댓글 조회
     @GetMapping("/my-comments")
     public ResponseEntity<List<CommentDto>> getMyComments() {

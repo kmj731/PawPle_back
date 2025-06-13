@@ -72,7 +72,7 @@ public class SecurityConfig {
                         .disable())
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(HttpMethod.GET, "/comments/**").permitAll() 
-                        .requestMatchers("/admin/sales/monthly", "/admin/sales/total").permitAll()
+                        .requestMatchers("/admin/sales/monthly", "/admin/sales/total","/admin/reports").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/posts/**").permitAll() // GET 요청은 인증없이 허용
                         .requestMatchers(HttpMethod.GET, "/notifications").authenticated()  // 댓글알림
                         .requestMatchers(HttpMethod.PATCH, "/notifications/**").authenticated()  // 댓글알림

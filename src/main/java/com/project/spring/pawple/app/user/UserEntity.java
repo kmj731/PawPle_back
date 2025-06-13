@@ -141,18 +141,30 @@ public class UserEntity {
     }
 
     public PetUserDto toDTO() {
-    List<PetShowing> petShowings = pets.stream()
-        .map(PetShowing::new) // PetShowing(PetEntity pet) 생성자 필요
-        .collect(Collectors.toList());
+        List<PetShowing> petShowings = pets.stream()
+            .map(PetShowing::new) // PetShowing(PetEntity pet) 생성자 필요
+            .collect(Collectors.toList());
 
-    return new PetUserDto(
-        id, name, pass, socialName,
-        roles, email, phoneNumber,
-        birthDate, imageUrl, thumbnailUrl,
-        created, attr, petShowings, point
-    );
-}
+        return new PetUserDto(
+            id, name, pass, socialName,
+            roles, email, phoneNumber,
+            birthDate, imageUrl, thumbnailUrl,
+            created, attr, petShowings, point
+        );
+    }
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
 
+        UserEntity user = (UserEntity) o;
+        return id != null && id.equals(user.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return 31;
+    }
 
 }
