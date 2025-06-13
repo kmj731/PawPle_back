@@ -232,26 +232,37 @@ public class AnimalApiService {
                     .path("/1543061/abandonmentPublicService_v2/abandonmentPublic_v2")
                     .queryParam("serviceKey", apiKey)
                     .queryParam("_type", "json")
-                    .queryParam("desertionNo", desertionNo)
+                    .queryParam("numOfRows", 1000) // 충분히 크게 설정
                     .build(false)
                     .toUri();
 
             String result = restTemplate.getForObject(uri, String.class);
             JsonNode root = objectMapper.readTree(result);
-            JsonNode item = root.path("response").path("body").path("items").path("item");
+            JsonNode items = root.path("response").path("body").path("items").path("item");
 
-            // item이 배열이 아닌 단일 객체로 나오는 경우 처리
-            if (item.isArray() && item.size() > 0) {
-                return item.get(0);
-            } else {
-                return item;
+            if (items.isArray()) {
+                for (JsonNode item : items) {
+                    if (item.has("desertionNo") &&
+                        item.get("desertionNo").asText().equals(desertionNo)) {
+                        return item;
+                    }
+                }
+            } else if (items.has("desertionNo") &&
+                    items.get("desertionNo").asText().equals(desertionNo)) {
+                return items;
             }
+
+            ObjectNode notFound = objectMapper.createObjectNode();
+            notFound.put("error", "해당 desertionNo에 대한 데이터가 없습니다.");
+            return notFound;
+
         } catch (Exception e) {
             ObjectNode error = objectMapper.createObjectNode();
             error.put("error", "API 호출 실패 또는 파싱 오류");
             return error;
         }
     }
+
 
 
 }
