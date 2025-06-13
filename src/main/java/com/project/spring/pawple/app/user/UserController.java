@@ -1,6 +1,7 @@
 package com.project.spring.pawple.app.user;
 
 import java.time.LocalDate;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -371,6 +372,35 @@ public class UserController {
         return ResponseEntity.ok(Map.of("message", "차단 해제 완료"));
     }
 
+    // 차단된 사용자 목록 조회
+@GetMapping("/blocked")
+public ResponseEntity<?> getBlockedUsers(@AuthenticationPrincipal UserDetails userDetails) {
+    if (userDetails == null || userDetails.getUsername() == null) {
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                .body(Map.of("message", "로그인 정보 없음"));
+    }
+
+    Optional<UserEntity> optionalUser = userRep.findByName(userDetails.getUsername());
+    if (optionalUser.isEmpty()) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                .body(Map.of("message", "사용자 없음"));
+    }
+
+    UserEntity currentUser = optionalUser.get();
+
+    List<Map<String, Object>> blockedList = currentUser.getBlockedUsers().stream()
+            .map(u -> {
+                Map<String, Object> map = new HashMap<>();
+                map.put("id", u.getId());
+                map.put("name", u.getSocialName() != null ? u.getSocialName() : u.getName());
+                return map;
+            })
+            .collect(Collectors.toList());
+
+    return ResponseEntity.ok(blockedList);
+}
+
+    
     // 프로필 조회
     @GetMapping("/{userId}/profile")
     public UserDto getUserProfile(@PathVariable Long userId) {
