@@ -59,31 +59,32 @@ public class JwtAuthorizationFilter extends OncePerRequestFilter {
         }
 
         // ✅ 2. 토큰이 있고 아직 인증되지 않았다면
-        if (StringUtils.hasText(token)) {
-            try {
-                String username = jwtUtil.extractUsername(token); // JWT에서 username 추출
+if (StringUtils.hasText(token)) {
+    try {
+        String username = jwtUtil.extractUsername(token);
+        if (StringUtils.hasText(username) &&
+            SecurityContextHolder.getContext().getAuthentication() == null) {
 
-                if (StringUtils.hasText(username) &&
-                    SecurityContextHolder.getContext().getAuthentication() == null) {
+            UserDetails userDetails = customUserDetailService.loadUserByUsername(username);
 
-                    UserDetails userDetails = customUserDetailService.loadUserByUsername(username);
+            if (jwtUtil.validateToken(token, userDetails)) {
+                UsernamePasswordAuthenticationToken authToken =
+                        new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
 
-                    if (jwtUtil.validateToken(token, userDetails)) {
-                        UsernamePasswordAuthenticationToken authToken =
-                                new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
-
-                        // ✅ 3. 인증 객체 설정
-                        SecurityContextHolder.getContext().setAuthentication(authToken);
-                    } else {
-                        // ❗ 토큰 유효하지 않으면 쿠키 삭제
-                        cookieUtil.RemoveJWTCookie(response);
-                    }
-                }
-            } catch (Exception e) {
-                System.out.println("[JWT 필터 오류] " + e.getClass().getSimpleName() + ": " + e.getMessage());
-                e.printStackTrace();
+                SecurityContextHolder.getContext().setAuthentication(authToken);
+            } else {
+                cookieUtil.RemoveJWTCookie(response);
+                response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "유효하지 않은 토큰");
+                return; // ❗ 요청 중단
             }
         }
+    } catch (Exception e) {
+        System.out.println("[JWT 필터 오류] " + e.getClass().getSimpleName() + ": " + e.getMessage());
+        response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "토큰 인증 실패: " + e.getMessage());
+        return; // ❗ 요청 중단
+    }
+}
+
 
         filterChain.doFilter(request, response); // 다음 필터로 전달
     }
