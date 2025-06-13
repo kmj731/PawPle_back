@@ -99,6 +99,7 @@ public class AnimalApiService {
             for (int i = 0; i < count; i++) {
                 ObjectNode animal = (ObjectNode) list.get(i);
                 animal.put("upkind", upkindValue);  // ✅ 강아지/고양이 타입 명시
+                animal.put("desertionNo", list.get(i).path("desertionNo").asText());
                 resultArray.add(animal);
             }
         }
