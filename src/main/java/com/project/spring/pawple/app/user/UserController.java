@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -31,6 +32,8 @@ import com.project.spring.pawple.app.media.ImageUtil;
 import com.project.spring.pawple.app.pet.PetEntity;
 import com.project.spring.pawple.app.pet.PetRepository;
 
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.transaction.Transactional;
 
@@ -226,30 +229,53 @@ public class UserController {
         return ResponseEntity.ok(Map.of("message", "이미지 삭제 완료"));
     }
 
-    // 회원 탈퇴
-    @DeleteMapping("/withdraw")
-    @Transactional
-    public ResponseEntity<?> withdrawUser(@AuthenticationPrincipal UserDetails userDetails) {
-        if (userDetails == null || userDetails.getUsername() == null) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                    .body(Map.of("message", "로그인 정보 없음"));
-        }
+  @DeleteMapping("/withdraw")
+@Transactional
+public ResponseEntity<?> withdrawUser(
+        @AuthenticationPrincipal UserDetails userDetails,
+        @RequestBody Map<String, String> body,
+        HttpServletRequest request,
+        HttpServletResponse response) {
 
-        Optional<UserEntity> optionalUser = userRep.findByName(userDetails.getUsername());
-        if (optionalUser.isEmpty()) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                    .body(Map.of("message", "사용자 없음"));
-        }
-
-        UserEntity user = optionalUser.get();
-
-        // 연관된 PetEntity들도 함께 제거됨 (orphanRemoval = true 설정 덕분에)
-        userRep.delete(user);
-
-        // 쿠키 제거 (선택: 로그아웃 처리 유도)
-        // 실제 환경에 맞춰 response에서 쿠키 삭제하거나 리다이렉트 처리 가능
-        return ResponseEntity.ok(Map.of("message", "회원 탈퇴가 완료되었습니다."));
+    if (userDetails == null || userDetails.getUsername() == null) {
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                .body(Map.of("message", "로그인 정보 없음"));
     }
+
+    String inputPassword = body.get("password");
+    if (inputPassword == null || inputPassword.isBlank()) {
+        return ResponseEntity.badRequest()
+                .body(Map.of("message", "비밀번호를 입력해주세요."));
+    }
+
+    Optional<UserEntity> optionalUser = userRep.findByName(userDetails.getUsername());
+    if (optionalUser.isEmpty()) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                .body(Map.of("message", "사용자 없음"));
+    }
+
+    UserEntity user = optionalUser.get();
+
+    if (!passwordEncoder.matches(inputPassword, user.getPass())) {
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                .body(Map.of("message", "비밀번호가 일치하지 않습니다."));
+    }
+
+    userRep.delete(user);
+
+    // 인증 정보 제거
+    SecurityContextHolder.clearContext();
+
+    // ✅ JWT 쿠키 삭제 (쿠키 이름 반드시 확인!)
+    Cookie jwtCookie = new Cookie("_ka_au_fo_th_", null);
+    jwtCookie.setHttpOnly(true);
+    jwtCookie.setSecure(request.isSecure());
+    jwtCookie.setPath("/");
+    jwtCookie.setMaxAge(0);
+    response.addCookie(jwtCookie);
+
+    return ResponseEntity.ok(Map.of("message", "회원 탈퇴가 완료되었으며 로그아웃 되었습니다."));
+}
 
     // 팔로우
     @PostMapping("/follow/{targetId}")

@@ -128,22 +128,31 @@ public class UserService {
     
 
 
-    // 회원 삭제 
-    public void deleteUser(Long userId) {
-        UserEntity user = userRepository.findById(userId)
-            .orElseThrow(() -> new RuntimeException("사용자를 찾을 수 없습니다."));
+  @Transactional
+public void deleteUser(Long userId) {
+    UserEntity user = userRepository.findById(userId)
+        .orElseThrow(() -> new RuntimeException("사용자를 찾을 수 없습니다."));
 
-        
-        // 자식 Pet의 healthRecord도 비워야 Pet이 삭제 가능
-        for(PetEntity pet : user.getPets()) {
-            pet.getHealthRecords().clear();
-        }
-        
-        user.getPets().clear();
-        // PetEntity는 cascade + orphanRemoval로 인해 자동 삭제됨
-        userRepository.delete(user);
+    // 1. PetEntity 자식 관계 정리 (예: HealthRecord)
+    for (PetEntity pet : user.getPets()) {
+        pet.getHealthRecords().clear();  // 자식 HealthRecord 제거
     }
+    user.getPets().clear();  // PetEntity 삭제 트리거
 
+    // 2. M:N 관계 정리
+    for (UserEntity followingUser : user.getFollowing()) {
+        followingUser.getBlockedUsers().remove(user); // 필요 시 반대 방향 관계 해제
+    }
+    user.getFollowing().clear();
+
+    for (UserEntity blockedUser : user.getBlockedUsers()) {
+        blockedUser.getFollowing().remove(user); // 필요 시 반대 방향 관계 해제
+    }
+    user.getBlockedUsers().clear();
+
+    // 3. 최종 User 삭제
+    userRepository.delete(user);
+}
 
     // roles 변경
     @Transactional

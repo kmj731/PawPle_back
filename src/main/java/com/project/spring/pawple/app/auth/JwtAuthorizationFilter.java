@@ -82,6 +82,8 @@ public class JwtAuthorizationFilter extends OncePerRequestFilter {
             } catch (Exception e) {
                 System.out.println("[JWT 필터 오류] " + e.getClass().getSimpleName() + ": " + e.getMessage());
                 e.printStackTrace();
+                cookieUtil.RemoveJWTCookie(response);
+                SecurityContextHolder.clearContext();
             }
         }
 
