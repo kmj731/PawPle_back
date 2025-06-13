@@ -128,12 +128,130 @@ public class AnimalApiService {
         return result;
     }
 
-    private JsonNode pickRandomAnimal(JsonNode filtered) {
+    // private JsonNode pickRandomAnimal(JsonNode filtered) {
+    //     JsonNode items = filtered.path("response").path("body").path("items").path("item");
+    //     if (items.isArray() && items.size() > 0) {
+    //         int randomIndex = new Random().nextInt(items.size());
+    //         return items.get(randomIndex);
+    //     }
+    //     return objectMapper.nullNode();
+    // }
+
+    public String getAllRecentAnimalsJson() {
+        try {
+            LocalDate today = LocalDate.now();
+            LocalDate sevenDaysAgo = today.minusDays(6);
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMMdd");
+
+            String endDate = today.format(formatter);
+            String beginDate = sevenDaysAgo.format(formatter);
+
+            // 개
+            URI dogUri = UriComponentsBuilder.newInstance()
+                    .scheme("https")
+                    .host("apis.data.go.kr")
+                    .path("/1543061/abandonmentPublicService_v2/abandonmentPublic_v2")
+                    .queryParam("serviceKey", apiKey)
+                    .queryParam("numOfRows", "50")
+                    .queryParam("pageNo", "1")
+                    .queryParam("_type", "json")
+                    .queryParam("upkind", "417000")
+                    .queryParam("bgnde", beginDate)
+                    .queryParam("endde", endDate)
+                    .build(false)
+                    .toUri();
+            String dogResult = restTemplate.getForObject(dogUri, String.class);
+
+            // 고양이
+            URI catUri = UriComponentsBuilder.newInstance()
+                    .scheme("https")
+                    .host("apis.data.go.kr")
+                    .path("/1543061/abandonmentPublicService_v2/abandonmentPublic_v2")
+                    .queryParam("serviceKey", apiKey)
+                    .queryParam("numOfRows", "50")
+                    .queryParam("pageNo", "1")
+                    .queryParam("_type", "json")
+                    .queryParam("upkind", "422400")
+                    .queryParam("bgnde", beginDate)
+                    .queryParam("endde", endDate)
+                    .build(false)
+                    .toUri();
+            String catResult = restTemplate.getForObject(catUri, String.class);
+
+            JsonNode dogFiltered = filterByProcessState(dogResult, "보호중");
+            JsonNode catFiltered = filterByProcessState(catResult, "보호중");
+
+            ArrayNode resultArray = objectMapper.createArrayNode();
+            addAllAnimals(resultArray, dogFiltered, 417000);
+            addAllAnimals(resultArray, catFiltered, 422400);
+
+            // 최신순 정렬
+            List<JsonNode> sortedList = new ArrayList<>();
+            resultArray.forEach(sortedList::add);
+            sortedList.sort((a, b) -> b.path("noticeSdt").asText("").compareTo(a.path("noticeSdt").asText("")));
+
+            ArrayNode sortedResult = objectMapper.createArrayNode();
+            sortedList.forEach(sortedResult::add);
+
+            ObjectNode result = objectMapper.createObjectNode();
+            result.set("animals", sortedResult);
+            return objectMapper.writeValueAsString(result);
+
+        } catch (IOException e) {
+            return "{\"error\": \"JSON 파싱 실패\"}";
+        } catch (Exception e) {
+            return "{\"error\": \"API 호출 실패\"}";
+        }
+    }
+
+    private void addAllAnimals(ArrayNode resultArray, JsonNode filtered, int upkindValue) {
         JsonNode items = filtered.path("response").path("body").path("items").path("item");
         if (items.isArray() && items.size() > 0) {
-            int randomIndex = new Random().nextInt(items.size());
-            return items.get(randomIndex);
+            for (JsonNode item : items) {
+                ObjectNode animal = (ObjectNode) item.deepCopy();
+
+                animal.put("upkind", upkindValue);
+                animal.put("desertionNo", item.path("desertionNo").asText());
+                animal.put("sexCd", item.path("sexCd").asText());
+                animal.put("happenPlace", item.path("happenPlace").asText());
+                animal.put("specialMark", item.path("specialMark").asText());
+                animal.put("noticeNo", item.path("noticeNo").asText());
+                animal.put("kindNm", item.path("kindNm").asText());
+                animal.put("age", item.path("age").asText());
+
+                resultArray.add(animal);
+            }
         }
-        return objectMapper.nullNode();
     }
+
+    public JsonNode getAnimalDetailByDesertionNo(String desertionNo) {
+        try {
+            URI uri = UriComponentsBuilder.newInstance()
+                    .scheme("https")
+                    .host("apis.data.go.kr")
+                    .path("/1543061/abandonmentPublicService_v2/abandonmentPublic_v2")
+                    .queryParam("serviceKey", apiKey)
+                    .queryParam("_type", "json")
+                    .queryParam("desertionNo", desertionNo)
+                    .build(false)
+                    .toUri();
+
+            String result = restTemplate.getForObject(uri, String.class);
+            JsonNode root = objectMapper.readTree(result);
+            JsonNode item = root.path("response").path("body").path("items").path("item");
+
+            // item이 배열이 아닌 단일 객체로 나오는 경우 처리
+            if (item.isArray() && item.size() > 0) {
+                return item.get(0);
+            } else {
+                return item;
+            }
+        } catch (Exception e) {
+            ObjectNode error = objectMapper.createObjectNode();
+            error.put("error", "API 호출 실패 또는 파싱 오류");
+            return error;
+        }
+    }
+
+
 }
