@@ -4,6 +4,9 @@ import java.io.IOException;
 import java.net.URI;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import java.util.Random;
 
 import org.springframework.beans.factory.annotation.Value;
@@ -19,8 +22,10 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 @Service
 public class AnimalApiService {
 
-    @Value("${ANIMAL_API_KEY:defaultValue}")
-    private String apiKey;
+    // @Value("${ANIMAL_API_KEY:defaultValue}")
+    // private String apiKey;
+
+    private String apiKey="u2K8r3OXbZkp2ka33s370Hes67Dd2PyVMhq/lfz6KrOB5enFKlSdoPSg5Zy8xRMIuhi3o//zU5lc80pxEvvmtw==" ;
 
     private final RestTemplate restTemplate = new RestTemplate();
     private final ObjectMapper objectMapper = new ObjectMapper();
@@ -34,13 +39,13 @@ public class AnimalApiService {
             String endDate = today.format(formatter);
             String beginDate = sevenDaysAgo.format(formatter);
 
-            // 🐶 개
+            // 개
             URI dogUri = UriComponentsBuilder.newInstance()
                     .scheme("https")
                     .host("apis.data.go.kr")
                     .path("/1543061/abandonmentPublicService_v2/abandonmentPublic_v2")
                     .queryParam("serviceKey", apiKey)
-                    .queryParam("numOfRows", "10")
+                    .queryParam("numOfRows", "50")
                     .queryParam("pageNo", "1")
                     .queryParam("_type", "json")
                     .queryParam("upkind", "417000")
@@ -50,13 +55,13 @@ public class AnimalApiService {
                     .toUri();
             String dogResult = restTemplate.getForObject(dogUri, String.class);
 
-            // 🐱 고양이
+            // 고양이
             URI catUri = UriComponentsBuilder.newInstance()
                     .scheme("https")
                     .host("apis.data.go.kr")
                     .path("/1543061/abandonmentPublicService_v2/abandonmentPublic_v2")
                     .queryParam("serviceKey", apiKey)
-                    .queryParam("numOfRows", "100")
+                    .queryParam("numOfRows", "50")
                     .queryParam("pageNo", "1")
                     .queryParam("_type", "json")
                     .queryParam("upkind", "422400")
@@ -66,24 +71,36 @@ public class AnimalApiService {
                     .toUri();
             String catResult = restTemplate.getForObject(catUri, String.class);
 
-            // 🔎 보호중 필터링 함수 호출
             JsonNode dogFiltered = filterByProcessState(dogResult, "보호중");
             JsonNode catFiltered = filterByProcessState(catResult, "보호중");
 
-            JsonNode oneDog = pickRandomAnimal(dogFiltered);
-            JsonNode oneCat = pickRandomAnimal(catFiltered);
+            ArrayNode resultArray = objectMapper.createArrayNode();
+            addRandomAnimals(resultArray, dogFiltered, 4, 417000);  // 🐶 강아지
+            addRandomAnimals(resultArray, catFiltered, 4, 422400);  // 🐱 고양이
 
-            // 🔁 개/고양이 통합 JSON 응답 생성
-            ObjectNode combined = objectMapper.createObjectNode();
-            combined.set("dog", oneDog);
-            combined.set("cat", oneCat);
+            ObjectNode result = objectMapper.createObjectNode();
+            result.set("animals", resultArray);
 
-            return objectMapper.writeValueAsString(combined);
-
+            return objectMapper.writeValueAsString(result);
         } catch (IOException e) {
             return "{\"error\": \"JSON 파싱 실패\"}";
         } catch (Exception e) {
             return "{\"error\": \"API 호출 실패\"}";
+        }
+    }
+
+    private void addRandomAnimals(ArrayNode resultArray, JsonNode filtered, int maxCount, int upkindValue) {
+        JsonNode items = filtered.path("response").path("body").path("items").path("item");
+        if (items.isArray() && items.size() > 0) {
+            int count = Math.min(maxCount, items.size());
+            List<JsonNode> list = new ArrayList<>();
+            items.forEach(list::add);
+            Collections.shuffle(list);
+            for (int i = 0; i < count; i++) {
+                ObjectNode animal = (ObjectNode) list.get(i);
+                animal.put("upkind", upkindValue);  // ✅ 강아지/고양이 타입 명시
+                resultArray.add(animal);
+            }
         }
     }
 
