@@ -11,8 +11,10 @@ public class OrderService {
 
     private final OrderRepository orderRepository;
 
-    public OrderEntity save(OrderDto dto) {
-        return orderRepository.save(dto.toEntity());
+    public OrderEntity save(Long userId, OrderDto dto) {
+        OrderEntity entity = dto.toEntity();
+        entity.setUserId(userId);
+        return orderRepository.save(entity);
     }
 
     public OrderEntity findById(Long id) {

@@ -4,8 +4,13 @@ import lombok.RequiredArgsConstructor;
 
 import java.util.List;
 
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
+
+import com.project.spring.pawple.app.auth.CustomUserDetails;
 
 @RestController
 @RequestMapping("/store/order")
@@ -15,9 +20,17 @@ public class OrderController {
     private final OrderService orderService;
 
     @PostMapping
-    public Long saveOrder(@RequestBody OrderDto dto) {
-        OrderEntity saved = orderService.save(dto);
-        return saved.getId(); // 주문 번호 반환
+    public Long saveOrder(
+        @RequestBody OrderDto dto,
+        @AuthenticationPrincipal CustomUserDetails userDetails
+    ) {
+        if (userDetails == null) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "로그인이 필요합니다.");
+        }
+
+        Long userId = userDetails.getId(); // 인증된 사용자 ID
+        OrderEntity saved = orderService.save(userId, dto);
+        return saved.getId();
     }
 
     @GetMapping("/{id}")
@@ -64,4 +77,20 @@ public class OrderController {
         OrderEntity updated = orderService.updateDeliveryInfo(id, dto);
         return ResponseEntity.ok(OrderDto.fromEntity(updated));
     }
+
+    @PostMapping("/confirm")
+    public ResponseEntity<?> confirmOrder(
+        @RequestBody OrderDto orderDto,
+        @AuthenticationPrincipal CustomUserDetails userDetails
+    ) {
+        if (userDetails == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("로그인이 필요합니다.");
+        }
+
+        Long userId = userDetails.getId(); // ✅ 로그인 사용자 기준으로 주문 저장
+        OrderEntity saved = orderService.save(userId, orderDto);
+
+        return ResponseEntity.ok(saved.getId());
+    }
+
 }
