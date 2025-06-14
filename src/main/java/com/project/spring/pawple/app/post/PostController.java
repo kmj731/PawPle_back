@@ -395,4 +395,11 @@ public class PostController {
         return ResponseEntity.ok(posts);
     }
 
+    @GetMapping("/views/public")
+public ResponseEntity<Page<PostDto>> getPopularPublicPostsByViews(
+        @RequestParam(defaultValue = "0") int page,
+        @RequestParam(defaultValue = "10") int size) {
+    Page<PostDto> posts = postService.getPopularPublicPostsByViews(page, size);
+    return ResponseEntity.ok(posts);
+}
 }

@@ -380,4 +380,9 @@ public class PostService {
     return postPage.map(PostDto::fromEntity);
 }
 
+public Page<PostDto> getPopularPublicPostsByViews(int page, int size) {
+    Pageable pageable = PageRequest.of(page, size);
+    return postRepository.findByIsPublicTrueOrderByViewCountDescCreatedAtDesc(pageable)
+                         .map(PostDto::fromEntity);
+}
 }
