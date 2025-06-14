@@ -732,6 +732,18 @@ public class DataInitializer implements CommandLineRunner {
                 .category("간식")
                 .tags(List.of("펫밀크"))
                 .image("/images/product/petmilk.png")
+                .build(),
+
+        
+            ProductEntity.builder()
+                .name("슬개골 따땃망토")
+                .brand("시리어스펫")
+                .discount(9)
+                .originalPrice(140000)
+                .price(128000)
+                .category("용품")
+                .tags(List.of("강아지","용품"))
+                .image("/images/product/cloak.jpg")
                 .build()
         );
 
