@@ -4,6 +4,7 @@ import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -36,15 +37,19 @@ public class Auth {
         return new Role(user.getAuthorities().toArray()[0].toString().replaceFirst("ROLE_", "").toLowerCase());
     }
 
-    @GetMapping("/me")
-    public ResponseEntity<?> getCurrentUser(Authentication authentication) {
-        UserEntity user = userRep.findByName(authentication.getName())
-                .orElseThrow(() -> new UsernameNotFoundException("User not found"));
-
-        return ResponseEntity.ok(Map.of(
-                "id", user.getId(),
-                "nickname", user.getSocialName(),
-                "username", user.getName()));
+@GetMapping("/me")
+public ResponseEntity<?> getCurrentUser(Authentication authentication) {
+    if (authentication == null || !authentication.isAuthenticated() || authentication.getPrincipal().equals("anonymousUser")) {
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("message", "로그인이 필요합니다."));
     }
+
+    UserEntity user = userRep.findByName(authentication.getName())
+            .orElseThrow(() -> new UsernameNotFoundException("User not found"));
+
+    return ResponseEntity.ok(Map.of(
+            "id", user.getId(),
+            "nickname", user.getSocialName(),
+            "username", user.getName()));
+}
 
 }
