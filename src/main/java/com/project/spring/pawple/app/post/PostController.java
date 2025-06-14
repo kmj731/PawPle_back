@@ -311,14 +311,18 @@ public class PostController {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         String username = auth.getName();
 
-        boolean isLiked = likeService.isLikedByUser(id, username);
-        long likeCount = likeService.getLikeCount(id);
-
         Map<String, Object> response = new HashMap<>();
-        response.put("isLiked", isLiked);
-        response.put("likeCount", likeCount);
+        try {
+            boolean isLiked = likeService.isLikedByUser(id, username);
+            long likeCount = likeService.getLikeCount(id);
 
-        return ResponseEntity.ok(response);
+            response.put("isLiked", isLiked);
+            response.put("likeCount", likeCount);
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            response.put("error", "서버 오류가 발생했습니다.");
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+        }
     }
 
     // 좋아요 수 기준 인기글 조회
