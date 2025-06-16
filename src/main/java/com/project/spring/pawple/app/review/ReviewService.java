@@ -62,7 +62,7 @@ public class ReviewService {
 
     // 공개된 리뷰만 조회
     public List<ReviewEntity> findPublicByProductId(Long productId) {
-        return reviewRepository.findByProduct_IdAndIsPublic(productId, "Y");
+        return reviewRepository.findByProduct_IdAndIsPublic(productId, "공개");
     }
 
     // 리뷰 공개 여부 설정
