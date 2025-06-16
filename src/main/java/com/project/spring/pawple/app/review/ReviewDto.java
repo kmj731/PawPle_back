@@ -17,6 +17,7 @@ public class ReviewDto {
     private Long productId;
     private Long userId;
     private String nickname;
+    private String isPublic;
     private String content;
     private Integer rating;
     private String image;
@@ -28,6 +29,7 @@ public class ReviewDto {
                 .productId(entity.getProduct().getId())
                 .userId(entity.getUserId())
                 .nickname(entity.getNickname())
+                .isPublic(entity.getIsPublic())
                 .content(entity.getContent())
                 .rating(entity.getRating())
                 .image(entity.getImage())
@@ -41,6 +43,7 @@ public class ReviewDto {
                 .product(ProductEntity.builder().id(productId).build()) // 단방향 연결
                 .userId(userId)
                 .nickname(nickname)
+                .isPublic(isPublic)
                 .content(content)
                 .rating(rating)
                 .image(image)

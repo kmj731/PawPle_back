@@ -45,7 +45,7 @@ public class ReviewService {
 
     // 특정 상품의 리뷰 개수 조회
     public Map<String, Object> getRatingSummary(Long productId) {
-        List<ReviewEntity> reviews = reviewRepository.findByProduct_Id(productId);
+        List<ReviewEntity> reviews = reviewRepository.findByProduct_IdAndIsPublic(productId, "Y");
 
         int reviewCount = reviews.size();
         double avgRating = reviews.stream()
@@ -59,4 +59,10 @@ public class ReviewService {
 
         return result;
     }
+
+    // 공개된 리뷰만 조회
+    public List<ReviewEntity> findPublicByProductId(Long productId) {
+        return reviewRepository.findByProduct_IdAndIsPublic(productId, "Y");
+    }
+
 }

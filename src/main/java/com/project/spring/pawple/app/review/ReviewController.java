@@ -21,8 +21,8 @@ public class ReviewController {
     private final ReviewService reviewService;
 
     @GetMapping("/product/{productId}")
-    public List<ReviewDto> getReviewsByProduct(@PathVariable Long productId) {
-        return reviewService.findByProductId(productId)
+    public List<ReviewDto> getPublicReviewsByProduct(@PathVariable Long productId) {
+        return reviewService.findPublicByProductId(productId)
                 .stream().map(ReviewDto::fromEntity).toList();
     }
 

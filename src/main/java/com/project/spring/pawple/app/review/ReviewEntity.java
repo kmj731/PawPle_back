@@ -40,6 +40,8 @@ public class ReviewEntity {
 
     private String nickname; // 작성자 닉네임
 
+    private String isPublic; // 공개 여부
+
     private String content;  // 리뷰 본문
 
     private Integer rating;  // 평점 (예: 1~5)
@@ -51,5 +53,5 @@ public class ReviewEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "product_id")
     private ProductEntity product;
-    
+
 }
