@@ -34,23 +34,22 @@ public class HealthCheckDetail {
 
     private String category;
 
+    private int score;
+
     @ElementCollection
     @CollectionTable(name = "health_check_answers", joinColumns = @JoinColumn(name = "detail_id"))
     @Column(name = "answer")
-    private List<String> selectedAnswers;
+    private List<String> selectedOptions;
 
-    private int score;
-
-   
     @ManyToOne
     @JoinColumn(name = "record_id")
     @JsonIgnore
     private HealthCheckRecord record;
 
     @Builder
-    public HealthCheckDetail(String category, List<String> selectedAnswers, int score, HealthCheckRecord record) {
+    public HealthCheckDetail(String category, List<String> selectedOptions, int score, HealthCheckRecord record) {
         this.category = category;
-        this.selectedAnswers = selectedAnswers;
+        this.selectedOptions = selectedOptions;
         this.score = score;
         this.record = record;
     }

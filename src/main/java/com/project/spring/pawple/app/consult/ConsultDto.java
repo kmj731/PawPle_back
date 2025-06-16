@@ -6,6 +6,8 @@ import lombok.*;
 
 import java.time.LocalDateTime;
 
+import com.project.spring.pawple.app.health.HealthCheckDetailDto;
+import com.project.spring.pawple.app.health.HealthCheckRecordDto;
 import com.project.spring.pawple.app.pet.PetEntity;
 import com.project.spring.pawple.app.user.UserEntity;
 
@@ -46,7 +48,19 @@ public class ConsultDto {
     private String replyAuthor;
     private LocalDateTime replyCreatedAt;
 
+    private HealthCheckRecordDto latestHealthRecord;
+
     public static ConsultDto fromEntity(ConsultEntity entity) {
+
+        HealthCheckRecordDto latestHealth = null;
+        if (entity.getPet() != null && entity.getPet().getHealthRecords() != null && !entity.getPet().getHealthRecords().isEmpty()) {
+            latestHealth = entity.getPet().getHealthRecords().stream()
+                .sorted((a, b) -> b.getCheckedAt().compareTo(a.getCheckedAt()))
+                .findFirst()
+                .map(HealthCheckRecordDto::fromEntity)
+                .orElse(null);
+        }
+
         return ConsultDto.builder()
                 .id(entity.getId())
                 .title(entity.getTitle())
@@ -66,6 +80,7 @@ public class ConsultDto {
                 .replyContent(entity.getReplyContent())
                 .replyAuthor(entity.getReplyAuthor())
                 .replyCreatedAt(entity.getReplyCreatedAt())
+                .latestHealthRecord(latestHealth)
                 .build();
     }
 
