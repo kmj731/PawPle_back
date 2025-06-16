@@ -49,6 +49,21 @@ public class HealthCheckController {
         "행동", List.of("기운이 없어요", "짖는 횟수가 줄었어요", "숨는 일이 많아졌어요", "혼자 있으려고 해요", "없어요"),
         "체중 및 비만도", List.of("최근 강아지의 체중이 눈에 띄게 늘었거나 줄었어요", "허리 라인이 잘 안 보이거나 만져지지 않아요", "배를 만졌을 때 갈비뼈가 잘 느껴지지 않아요", "예전보다 덜 움직이고, 활동량이 줄었거나 쉽게 지쳐해요", "없어요")
     );
+    
+    private static final Map<String, Map<String, Integer>> DEDUCTION_SCORES = QUESTION_SCORES.entrySet().stream()
+        .collect(Collectors.toMap(
+            Map.Entry::getKey,
+            entry -> {
+                Map<String, Integer> scores = new LinkedHashMap<>();
+                List<String> options = entry.getValue();
+                for (int i = 0; i < options.size(); i++) {
+                    // '없어요'는 감점 없음
+                    int score = "없어요".equals(options.get(i)) ? 0 : 4 - i;
+                    scores.put(options.get(i), score);
+                }
+                return scores;
+            }
+        ));
 
     /**
      * 건강검진 결과 저장
@@ -98,13 +113,33 @@ public class HealthCheckController {
         record.setResultStatus(status);
         record.setWarnings(new ArrayList<>(getTopCategories(request)));
 
+        List<HealthCheckDetail> detailList = new ArrayList<>();
 
+        for (Map.Entry<String, List<String>> entry : request.getSelectedOptions().entrySet()) {
+            String category = entry.getKey();
+            List<String> selectedOptions = entry.getValue();
+            Map<String, Integer> scoreMap = DEDUCTION_SCORES.getOrDefault(category, Map.of());
+
+            int score = selectedOptions.stream()
+                .mapToInt(option -> scoreMap.getOrDefault(option, 0))
+                .sum();
+
+            HealthCheckDetail detail = HealthCheckDetail.builder()
+                .category(category)
+                .score(score)
+                .selectedAnswers(selectedOptions)
+                .record(record)
+                .build();
+
+            detailList.add(detail);
+        }
         recordRepository.save(record);
 
         // 결과 응답
         HealthCheckResultResponse response = new HealthCheckResultResponse();
         response.setScore(totalScore);
         response.setStatus(status);
+        record.setDetails(detailList);
         record.setWarnings(new ArrayList<>(getTopCategories(request)));
 
 
@@ -115,22 +150,86 @@ public class HealthCheckController {
     /**
      * 특정 펫의 건강검진 이력 조회
      */
+    // @GetMapping("/pet/{petId}")
+    // public ResponseEntity<?> getRecordsByPet(@PathVariable Long petId) {
+    //     List<HealthCheckRecord> records = recordRepository.findByPetId(petId);
+    //     return ResponseEntity.ok(records);
+    // }
+
     @GetMapping("/pet/{petId}")
     public ResponseEntity<?> getRecordsByPet(@PathVariable Long petId) {
         List<HealthCheckRecord> records = recordRepository.findByPetId(petId);
-        return ResponseEntity.ok(records);
+
+        List<HealthCheckRecordDto> result = records.stream().map(record -> {
+            HealthCheckRecordDto dto = new HealthCheckRecordDto();
+            dto.setId(record.getId());
+            dto.setCheckedAt(record.getCheckedAt());
+            dto.setTotalScore(record.getTotalScore());
+            dto.setResultStatus(record.getResultStatus());
+            dto.setWarnings(record.getWarnings());
+
+        List<HealthCheckDetailDto> details = record.getDetails().stream().map(detail -> {
+            HealthCheckDetailDto d = new HealthCheckDetailDto();
+            d.setCategory(detail.getCategory());
+            d.setScore(detail.getScore());
+            d.setSelectedOptions(detail.getSelectedAnswers());
+            return d;
+        }).collect(Collectors.toList());
+
+            dto.setDetails(details);
+            return dto;
+        }).collect(Collectors.toList());
+
+        return ResponseEntity.ok(result);
     }
 
     /**
      * 주의가 필요한 항목 top 3 리턴 (선택된 항목 수 기준 정렬)
      */
-    private List<String> getTopCategories(HealthCheckRequest request) {
-        return request.getSelectedOptions().entrySet().stream()
-            .sorted((a, b) -> Integer.compare(b.getValue().size(), a.getValue().size()))
-            .limit(3)
-            .map(entry -> entry.getKey().replaceAll("^\\d+\\.\\s*", ""))  // ← 숫자 제거
-            .collect(Collectors.toList());
+private List<String> getTopCategories(HealthCheckRequest request) {
+    Map<String, Integer> categoryScores = request.getSelectedOptions().entrySet().stream()
+        .collect(Collectors.toMap(
+            entry -> entry.getKey(),
+            entry -> {
+                String cleanedCategory = entry.getKey().replaceAll("^\\d+\\.\\s*", "").trim();  // 숫자 제거
+                return entry.getValue().stream()
+                    .mapToInt(opt -> DEDUCTION_SCORES
+                        .getOrDefault(cleanedCategory, Map.of())
+                        .getOrDefault(opt.trim(), 0))
+                    .sum();
+            }
+        ));
+
+    Map<Integer, List<String>> scoreToCategories = new TreeMap<>(Comparator.reverseOrder());
+    for (Map.Entry<String, Integer> entry : categoryScores.entrySet()) {
+        int score = entry.getValue();
+        String cleanedCategory = entry.getKey().replaceAll("^\\d+\\.\\s*", "").trim();
+        scoreToCategories.computeIfAbsent(score, k -> new ArrayList<>()).add(cleanedCategory);
     }
+
+    List<String> result = new ArrayList<>();
+    int rankCount = 0;
+    for (Map.Entry<Integer, List<String>> entry : scoreToCategories.entrySet()) {
+        if (rankCount >= 3) break;
+        result.addAll(entry.getValue());
+        rankCount++;
+    }
+
+    // 디버깅 로그
+    System.out.println("==== [HealthCheck] 감점 점수 분포 ====");
+    scoreToCategories.forEach((score, list) ->
+        System.out.println(score + " → " + list)
+    );
+    System.out.println("==== [HealthCheck] 최종 주의 항목 ====");
+    System.out.println(result);
+
+    return result;
+}
+
+
+
+
+
 
 
     @PutMapping("/update/{recordId}")
@@ -226,11 +325,19 @@ public class HealthCheckController {
 
 
     private int calculateTotalScore(Map<String, List<String>> selectedOptions) {
-        return 100 - selectedOptions.values().stream()
-            .flatMap(List::stream)
-            .filter(answer -> !"없어요".equals(answer))
-            .mapToInt(answer -> 2)
+        int deduction = selectedOptions.entrySet().stream()
+            .mapToInt(entry -> {
+                String category = entry.getKey().replaceAll("^\\d+\\.\\s*", "").trim(); // 정제
+                List<String> answers = entry.getValue();
+                Map<String, Integer> scoreMap = DEDUCTION_SCORES.getOrDefault(category, Map.of());
+
+                return answers.stream()
+                    .mapToInt(ans -> scoreMap.getOrDefault(ans.trim(), 0))
+                    .sum();
+            })
             .sum();
+
+        return Math.max(0, 100 - deduction);
     }
 
     private String determineStatus(int score) {

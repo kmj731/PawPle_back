@@ -34,14 +34,13 @@ public class HealthCheckDetail {
 
     private String category;
 
+    private int score;
+
     @ElementCollection
     @CollectionTable(name = "health_check_answers", joinColumns = @JoinColumn(name = "detail_id"))
     @Column(name = "answer")
     private List<String> selectedAnswers;
 
-    private int score;
-
-   
     @ManyToOne
     @JoinColumn(name = "record_id")
     @JsonIgnore
