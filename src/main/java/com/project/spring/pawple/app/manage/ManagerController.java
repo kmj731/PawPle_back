@@ -553,9 +553,11 @@ public class ManagerController {
 
     // review 전체 조회
     @GetMapping("/review")
-    public ResponseEntity<List<ReviewEntity>> getAllReviews(){
-        List<ReviewEntity> reviews = reviewRepository.findAll();
-        return ResponseEntity.ok(reviews);
+    public List<ReviewDto> getAllReviewsWithoutImage() {
+        return reviewRepository.findAll().stream()
+                .map(ReviewDto::fromEntity)
+                .peek(dto -> dto.setImage(null)) // 이미지 null 처리
+                .collect(Collectors.toList());
     }
 
     // review 삭제
@@ -575,7 +577,7 @@ public class ManagerController {
     
     // review 공개 여부 수정
      @PreAuthorize("hasRole('ADMIN')")
-    @PatchMapping("/review/{id}/visibility")
+    @PatchMapping("/review/{id}/public")
     public ReviewDto updateReviewVisibility(@PathVariable Long id, @RequestBody Map<String, String> request) {
         String isPublic = request.get("isPublic");
         ReviewEntity updated = reviewService.updateVisibility(id, isPublic);

@@ -15,6 +15,7 @@ public class ReviewDto {
 
     private Long id;
     private Long productId;
+    private String productName;
     private Long userId;
     private String nickname;
     private String isPublic;
@@ -26,7 +27,8 @@ public class ReviewDto {
     public static ReviewDto fromEntity(ReviewEntity entity) {
         return ReviewDto.builder()
                 .id(entity.getId())
-                .productId(entity.getProduct().getId())
+                .productId(entity.getProduct() != null ? entity.getProduct().getId() : null)
+                .productName(entity.getProduct() != null ? entity.getProduct().getName() : "상품 없음") // 상품명 설정
                 .userId(entity.getUserId())
                 .nickname(entity.getNickname())
                 .isPublic(entity.getIsPublic())
