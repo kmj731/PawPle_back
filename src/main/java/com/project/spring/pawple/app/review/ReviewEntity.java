@@ -2,6 +2,7 @@ package com.project.spring.pawple.app.review;
 
 import com.project.spring.pawple.app.store.ProductEntity;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
@@ -35,13 +36,17 @@ public class ReviewEntity {
     private Long id;
 
     private Long productId; // 어떤 상품에 대한 리뷰인지 (FK처럼 사용)
+ 
 
     private Long userId;    // 누가 작성했는지 (사용자 ID, 추후 회원 기능 연동 대비)
 
+
+    @Column(length=50)
     private String nickname; // 작성자 닉네임
 
     private String isPublic; // 공개 여부
 
+    @Column(length=4000)
     private String content;  // 리뷰 본문
 
     private Integer rating;  // 평점 (예: 1~5)

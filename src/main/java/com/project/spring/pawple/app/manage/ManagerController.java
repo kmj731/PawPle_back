@@ -551,14 +551,26 @@ public class ManagerController {
         return ResponseEntity.ok("상태가 변경되었습니다.");
     }
 
-    // review 전체 조회
+    // // 리뷰 전체 조회 (이미지 제외)
+    // @GetMapping("/review")
+    // public List<ReviewDto> getAllReviewsWithoutImage() {
+    //     return reviewRepository.findAll().stream()
+    //             .map(review -> {
+    //                 ReviewDto dto = ReviewDto.fromEntity(review);
+    //                 dto.setImage(null); // 이미지 필드 null 처리
+    //                 return dto;
+    //             })
+    //             .collect(Collectors.toList());
+    // }
+
     @GetMapping("/review")
-    public List<ReviewDto> getAllReviewsWithoutImage() {
-        return reviewRepository.findAll().stream()
-                .map(ReviewDto::fromEntity)
-                .peek(dto -> dto.setImage(null)) // 이미지 null 처리
-                .collect(Collectors.toList());
-    }
+    public List<ReviewDto> getAllReviews() {
+    List<ReviewEntity> entities = reviewRepository.findAllWithProduct();
+    return entities.stream()
+            .map(ReviewDto::fromEntity)
+            .collect(Collectors.toList());
+}
+
 
     // review 삭제
     @PreAuthorize("hasRole('ADMIN')")

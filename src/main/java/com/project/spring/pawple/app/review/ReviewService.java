@@ -3,8 +3,11 @@ package com.project.spring.pawple.app.review;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
+
+import com.project.spring.pawple.app.store.ProductDto;
 
 import lombok.RequiredArgsConstructor;
 
@@ -74,5 +77,12 @@ public class ReviewService {
     return reviewRepository.save(review);
     }
 
+    public List<ReviewDto> getAllReviewsWithProduct() {
+        return reviewRepository.findAllWithProduct()
+                .stream()
+                .map(ReviewDto::fromEntity)
+                .collect(Collectors.toList());
+    }
+    
 
 }
