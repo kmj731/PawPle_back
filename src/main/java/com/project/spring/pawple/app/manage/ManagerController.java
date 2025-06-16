@@ -43,6 +43,7 @@ import com.project.spring.pawple.app.report.ReportDto;
 import com.project.spring.pawple.app.report.ReportEntity;
 import com.project.spring.pawple.app.report.ReportRepository;
 import com.project.spring.pawple.app.report.ReportService;
+import com.project.spring.pawple.app.review.ReviewDto;
 import com.project.spring.pawple.app.review.ReviewEntity;
 import com.project.spring.pawple.app.review.ReviewRepository;
 import com.project.spring.pawple.app.review.ReviewService;
@@ -559,7 +560,7 @@ public class ManagerController {
 
     // review 삭제
     @PreAuthorize("hasRole('ADMIN')")
-    @DeleteMapping("/{id}")
+    @DeleteMapping("/review/{id}")
     public void deleteReview(@PathVariable Long id) {
         reviewService.delete(id);
     }
@@ -567,11 +568,19 @@ public class ManagerController {
     
     // 특정 상품의 모든 리뷰 조회
     @PreAuthorize("hasRole('ADMIN')")
+    @GetMapping("/review/product/")
     public List<ReviewEntity> findByProductId(Long productId) {
         return reviewRepository.findByProduct_Id(productId);
     }
     
     // review 공개 여부 수정
+     @PreAuthorize("hasRole('ADMIN')")
+    @PatchMapping("/review/{id}/visibility")
+    public ReviewDto updateReviewVisibility(@PathVariable Long id, @RequestBody Map<String, String> request) {
+        String isPublic = request.get("isPublic");
+        ReviewEntity updated = reviewService.updateVisibility(id, isPublic);
+        return ReviewDto.fromEntity(updated);
+    }
 
     // 본문 조회(보류)
 

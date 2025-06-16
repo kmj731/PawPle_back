@@ -65,4 +65,14 @@ public class ReviewService {
         return reviewRepository.findByProduct_IdAndIsPublic(productId, "Y");
     }
 
+    // 리뷰 공개 여부 설정
+    public ReviewEntity updateVisibility(Long reviewId, String isPublic) {
+    ReviewEntity review = reviewRepository.findById(reviewId)
+        .orElseThrow(() -> new RuntimeException("리뷰를 찾을 수 없습니다."));
+    
+    review.setIsPublic(isPublic);
+    return reviewRepository.save(review);
+    }
+
+
 }
