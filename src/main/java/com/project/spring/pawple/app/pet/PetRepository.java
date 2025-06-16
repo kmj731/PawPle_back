@@ -17,10 +17,12 @@ import java.util.Optional;
 public interface PetRepository extends JpaRepository<PetEntity, Long> {
     Optional<PetEntity> findByOwnerAndPetName(UserEntity owner, String petName);
     List<PetEntity> findByOwner(UserEntity owner);
-
+    List<PetEntity> findByOwnerId(Long ownerId);
 
     @Modifying
     @Query("delete from PetEntity p where p.owner.id = :ownerId")
     void deleteByOwnerId(@Param("ownerId") Long ownerId);
+
+    
 
 }

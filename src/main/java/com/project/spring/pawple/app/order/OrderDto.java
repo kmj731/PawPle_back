@@ -28,7 +28,6 @@ public class OrderDto {
         }
 
         OrderEntity order = OrderEntity.builder()
-                .userId(userId)
                 .totalAmount(totalAmount)
                 .status(status != null ? status : "결제완료")
                 .orderDate(LocalDateTime.now())

@@ -33,21 +33,19 @@ public class ProductEntity {
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "ProductSeq")
     private Long id;
 
-    private String name;          // 상품명
-    private String brand;         // 브랜드
-    private double rating;        // 평점
-    private int reviews;          // 리뷰 수
-    private int discount;         // 할인율 (%)
-    private int price;            // 할인가
-    private int originalPrice;    // 원가
+    private String name;
+    private String brand;
+    private Double rating;           // 평점 (null 허용)
+    private Integer reviews;         // 리뷰 수
+    private Integer discount;        // 할인율 (%)
+    private Integer price;           // 할인가
+    private Integer originalPrice;   // 원가
 
     @ElementCollection
-    private List<String> tags = new ArrayList<>(); // 태그들
+    private List<String> tags = new ArrayList<>();
 
-    private String image;         // 이미지 URL
-
-    private String category;      // 카테고리 (사료, 간식, 영양제, 용품 등)
-
-    private int quantity;         // 수량
+    private String image;
+    private String category;
+    private Integer quantity;        // 수량
+    
 }
-

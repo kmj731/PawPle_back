@@ -78,21 +78,56 @@ public class VaccinationController {
 
     @GetMapping("/history")
     public List<VaccinationHistoryDto> getVaccinationHistory(@RequestParam("petId") Long petId) {
-    List<VaccinationRecord> records = vaccinationRecordRepository.findByPetIdOrderByVaccinatedAtDesc(petId);
+        List<VaccinationRecord> records = vaccinationRecordRepository.findByPetIdOrderByVaccinatedAtDesc(petId);
 
-    return records.stream().map(record -> {
-        long ddayValue = ChronoUnit.DAYS.between(LocalDate.now(), record.getNextVaccinationDate());
-        String dday = (ddayValue == 0) ? "D-Day" :
-                      (ddayValue > 0) ? "D-" + ddayValue : "D+" + Math.abs(ddayValue);
-        return new VaccinationHistoryDto(
-                record.getStep(),
-                record.getVaccineName(),
-                record.getVaccinatedAt(),
-                record.getNextVaccinationDate(),
-                dday
-        );
-    }).toList();
-}
+        return records.stream().map(record -> {
+            long ddayValue = ChronoUnit.DAYS.between(LocalDate.now(), record.getNextVaccinationDate());
+            String dday = (ddayValue == 0) ? "D-Day" :
+                        (ddayValue > 0) ? "D-" + ddayValue : "D+" + Math.abs(ddayValue);
+            return new VaccinationHistoryDto(
+                    record.getStep(),
+                    record.getVaccineName(),
+                    record.getVaccinatedAt(),
+                    record.getNextVaccinationDate(),
+                    dday
+            );
+        }).toList();
+    }
+
+    @GetMapping("/history/all")
+    public List<VaccinationHistoryAllDto> getAllVaccinationRecords(
+            @AuthenticationPrincipal UserDetails userDetails
+    ) {
+        String username = userDetails.getUsername();
+        Long userId = userRepository.findByName(username)
+                .orElseThrow(() -> new RuntimeException("로그인 유저 정보를 찾을 수 없습니다."))
+                .getId();
+
+        List<PetEntity> pets = petRepository.findByOwnerId(userId);
+
+        return pets.stream()
+                .flatMap(pet -> {
+                    List<VaccinationRecord> records = vaccinationRecordRepository.findByPetIdOrderByVaccinatedAtDesc(pet.getId());
+
+                    return records.stream().map(record -> {
+                        long ddayValue = ChronoUnit.DAYS.between(LocalDate.now(), record.getNextVaccinationDate());
+                        String dday = (ddayValue == 0) ? "D-Day" :
+                                    (ddayValue > 0) ? "D-" + ddayValue : "D+" + Math.abs(ddayValue);
+
+                        return new VaccinationHistoryAllDto(
+                                pet.getId(),
+                                pet.getPetName(),
+                                record.getStep(),
+                                record.getVaccineName(),
+                                record.getVaccinatedAt(),
+                                record.getNextVaccinationDate(),
+                                dday
+                        );
+                    });
+                })
+                .toList();
+    }
+
 
     @PutMapping("/update")
     public ResponseEntity<String> updateVaccinationRecord(

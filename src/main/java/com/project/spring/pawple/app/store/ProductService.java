@@ -3,11 +3,17 @@ package com.project.spring.pawple.app.store;
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.server.ResponseStatusException;
+
+import com.project.spring.pawple.app.media.ImageUtil;
 
 @Service
 public class ProductService {
@@ -31,7 +37,6 @@ public class ProductService {
         } catch (IOException e) {
             throw new RuntimeException("이미지 저장 실패", e);
         }
-System.out.println("저장된 이미지 URL: " + filename);
         return "/uploads/product/" + filename;
     }
 
@@ -74,5 +79,28 @@ System.out.println("저장된 이미지 URL: " + filename);
 
         return productRepository.save(product);
     }
+
+    @Transactional
+    public ProductEntity patchUpdate(Long id, ProductEntity patchData, MultipartFile image) {
+        ProductEntity original = productRepository.findById(id)
+            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "상품을 찾을 수 없습니다."));
+
+        if (patchData.getName() != null) original.setName(patchData.getName());
+        if (patchData.getBrand() != null) original.setBrand(patchData.getBrand());
+        if (patchData.getOriginalPrice() != null) original.setOriginalPrice(patchData.getOriginalPrice());
+        if (patchData.getDiscount() != null) original.setDiscount(patchData.getDiscount());
+        if (patchData.getPrice() != null) original.setPrice(patchData.getPrice());
+        if (patchData.getCategory() != null) original.setCategory(patchData.getCategory());
+        if (patchData.getQuantity() != null) original.setQuantity(patchData.getQuantity());
+        if (patchData.getTags() != null) original.setTags(patchData.getTags());
+
+        if (image != null && !image.isEmpty()) {
+            Map<String, String> paths = ImageUtil.saveImageAndThumbnail(image, "product");
+            original.setImage(paths.get("imageUrl"));
+        }
+
+        return productRepository.save(original);
+    }
+
 }
 

@@ -123,5 +123,7 @@ public interface PostRepository extends JpaRepository<PostEntity, Long> {
 
     Page<PostEntity> findByUserId(Long userId, Pageable pageable);
 
+    Page<PostEntity> findByIsPublicTrueOrderByViewCountDescCreatedAtDesc(Pageable pageable);
+
 
 }

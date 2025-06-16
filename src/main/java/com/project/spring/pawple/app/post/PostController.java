@@ -162,21 +162,31 @@ public class PostController {
     public ResponseEntity<PostDto> updatePost(
             @PathVariable Long id,
             @RequestBody PostDto postDto) {
+
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        if (auth == null || !auth.isAuthenticated() || auth.getPrincipal().equals("anonymousUser")) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build(); // 401
+        }
+
         String username = auth.getName();
 
         try {
             PostDto updatedPost = postService.updatePost(id, postDto, username);
             return ResponseEntity.ok(updatedPost);
         } catch (IllegalArgumentException e) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build(); // 본인 글 아님
         }
     }
+
 
     // 게시글 삭제
     @DeleteMapping("/{id}")
     public ResponseEntity<Map<String, String>> deletePost(@PathVariable Long id) {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        if (auth == null || !auth.isAuthenticated() || auth.getPrincipal().equals("anonymousUser")) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+
         String username = auth.getName();
 
         try {
@@ -278,17 +288,21 @@ public class PostController {
     @PostMapping("/{id}/like")
     public ResponseEntity<Map<String, Object>> toggleLike(@PathVariable Long id) {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        if (auth == null || !auth.isAuthenticated() || auth.getPrincipal().equals("anonymousUser")) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(Map.of("error", "로그인이 필요합니다."));
+        }
+
         String username = auth.getName();
 
         boolean isLiked = likeService.toggleLike(id, username);
         long likeCount = likeService.getLikeCount(id);
 
-        Map<String, Object> response = new HashMap<>();
-        response.put("isLiked", isLiked);
-        response.put("likeCount", likeCount);
-        response.put("message", isLiked ? "좋아요를 눌렀습니다." : "좋아요를 취소했습니다.");
-
-        return ResponseEntity.ok(response);
+        return ResponseEntity.ok(Map.of(
+                "isLiked", isLiked,
+                "likeCount", likeCount,
+                "message", isLiked ? "좋아요를 눌렀습니다." : "좋아요를 취소했습니다."
+        ));
     }
 
     // 좋아요 상태 확인
@@ -297,14 +311,18 @@ public class PostController {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         String username = auth.getName();
 
-        boolean isLiked = likeService.isLikedByUser(id, username);
-        long likeCount = likeService.getLikeCount(id);
-
         Map<String, Object> response = new HashMap<>();
-        response.put("isLiked", isLiked);
-        response.put("likeCount", likeCount);
+        try {
+            boolean isLiked = likeService.isLikedByUser(id, username);
+            long likeCount = likeService.getLikeCount(id);
 
-        return ResponseEntity.ok(response);
+            response.put("isLiked", isLiked);
+            response.put("likeCount", likeCount);
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            response.put("error", "서버 오류가 발생했습니다.");
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+        }
     }
 
     // 좋아요 수 기준 인기글 조회
@@ -377,4 +395,11 @@ public class PostController {
         return ResponseEntity.ok(posts);
     }
 
+    @GetMapping("/views/public")
+public ResponseEntity<Page<PostDto>> getPopularPublicPostsByViews(
+        @RequestParam(defaultValue = "0") int page,
+        @RequestParam(defaultValue = "10") int size) {
+    Page<PostDto> posts = postService.getPopularPublicPostsByViews(page, size);
+    return ResponseEntity.ok(posts);
+}
 }
