@@ -127,7 +127,7 @@ public class HealthCheckController {
             HealthCheckDetail detail = HealthCheckDetail.builder()
                 .category(category)
                 .score(score)
-                .selectedAnswers(selectedOptions)
+                .selectedOptions(selectedOptions)
                 .record(record)
                 .build();
 
@@ -160,25 +160,9 @@ public class HealthCheckController {
     public ResponseEntity<?> getRecordsByPet(@PathVariable Long petId) {
         List<HealthCheckRecord> records = recordRepository.findByPetId(petId);
 
-        List<HealthCheckRecordDto> result = records.stream().map(record -> {
-            HealthCheckRecordDto dto = new HealthCheckRecordDto();
-            dto.setId(record.getId());
-            dto.setCheckedAt(record.getCheckedAt());
-            dto.setTotalScore(record.getTotalScore());
-            dto.setResultStatus(record.getResultStatus());
-            dto.setWarnings(record.getWarnings());
-
-        List<HealthCheckDetailDto> details = record.getDetails().stream().map(detail -> {
-            HealthCheckDetailDto d = new HealthCheckDetailDto();
-            d.setCategory(detail.getCategory());
-            d.setScore(detail.getScore());
-            d.setSelectedOptions(detail.getSelectedAnswers());
-            return d;
-        }).collect(Collectors.toList());
-
-            dto.setDetails(details);
-            return dto;
-        }).collect(Collectors.toList());
+        List<HealthCheckRecordDto> result = records.stream()
+            .map(HealthCheckRecordDto::fromEntity)
+            .collect(Collectors.toList());
 
         return ResponseEntity.ok(result);
     }
@@ -186,49 +170,50 @@ public class HealthCheckController {
     /**
      * 주의가 필요한 항목 top 3 리턴 (선택된 항목 수 기준 정렬)
      */
-private List<String> getTopCategories(HealthCheckRequest request) {
-    Map<String, Integer> categoryScores = request.getSelectedOptions().entrySet().stream()
-        .collect(Collectors.toMap(
-            entry -> entry.getKey(),
-            entry -> {
-                String cleanedCategory = entry.getKey().replaceAll("^\\d+\\.\\s*", "").trim();  // 숫자 제거
-                return entry.getValue().stream()
-                    .mapToInt(opt -> DEDUCTION_SCORES
-                        .getOrDefault(cleanedCategory, Map.of())
-                        .getOrDefault(opt.trim(), 0))
-                    .sum();
-            }
-        ));
+    private List<String> getTopCategories(HealthCheckRequest request) {
+        // 1. 카테고리별 감점 점수 계산
+        Map<String, Integer> categoryScores = request.getSelectedOptions().entrySet().stream()
+            .collect(Collectors.toMap(
+                entry -> entry.getKey(),
+                entry -> {
+                    String cleanedCategory = entry.getKey().replaceAll("^\\d+\\.\\s*", "").trim();
+                    return entry.getValue().stream()
+                        .mapToInt(opt -> DEDUCTION_SCORES
+                            .getOrDefault(cleanedCategory, Map.of())
+                            .getOrDefault(opt.trim(), 0))
+                        .sum();
+                }
+            ));
 
-    Map<Integer, List<String>> scoreToCategories = new TreeMap<>(Comparator.reverseOrder());
-    for (Map.Entry<String, Integer> entry : categoryScores.entrySet()) {
-        int score = entry.getValue();
-        String cleanedCategory = entry.getKey().replaceAll("^\\d+\\.\\s*", "").trim();
-        scoreToCategories.computeIfAbsent(score, k -> new ArrayList<>()).add(cleanedCategory);
+        // 2. 감점 점수 4점 이상인 항목만 점수별로 그룹화 (내림차순 정렬)
+        Map<Integer, List<String>> scoreToCategories = new TreeMap<>(Comparator.reverseOrder());
+        for (Map.Entry<String, Integer> entry : categoryScores.entrySet()) {
+            int score = entry.getValue();
+            if (score < 4) continue;  // ✅ 4점 이상만 포함
+
+            String cleanedCategory = entry.getKey().replaceAll("^\\d+\\.\\s*", "").trim();
+            scoreToCategories.computeIfAbsent(score, k -> new ArrayList<>()).add(cleanedCategory);
+        }
+
+        // 3. 최대 3등급까지만 포함
+        List<String> result = new ArrayList<>();
+        int rankCount = 0;
+        for (Map.Entry<Integer, List<String>> entry : scoreToCategories.entrySet()) {
+            if (rankCount >= 3) break;
+            result.addAll(entry.getValue());
+            rankCount++;
+        }
+
+        // 4. 디버깅 로그
+        System.out.println("==== [HealthCheck] 감점 점수 분포 (4점 이상만) ====");
+        scoreToCategories.forEach((score, list) ->
+            System.out.println(score + "점 → " + list)
+        );
+        System.out.println("==== [HealthCheck] 최종 주의 항목 ====");
+        System.out.println(result);
+
+        return result;
     }
-
-    List<String> result = new ArrayList<>();
-    int rankCount = 0;
-    for (Map.Entry<Integer, List<String>> entry : scoreToCategories.entrySet()) {
-        if (rankCount >= 3) break;
-        result.addAll(entry.getValue());
-        rankCount++;
-    }
-
-    // 디버깅 로그
-    System.out.println("==== [HealthCheck] 감점 점수 분포 ====");
-    scoreToCategories.forEach((score, list) ->
-        System.out.println(score + " → " + list)
-    );
-    System.out.println("==== [HealthCheck] 최종 주의 항목 ====");
-    System.out.println(result);
-
-    return result;
-}
-
-
-
-
 
 
 
