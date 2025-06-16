@@ -44,6 +44,7 @@ public class ReviewDto {
     public ReviewEntity toEntity() {
         return ReviewEntity.builder()
                 .id(id)
+                .productId(productId)
                 .product(ProductEntity.builder().id(productId).build()) // 단방향 연결
                 .userId(userId)
                 .nickname(nickname)
