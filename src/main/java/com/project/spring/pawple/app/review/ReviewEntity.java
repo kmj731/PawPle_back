@@ -51,7 +51,7 @@ public class ReviewEntity {
     private String createdAt;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "product_id")
+    @JoinColumn(name = "product_paw_id")
     private ProductEntity product;
 
 }
