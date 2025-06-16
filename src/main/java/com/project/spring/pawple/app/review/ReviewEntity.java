@@ -4,6 +4,7 @@ import java.time.LocalDateTime;
 
 import org.hibernate.annotations.CreationTimestamp;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.project.spring.pawple.app.store.ProductEntity;
 
 import jakarta.persistence.Column;
@@ -55,10 +56,10 @@ public class ReviewEntity {
 
     @CreationTimestamp
     @Column(updatable = false)
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss")
     private LocalDateTime createdAt;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "product_paw_id")
     private ProductEntity product;
-
 }
