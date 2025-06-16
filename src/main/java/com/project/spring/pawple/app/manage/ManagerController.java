@@ -43,6 +43,9 @@ import com.project.spring.pawple.app.report.ReportDto;
 import com.project.spring.pawple.app.report.ReportEntity;
 import com.project.spring.pawple.app.report.ReportRepository;
 import com.project.spring.pawple.app.report.ReportService;
+import com.project.spring.pawple.app.review.ReviewEntity;
+import com.project.spring.pawple.app.review.ReviewRepository;
+import com.project.spring.pawple.app.review.ReviewService;
 import com.project.spring.pawple.app.store.ProductEntity;
 import com.project.spring.pawple.app.store.ProductService;
 import com.project.spring.pawple.app.user.UserDto;
@@ -68,10 +71,12 @@ public class ManagerController {
     private final PostManagerService postManagerService;
     @Autowired
     private final ReportService reportService;
+    private final ReviewService reviewService;
 
     private final PostRepository postRepository;
     private final ProductService productService;
     private final OrderRepository orderRepository;
+    private final ReviewRepository reviewRepository;
 
     @Autowired
     private ReportRepository reportRepository;
@@ -80,7 +85,7 @@ public class ManagerController {
 
     public ManagerController(UserService userService, PostService postService, PostManagerService postManagerService,
                              PostRepository postRepository,ProductService productService, OrderRepository orderRepository,
-                             ReportService reportService, UserRepository userRepository){
+                             ReportService reportService, UserRepository userRepository,ReviewRepository reviewRepository,ReviewService reviewService){
         this.userService = userService;
         this.postService = postService;
         this.postManagerService = postManagerService;
@@ -89,6 +94,8 @@ public class ManagerController {
         this.orderRepository = orderRepository;
         this.reportService = reportService;
         this.userRepository = userRepository;
+        this.reviewRepository = reviewRepository;
+        this.reviewService = reviewService;
     }
 
     // 전체 회원 조회
@@ -542,6 +549,31 @@ public class ManagerController {
         reportService.updateStatus(id, newStatus);
         return ResponseEntity.ok("상태가 변경되었습니다.");
     }
+
+    // review 전체 조회
+    @GetMapping("/review")
+    public ResponseEntity<List<ReviewEntity>> getAllReviews(){
+        List<ReviewEntity> reviews = reviewRepository.findAll();
+        return ResponseEntity.ok(reviews);
+    }
+
+    // review 삭제
+    @PreAuthorize("hasRole('ADMIN')")
+    @DeleteMapping("/{id}")
+    public void deleteReview(@PathVariable Long id) {
+        reviewService.delete(id);
+    }
+
+    
+    // 특정 상품의 모든 리뷰 조회
+    @PreAuthorize("hasRole('ADMIN')")
+    public List<ReviewEntity> findByProductId(Long productId) {
+        return reviewRepository.findByProduct_Id(productId);
+    }
+    
+    // review 공개 여부 수정
+
+    // 본문 조회(보류)
 
 
 
