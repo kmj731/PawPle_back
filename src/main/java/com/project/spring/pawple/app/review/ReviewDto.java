@@ -1,5 +1,7 @@
 package com.project.spring.pawple.app.review;
 
+import java.time.LocalDateTime;
+
 import com.project.spring.pawple.app.store.ProductEntity;
 
 import lombok.AllArgsConstructor;
@@ -22,7 +24,7 @@ public class ReviewDto {
     private String content;
     private Integer rating;
     private String image;
-    private String createdAt;
+    private LocalDateTime createdAt;
 
     public static ReviewDto fromEntity(ReviewEntity entity) {
         return ReviewDto.builder()

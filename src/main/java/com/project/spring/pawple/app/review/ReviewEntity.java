@@ -1,7 +1,12 @@
 package com.project.spring.pawple.app.review;
 
+import java.time.LocalDateTime;
+
+import org.hibernate.annotations.CreationTimestamp;
+
 import com.project.spring.pawple.app.store.ProductEntity;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
@@ -48,7 +53,9 @@ public class ReviewEntity {
 
     private String image;    // 이미지 URL (선택사항)
 
-    private String createdAt;
+    @CreationTimestamp
+    @Column(updatable = false)
+    private LocalDateTime createdAt;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "product_paw_id")
