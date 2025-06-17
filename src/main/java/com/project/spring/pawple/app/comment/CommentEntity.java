@@ -81,4 +81,7 @@ public class CommentEntity {
     protected void onUpdate() {
         this.updatedAt = LocalDateTime.now();
     }
+
+    @OneToMany(mappedBy = "comment", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<CommentLikeEntity> likes = new ArrayList<>();
 }

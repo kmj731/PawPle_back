@@ -80,8 +80,7 @@ public class CommentController {
             long likeCount = commentLikeService.getLikeCount(commentId);
             return ResponseEntity.ok(Map.of(
                     "isLiked", isLiked,
-                    "likeCount", likeCount
-            ));
+                    "likeCount", likeCount));
         } catch (RuntimeException e) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("error", e.getMessage()));
         }
@@ -104,16 +103,16 @@ public class CommentController {
 
         return ResponseEntity.ok(Map.of(
                 "isLiked", isLiked,
-                "likeCount", likeCount
-        ));
+                "likeCount", likeCount));
     }
 
     @GetMapping("/mentionable")
     public ResponseEntity<List<MentionUserDto>> getMentionableUsers() {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        String currentUsername = (auth != null && auth.isAuthenticated() && !auth.getPrincipal().equals("anonymousUser"))
-                ? auth.getName()
-                : "";
+        String currentUsername = (auth != null && auth.isAuthenticated()
+                && !auth.getPrincipal().equals("anonymousUser"))
+                        ? auth.getName()
+                        : "";
 
         List<MentionUserDto> mentionable = userRepository.findAll().stream()
                 .filter(user -> !user.getName().equals(currentUsername))
@@ -122,4 +121,11 @@ public class CommentController {
 
         return ResponseEntity.ok(mentionable);
     }
+
+    @GetMapping("/user/id/{userId}")
+    public ResponseEntity<List<CommentDto>> getCommentsByUserId(@PathVariable Long userId) {
+        List<CommentDto> comments = commentService.getCommentsByUserId(userId);
+        return ResponseEntity.ok(comments);
+    }
+
 }
