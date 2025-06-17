@@ -7,6 +7,7 @@ import java.util.List;
 
 import com.project.spring.pawple.app.comment.CommentEntity;
 import com.project.spring.pawple.app.media.MediaEntity;
+import com.project.spring.pawple.app.notification.NotificationEntity;
 import com.project.spring.pawple.app.pet.PetEntity;
 import com.project.spring.pawple.app.user.UserEntity;
 
@@ -115,4 +116,8 @@ public class PostEntity {
     protected void onUpdate() {
         this.updatedAt = LocalDateTime.now();
     }
+    
+    @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<NotificationEntity> notifications = new ArrayList<>();
+
 }
