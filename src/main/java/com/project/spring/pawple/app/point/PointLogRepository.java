@@ -23,5 +23,9 @@ public interface PointLogRepository extends JpaRepository<PointLog, Long> {
     boolean existsByUserAndReasonAndCreatedBetween(
         UserEntity user, String reason, LocalDateTime start, LocalDateTime end
     );
+
+    boolean existsByUserAndReasonAndCreatedAtBetween(UserEntity user, String reason, LocalDateTime start, LocalDateTime end);
 }
+
+
 

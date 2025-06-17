@@ -3,6 +3,7 @@ package com.project.spring.pawple.app.point;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
 import java.util.Random;
 
 import org.springframework.http.ResponseEntity;
@@ -42,7 +43,8 @@ public class PointService {
             user, "DAILY_MISSION", startOfDay, endOfDay);
 
         if (alreadyReceived) {
-            return ResponseEntity.badRequest().body("오늘은 이미 미션 포인트를 받았어요!");
+                return ResponseEntity.badRequest().body("❌ 오늘은 이미 미션 포인트를 받았어요!");
+
         }
 
         int randomPoint = 1 + random.nextInt(10); // 1~10점 랜덤
