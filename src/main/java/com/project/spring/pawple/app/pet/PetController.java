@@ -197,8 +197,7 @@ public class PetController {
         if (!pet.getOwner().getId().equals(optionalUser.get().getId())) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body(Map.of("message", "삭제 권한 없음"));
         }
-
-        petRepository.delete(pet);
+        petRepository.deleteById(pet.getId());
         System.out.println("[🗑️ deletePet] 삭제 실행 완료");
         
         return ResponseEntity.ok(Map.of("message", "반려동물 삭제 완료"));

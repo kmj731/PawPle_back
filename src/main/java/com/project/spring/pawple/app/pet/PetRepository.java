@@ -23,6 +23,9 @@ public interface PetRepository extends JpaRepository<PetEntity, Long> {
     @Query("delete from PetEntity p where p.owner.id = :ownerId")
     void deleteByOwnerId(@Param("ownerId") Long ownerId);
 
-    
+    @Modifying
+    @Query("DELETE FROM PetEntity p WHERE p.id = :id")
+    void deleteById(@Param("id") Long id);
+
 
 }
