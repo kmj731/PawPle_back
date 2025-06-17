@@ -21,16 +21,20 @@ public class PointController {
     @PostMapping("/mission/complete")
     public ResponseEntity<?> completeMission(
     @RequestParam Long userId,
-    @RequestParam String missions
+    @RequestParam List<String> missions
 ) {
-    List<MissionType> parsed = List.of(missions.split(","))
-        .stream()
-        .map(String::trim)
-        .map(MissionType::valueOf)
-        .collect(Collectors.toList());
+    List<MissionType> parsed;
+    try {
+        parsed = missions.stream()
+            .map(m -> MissionType.valueOf(m.toUpperCase()))  // 대소문자 허용
+            .collect(Collectors.toList());
+    } catch (IllegalArgumentException e) {
+        return ResponseEntity.badRequest().body("❗ 유효하지 않은 미션 항목이 포함되어 있어요!");
+    }
 
     return pointService.completeMission(userId, parsed);
 }
+
 
 
 
