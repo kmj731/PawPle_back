@@ -25,7 +25,7 @@ public class AnimalApiService {
     // @Value("${ANIMAL_API_KEY:defaultValue}")
     // private String apiKey;
 
-    private String apiKey="u2K8r3OXbZkp2ka33s370Hes67Dd2PyVMhq/lfz6KrOB5enFKlSdoPSg5Zy8xRMIuhi3o//zU5lc80pxEvvmtw==" ;
+    private String apiKey="w4Z2XsyWOanjALTy0MMt%2FQiOl7cLztqw%2Fgi4ixy9fSp703rmUODqXnenU1i09aRrX3xKKy17S4jCsBGy1qYkJg%3D%3D" ;
 
     private final RestTemplate restTemplate = new RestTemplate();
     private final ObjectMapper objectMapper = new ObjectMapper();
@@ -51,7 +51,7 @@ public class AnimalApiService {
                     .queryParam("upkind", "417000")
                     .queryParam("bgnde", beginDate)
                     .queryParam("endde", endDate)
-                    .build(false)
+                    .build(true)
                     .toUri();
             String dogResult = restTemplate.getForObject(dogUri, String.class);
 
@@ -67,7 +67,7 @@ public class AnimalApiService {
                     .queryParam("upkind", "422400")
                     .queryParam("bgnde", beginDate)
                     .queryParam("endde", endDate)
-                    .build(false)
+                    .build(true)
                     .toUri();
             String catResult = restTemplate.getForObject(catUri, String.class);
 
@@ -158,7 +158,7 @@ public class AnimalApiService {
                     .queryParam("upkind", "417000")
                     .queryParam("bgnde", beginDate)
                     .queryParam("endde", endDate)
-                    .build(false)
+                    .build(true)
                     .toUri();
             String dogResult = restTemplate.getForObject(dogUri, String.class);
 
@@ -174,7 +174,7 @@ public class AnimalApiService {
                     .queryParam("upkind", "422400")
                     .queryParam("bgnde", beginDate)
                     .queryParam("endde", endDate)
-                    .build(false)
+                    .build(true)
                     .toUri();
             String catResult = restTemplate.getForObject(catUri, String.class);
 
@@ -233,7 +233,7 @@ public class AnimalApiService {
                     .queryParam("serviceKey", apiKey)
                     .queryParam("_type", "json")
                     .queryParam("numOfRows", 1000) // 충분히 크게 설정
-                    .build(false)
+                    .build(true)
                     .toUri();
 
             String result = restTemplate.getForObject(uri, String.class);
