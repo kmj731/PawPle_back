@@ -86,7 +86,7 @@ public ResponseEntity<Map<String, String>> downloadImage(@RequestParam String ur
 
         // 저장 경로 설정
         String basePath = System.getProperty("user.dir") + "/uploads/animal/";
-        String thumbPath = System.getProperty("user.dir") + "/uploads/thumb/";
+        String thumbPath = System.getProperty("user.dir") + "/uploads/animal_thumb";
         File imageDest = Paths.get(basePath, filename).toFile();
         File thumbDest = Paths.get(thumbPath, "thumb_" + filename).toFile();
 
@@ -115,7 +115,7 @@ public ResponseEntity<Map<String, String>> downloadImage(@RequestParam String ur
         // 결과 Map 반환
         Map<String, String> result = new HashMap<>();
         result.put("imageUrl", "/animal/" + filename);
-        result.put("thumbnailUrl", "/thumb/thumb_" + filename);
+        result.put("thumbnailUrl", "/animal_thumb/thumb_" + filename);
 
         // 🔵 로그: 실제 파일명 및 반환 JSON
         System.out.println("📦 반환 파일명: " + filename);

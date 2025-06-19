@@ -28,5 +28,8 @@ public class WebConfig implements WebMvcConfigurer {
         // 유기동물 이미지
         registry.addResourceHandler("/uploads/animal/**")
                 .addResourceLocations("file:" + System.getProperty("user.dir") + "/uploads/animal/");
-        }    
+        registry.addResourceHandler("/uploads/animal_thumb/**")
+                .addResourceLocations("file:" + System.getProperty("user.dir") + "/uploads/animal_thumb/");
+        }
+        
 }

@@ -1,10 +1,6 @@
 HELP.md
 target/
-/uploads/images/
-/uploads/thumb/
-/uploads/product/
-/uploads/post/
-/uploads/animal/
+/uploads/
 !.mvn/wrapper/maven-wrapper.jar
 !**/src/main/**/target/
 !**/src/test/**/target/
