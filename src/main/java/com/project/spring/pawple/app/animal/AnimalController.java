@@ -118,6 +118,18 @@ public class AnimalController {
                         .size(150, 150)
                         .outputFormat("jpg")
                         .toFile(thumbDest);
+
+                int waitCount = 0;
+                while (!thumbDest.exists() && waitCount < 10) {
+                    Thread.sleep(100); // 최대 1초까지 대기
+                    waitCount++;
+                }
+
+                if (!thumbDest.exists()) {
+                    System.out.println("❌ 썸네일 생성 확인 실패");
+                    return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+                }
+                Thread.sleep(200);
                 System.out.println("✅ 썸네일 생성 성공: " + thumbDest.getAbsolutePath());
             }
 
