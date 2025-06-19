@@ -83,7 +83,8 @@ public class SecurityConfig {
                         .requestMatchers("/oauth2/**", "/logout").permitAll()
                         .requestMatchers("/auth/**", "/user/**", "/pet/**", "/consult/**").authenticated()
                         .requestMatchers("/admin/**").hasRole("ADMIN")
-                        .requestMatchers("/health/**", "/", "/css/**", "/js/**", "/images/**", "/uploads/images/**", "/uploads/thumb/**").permitAll()
+                        .requestMatchers("/health/**", "/", "/css/**", "/js/**", "/images/**").permitAll()
+                        .requestMatchers("/uploads/**", "/uploads/images/**", "/uploads/thumb/**", "/uploads/post/**", "/uploads/product/**", "/uploads/animal/**").permitAll()
                         .anyRequest().authenticated())
 
                 .formLogin(form -> form

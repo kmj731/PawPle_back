@@ -24,5 +24,9 @@ public class WebConfig implements WebMvcConfigurer {
         // 게시글 이미지 (예: /uploads/post/abc.jpg)
         registry.addResourceHandler("/uploads/post/**")
                 .addResourceLocations("file:" + System.getProperty("user.dir") + "/uploads/post/");
-    }    
+
+        // 유기동물 이미지
+        registry.addResourceHandler("/uploads/animal/**")
+                .addResourceLocations("file:" + System.getProperty("user.dir") + "/uploads/animal/");
+        }    
 }

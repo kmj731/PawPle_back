@@ -4,6 +4,7 @@ target/
 /uploads/thumb/
 /uploads/product/
 /uploads/post/
+/uploads/animal/
 !.mvn/wrapper/maven-wrapper.jar
 !**/src/main/**/target/
 !**/src/test/**/target/
