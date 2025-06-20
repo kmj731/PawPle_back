@@ -25,6 +25,7 @@ public class AnimalApiService {
     // @Value("${ANIMAL_API_KEY:defaultValue}")
     // private String apiKey;
 
+    // private String apiKey="w4Z2XsyWOanjALTy0MMt/QiOl7cLztqw/gi4ixy9fSp703rmUODqXnenU1i09aRrX3xKKy17S4jCsBGy1qYkJg==" ;
     private String apiKey="w4Z2XsyWOanjALTy0MMt%2FQiOl7cLztqw%2Fgi4ixy9fSp703rmUODqXnenU1i09aRrX3xKKy17S4jCsBGy1qYkJg%3D%3D" ;
 
     private final RestTemplate restTemplate = new RestTemplate();
